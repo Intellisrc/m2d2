@@ -213,7 +213,7 @@ Model.prototype = {
 				change[property] = valObj.value;
                 _this._doRender(data._node, $.extend(data,change));
             } else {
-                _this.data = data;
+                _this._doRender(_this.$root, data);
             }
         }
     },
@@ -241,14 +241,6 @@ Model.prototype = {
                     _this.update(obj, variable, value);
                 }
             });
-        } else {
-            var currVal = _this._data;
-            var varProxy = function () {
-              var obj = {
-                _val: currVal,
-              }
-              return obj;
-            };
         }
         _this.rendered = true;
     },

@@ -51,6 +51,16 @@ $(function($) {
 		root : "#advance",
 		data : advance
 	});
+	// Events
+	$("#title").keyup(function(){
+		title.data = $(this).val();
+	});
+	$("#link").keyup(function(){
+		info.data.a.text = $(this).val();
+	});
+	$("#price").keyup(function(){
+		model.data[1].price = $(this).val();
+	});
 });
 </script>
 </head>
@@ -74,5 +84,8 @@ $(function($) {
 </table>
 <form id="advance">
 </form>
+New Title: <input id="title" type="text" /><br>
+New Link: <input id="link" type="text" /><br>
+New Price: <input id="price" type="text" /><br>
 </body>
 </html>
