@@ -46,7 +46,7 @@ var title = new Model({
   root: "h1",
   data: "Hello World" 
  });
- /To modify it:
+//To modify it:
 title.data.h1 = "Great!";
 ```
 In here, we will set `<h1>` as our element root (instead `<body>`)
@@ -189,6 +189,7 @@ And the HTML will be updated accordingly.
 
 What if your data comes from a service? You can convert it using a custom function, for example:
 
+Original JSON:
 ```json
 [{"title":"London","location_type":"City","woeid":44418,"latt_long":"51.506321,-0.12714"}]
 ```
