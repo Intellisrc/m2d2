@@ -248,13 +248,6 @@ Model.prototype = {
         // Trigger on finish
         _this.postRender(this);
 		// Set trigger on modifications 
-        if($.isPlainObject(_this._data) || $.isArray(_this.data)) {
-            _this._data = _this._proxy(_this._data, function(obj, variable, value) {
-                if(variable != "_node") {
-                    _this.update(obj, variable, value);
-                }
-            });
-        }
         _this.rendered = true;
     },
     /**
@@ -305,8 +298,18 @@ Model.prototype = {
     // Render an element with its values
     _doRender : function($elem, value) {
         var _this = this;
+        if(_this.data._proxy == undefined && ($.isPlainObject(_this._data) || $.isArray(_this.data))) {
+            _this._data = _this._proxy(_this._data, function(obj, variable, value) {
+                if(variable != "_node") {
+                    _this.update(obj, variable, value);
+                }
+            });
+        }
 		if($.isArray(value)) {
 			for(var i = 0; i < value.length; i++) {
+                if(value[i]._node != undefined) {
+                    value[i]._node = undefined;
+                }
                 var $item = _this._getNewModel();
                 $item.data("id", i);
                 $elem.append($item);
@@ -407,38 +410,43 @@ Model.prototype = {
 			obj._node = $node;
 		}
 	},
-	_proxy : function(object, onChange) {
-		const handler = {
-			get(target, property, receiver) {
-				if(property == "_node") {
-					return target._node;
-				} else {
-					try {
-                        if($.isArray(object) && !$.isNumeric(property)) {
+	_proxy : function(obj, onChange) {
+        Object.defineProperty(obj, "_proxy", {
+            enumerable: false,
+            writable: true
+        });
+        obj._proxy = true;
+        const handler = {
+            get(target, property, receiver) {
+                if(property == "_node") {
+                    return target._node;
+                } else {
+                    try {
+                        if($.isArray(obj) && !$.isNumeric(property)) {
                             return target[property];
                         } else {
-						    return new Proxy(target[property], handler);
+                            return new Proxy(target[property], handler);
                         }
-					} catch (err) {
-						return Reflect.get(target, property, receiver);
-					}
-				}
-			},
-			defineProperty(target, property, descriptor) {
-				onChange(target, property, descriptor);
-				return Reflect.defineProperty(target, property, descriptor);
-			},
-			deleteProperty(target, property) {
-				onChange(target, property);
-				return Reflect.deleteProperty(target, property);
-			},
+                    } catch (err) {
+                        return Reflect.get(target, property, receiver);
+                    }
+                }
+            },
+            defineProperty(target, property, descriptor) {
+                onChange(target, property, descriptor);
+                return Reflect.defineProperty(target, property, descriptor);
+            },
+            deleteProperty(target, property) {
+                onChange(target, property);
+                return Reflect.deleteProperty(target, property);
+            },
             set(target, property, value, receiver) {      
                 target[property] = value;
-				onChange(target, property, { value: value });
+                onChange(target, property, { value: value });
                 return true;
             }
         }
-		return new Proxy(object, handler);
+        return new Proxy(obj, handler);
 	},
     //----- setters and getters for data
     _data           : null,

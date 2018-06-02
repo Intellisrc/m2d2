@@ -70,7 +70,7 @@ $(function($) {
 		info.data.a.text = $(this).val();
 	});
 	$("#price").keyup(function(){
-		model.data[1].price = $(this).val();
+		model.data[1].price = $(this).val() * 1;
 	});
     $(".add").click(function(){
         model.data.push({
@@ -109,7 +109,7 @@ $(function($) {
     <div><button class="add">Add Row</button><button class="remove">Remove Row</button></div>
     <div>New Title: <input id="title" type="text" /></div>
     <div>New Link: <input id="link" type="text" /></div>
-    <div>New Price: <input id="price" type="text" /></div>
+    <div>New Price: <input id="price" type="number" /></div>
 </div>
 <div id="datetime">
     <time>Time Now</time>
