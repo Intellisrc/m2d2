@@ -169,10 +169,13 @@ Model.prototype = {
     root            : "body",   // DOM baseline to perform searches and replacements. The outer element.
     filler          : false,    // If true, will add an empty model after rendering
     auto_init       : true,     // If true, it will render automatically on initialization, otherwise, call model.render()
-    reset           : false,     // If true, it will remove previously added model copies and start over. It will try to update current ones or add if not found
+    reset           : true,     // If true, it will remove previously added model copies and start over. It will try to update current ones or add if not found
     insert          : true,     // If true, all elements no present in array will be inserted automatically.
     html            : true,     // Auto detect and insert HTML instead of text
-    data            : {},       // object to render. This object will be monitored for changes
+    data            : {},       // object to render. This object will be monitored for changes,
+    interval        : 0,        // how often to update data if data is a function. 
+                                // ... Also can be set as second parameter when calling: callback(data, interval). 
+                                // ... After render, it will become the timer, so it can be stopped if required.
     //------- events ------------------
     preRender  : function(instance) {},       // This is executed before we start rendering
     beforeDataRender   : function(instance, $elem, row) {},  // This is executed just before rendering a row. "row" can be changed before it is rendered. (return false to skip)
@@ -190,12 +193,19 @@ Model.prototype = {
      */
     init : function() {
         var _this = this;
+        _this.$root = $(this.root);
+        _this.cache = _this.$root.html();
         if($.isFunction(_this._data)) {
             var origFunc = _this._data;
             origFunc(function(newData, refreshRate){
                 _this._data = newData;
-                if(refreshRate != undefined && refreshRate*1 > 0) {
-                    setInterval(function(){
+                if(refreshRate == undefined) {
+                    if(_this.interval*1 > 0) {
+                        refreshRate = _this.interval;
+                    }
+                }
+                if(refreshRate*1 > 0) {
+                    _this.interval = setInterval(function(){
                         origFunc(function(updData) {
                             _this.update(updData);
                         });
@@ -218,6 +228,10 @@ Model.prototype = {
 				change[property] = valObj.value;
                 _this._doRender(data._node, $.extend(data,change));
             } else {
+                // Clear root element
+                if(_this.reset) {
+                    _this.clear();
+                }
                 _this._doRender(_this.$root, data);
             }
         }
@@ -227,12 +241,6 @@ Model.prototype = {
      */
     render : function() {
         var _this = this;
-        _this.$root = $(this.root);
-
-        // Clear root element
-        if(_this.reset) {
-            _this.clear();
-        }
         // Initial trigger
         _this.preRender(this);
 		// Render data
@@ -254,11 +262,8 @@ Model.prototype = {
      */
     clear : function() {
         var _this = this;
-        var child = _this.$root.parent().find(":not(template)");
-        if(child.length) {
-            child.each(function($it) {
-                $it.remove();
-            });
+        if(_this.rendered) {
+            _this.$root.html(_this.cache);
         }
     },
     // Adds an empty model (filler)
@@ -277,7 +282,7 @@ Model.prototype = {
         }
         var $item = _this._getNewModel(); //TODO: key is missing
         _this._fillElement($item, item);
-        _this.$root.after($item);
+        _this.$root.append($item);
         _this.onFillerRender(this, $item);
     },
     //---- For items: -----
@@ -290,6 +295,7 @@ Model.prototype = {
         return _this.$model.data("id");
     },
     //---- Private --
+    _cache : null,
 	// HTML5 valid attributes and tags (2018)
 	_htmlGenTags : ["a","abbr","acronym","address","area","article","aside","audio","b","bdi","bdo","big","blockquote","body","br","button","canvas","caption","cite","code","col","colgroup","datalist","dd","del","details","dfn","div","dl","dt","em","embed","fieldset","figcaption","figure","footer","form","frame","frameset","h1","h2","h3","h4","h5","h6","head","header","hgroup","hr","html","i","img","input","ins","kbd","label","legend","li","map","mark","menu","meter","nav","ol","optgroup","option","output","p","pre","progress","q","rp","rt","ruby","samp","section","select","small","span","strong","sub","summary","sup","table","tbody","td","textarea","tfoot","th","thead","tr","tt","ul","var"],
     // Clone data object
@@ -303,7 +309,7 @@ Model.prototype = {
 			for(var i = 0; i < value.length; i++) {
                 var $item = _this._getNewModel();
                 $item.data("id", i);
-                $elem.before($item);
+                $elem.append($item);
 				_this._setValues($item, value[i]);
 			}
 		} else { //Number, String or Objects
@@ -317,27 +323,23 @@ Model.prototype = {
     // Returns a copy of the model to duplicate
     _getNewModel : function(key) {
         var _this = this;
-        // If its array, search for template.
-        var $origmodel = _this.$root.clone();
-        if(!$origmodel.is("template")) {
-            // Search specific template
-            var css = key == undefined ? "" : "." + key;
-            var $template = $origmodel.find("template" + css);
-            if($template.length) {
-                $origmodel = $template;
-            } else if(css) {
+        // Search specific template
+        var css = key == undefined ? "" : "." + key;
+        var $template = _this.$root.find("template" + css);
+        if(!$template.length) {
+            if(css) {
                 // if not found... Search by class
-                $template = $origmodel.find(css);
-                if($template.length) {
-                    $origmodel = $template;
-                } else {
+                $template = _this.$root.find(css);
+                if(!$template.length) {
                     console.log("Unable to find template with class: " + css);
+                    return $();
                 }
             } else {
                 console.log("<template> tag not found inside model root");
+                return $();
             }
         }
-        return $origmodel.children() > 1 ? $origmodel : $($origmodel.html());
+        return $($template.html());
     },
     // Set values in elements
     _setValues : function($elem, value) {
@@ -412,7 +414,11 @@ Model.prototype = {
 					return target._node;
 				} else {
 					try {
-						return new Proxy(target[property], handler);
+                        if($.isArray(object) && !$.isNumeric(property)) {
+                            return target[property];
+                        } else {
+						    return new Proxy(target[property], handler);
+                        }
 					} catch (err) {
 						return Reflect.get(target, property, receiver);
 					}
@@ -425,8 +431,13 @@ Model.prototype = {
 			deleteProperty(target, property) {
 				onChange(target, property);
 				return Reflect.deleteProperty(target, property);
-			}
-		};
+			},
+            set(target, property, value, receiver) {      
+                target[property] = value;
+				onChange(target, property, { value: value });
+                return true;
+            }
+        }
 		return new Proxy(object, handler);
 	},
     //----- setters and getters for data

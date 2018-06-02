@@ -10,17 +10,17 @@ var list = [
           id : 1,
           price: 100,
           name : "Doggy Bag",
-          style : "border: 1px solid #0c0"
+          style : "color: #713c3c"
     },{
           id : 2,
           price: 200,
           name : "Skateboard",
-          style : "border: 1px solid #c00"
+          style : "color: #3c7141"
     },{
           id    : 5,
           price : 500,
           name  : "Sassy Pants",
-          style : "border: 1px solid #00c"
+          style : "color: #3c3f71"
     }
 ];
 var struc = {
@@ -33,6 +33,7 @@ var struc = {
 		text : "Visit: example.com"
     }
 }
+//These variables are set global, so you can play with them:
 var title, info, model, func
 $(function($) {
 	title = new Model({
@@ -54,9 +55,9 @@ $(function($) {
             var date = new Date();
             callback({
                 time : { 
-                    text : "Today time is: " + date,
+                    text : "Now: " + date,
                     datetime : date,
-                    title: "See attribute... " + date
+                    title: "Attribute datetime is also changing!"
                 }
             }, 1000); //1000: call function each 1sec.
         }
@@ -71,6 +72,17 @@ $(function($) {
 	$("#price").keyup(function(){
 		model.data[1].price = $(this).val();
 	});
+    $(".add").click(function(){
+        model.data.push({
+          id    : Math.round((Math.random() * 1000 / 100)),
+          price : Math.round((Math.random() * 100000 / 100)),
+          name  : "Extra Item",
+          style : "color: #B17E28"
+        });
+    });
+    $(".remove").click(function(){
+        model.data.splice(0, 1);
+    });
 });
 </script>
 </head>
@@ -79,8 +91,8 @@ $(function($) {
 <div class="info"></div>
 <table id="checkout">
   <caption>My whish list:</caption>
-  <tbody>
-    <template id="items">
+  <tbody id="items">
+    <template>
         <tr>
           <td class="id" />
           <td>
@@ -94,6 +106,7 @@ $(function($) {
   </tbody>
 </table>
 <div id="controls">
+    <div><button class="add">Add Row</button><button class="remove">Remove Row</button></div>
     <div>New Title: <input id="title" type="text" /></div>
     <div>New Link: <input id="link" type="text" /></div>
     <div>New Price: <input id="price" type="text" /></div>

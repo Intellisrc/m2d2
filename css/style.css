@@ -47,3 +47,13 @@ div.info dd {
     text-align: center;
     color: blue;
 }
+button {
+    color: #EEE;
+    border: 1px solid #CCC;
+    border-radius: 4px;
+    padding: 10px;
+    width: 200px;
+    margin: 0 10px;
+    color: #333;
+    cursor: pointer;
+}
