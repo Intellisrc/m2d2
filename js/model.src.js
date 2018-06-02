@@ -160,9 +160,6 @@ var Model = function(options) {
         // CUSTOM OPTIONS
         model = $.extend(model, options || {});
         if(model.auto_init) {
-			if($.isFunction(model.data)) {
-				model.data = model.data();
-			}
             model.init();
         }
     }
@@ -194,10 +191,18 @@ Model.prototype = {
     init : function() {
         var _this = this;
         if($.isFunction(_this._data)) {
-            _this._data(function(newData){
+            var origFunc = _this._data;
+            origFunc(function(newData, refreshRate){
                 _this._data = newData;
+                if(refreshRate != undefined && refreshRate*1 > 0) {
+                    setInterval(function(){
+                        origFunc(function(updData) {
+                            _this.update(updData);
+                        });
+                    }, refreshRate);
+                }
                 _this.render();
-            })
+            });
         } else {
             _this.render();
         }

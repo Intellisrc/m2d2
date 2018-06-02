@@ -1,0 +1,49 @@
+body {
+    max-width: 600px;
+    margin: auto;
+    border: 1px solid #CCC;
+    padding: 20px;
+}
+h1 {
+    font-family: verdana, tahoma;
+    color: #333;
+}
+div.info {
+    margin: 10px;
+    padding: 10px;
+    border: 1px solid #EEE;
+}
+div.info a {
+    display: block;
+    text-align: center;
+    padding: 10px;
+}
+div.info dt, #checkout caption {
+    background: #EEE;
+    padding: 10px;
+}
+div.info dd {
+    padding: 10px;
+}
+#checkout {
+    margin: 10px;
+    border-spacing: 5px;
+    border: 1px solid #EEE;
+    width: 100%;
+}
+#checkout tr td:last-child {
+    text-align: right;
+}
+#controls {
+    margin: 10px;
+    padding: 10px;
+    border-top: 2px solid #EEE;
+}
+#controls div {
+    margin: 10px 0;
+}
+#datetime {
+    display: block;
+    text-align: center;
+    color: blue;
+}
