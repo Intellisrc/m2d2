@@ -1,149 +1,8 @@
 /**
- * Search and insert values from an object into HTML.
- *
- * For example:
- * --------- HTML ----------
- * <body>
- * <h1 class="title"></h1>
- * <ul>
- *      <li class="list">
- * </ul>
- * </body>
- * --------- JS -----------
- * new Model({
- *      data : {
- *          title : "Hello World!",
- *          list  : [ 100, 200, 300 ]
- *      }
- * });
- *
- * If "data" is an array:
- * Use the "template" tag
- * which is not displayed by the browser
- * and its contents will be used to duplicate (automatically)
- * --------- HTML ----------
- * <body>
- * <h1>Hello World</h1>
- * <ul>
- *      <li>
-            <template>      //Use template if you don't want it to be shown
- *              <a href="about:blank">Dummy Link</a>
-            </template>
- *      </li>
- * </ul>
- * </body>
- * --------- JS -----------
- * new Model({
- *    //root : "template", (default value for array data)
- *      data : [ 
- *          //When <template> has only one element, properties are assigned to it: (in this case, <a>)
- *          {
- *              href : "http://wikipedia.org",
- *              text : "Wikipedia"
- *          },
- *          {
- *              href  : "https://duckduckgo.com,
- *              text  : "Duck Duck Go"
- *          },
- *          {
- *              href  : "http://groovy-lang.org/",
- *              text  : "Groovy Language"
- *          },
- *      ]
- * });
- *
- * if "data" is an object with arrays:
- * --------- HTML ----------
- * <body>
- * <h1 class="title"></h1>
- * <div>
-        <template class="links">
-            <a class="imglnk" target="_blank">
-                <img />
-            </a>
-            Link:
-            <a class="txtlnk" target="_blank">
-                <span>Dummy Link</span>
-            </a>
-        </template>
- * </div>
- * <input type="text" name="info" />
- * </body>
- * --------- JS -----------
- * new Model({
-    //  root : "body", (default value for object data)
-        data : {
-            css   : "ready", //it will add the class "ready" to <body>
-     *      title : "Useful Links",  //it could also be: h1 : "hello"
-     *      links : [   //it could be also a : ... (will search for <template> inside root)
-     *              { 
-                        imglnk : {
-                            href  : "http://wikipedia.org",
-                            img   : {
-                                src : "http://wikipedia.org/logo.png",
-                                css : "highlight"
-                            }
-                        },
-                        txtlnk : {
-                            href  : "http://wikipedia.org",
-                            text  : "Wikipedia",
-                            css   : "main"
-                        }
-     *              },
-                    ...
-     *          ],
-            info : { //it can be input as well
-                value : "Some value",
-                style : "color:red"
-            }
-        }
- * });
- *
- * ----------- Using converter ---------------
- * //Json coming from some service
- * var json = {
-        "glossary": {
-            "title": "example glossary",
-            "GlossDiv": {
-                "title": "S",
-                "GlossList": [
-                    "ID": "SGML",
-                    "SortAs": "SGML",
-                    "GlossTerm": "Standard Generalized Markup Language",
-                    "Acronym": "SGML",
-                    "Abbrev": "ISO 8879:1986",
-                    "LinkURL": "http://markup.org/",
-                    "GlossDef": {
-                        "para": "A meta-markup language, used to create markup languages such as DocBook.",
-                        "GlossSeeAlso": ["GML", "XML"]
-                    },
-                    "GlossSee": "markup"
-                ]
-            }
-        }
- * }
- *
- * new Model({
-        data : function() {
-            var d = {
-                h1 : json.glossary.title,
-                a : [],
-                input : "value"
-            }
-            for(var g in json.glossary.GlossDiv.GlossList) {
-                var item = json.glossary.GlossDiv.GlossList[g];
-                a.push({
-                    href : item.LinkURL,
-                    text : item.GlossTerm
-                });
-            }
-            return d;
-        }
-  }
- *
-
-//TODO: should we store the function if passed as data?
-
+ * @author: A. Lepe
+ * @url : https://github.com/lepe/modeljs/
+ * @since: May, 2018
+ * @version: 1.0.0
  */
 "use strict";
 //--- Extend ---
@@ -249,6 +108,12 @@ Model.prototype = {
         _this.postRender(this);
 		// Set trigger on modifications 
         _this.rendered = true;
+    },
+    /**
+     * Returns data object
+     */
+    get : function() {
+        return this.data;
     },
     /**
      * Removes added model items
