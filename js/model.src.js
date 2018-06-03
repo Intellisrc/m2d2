@@ -305,8 +305,8 @@ Model.prototype = {
         this._defineProp(obj, "_proxy", true);
         const handler = {
             get(target, property, receiver) {
-                if(property == "_node") {
-                    return target._node;
+                if(property[0] == '_') {
+                    return target[property];
                 } else {
                     try {
                         if($.isArray(obj) && !$.isNumeric(property)) {
