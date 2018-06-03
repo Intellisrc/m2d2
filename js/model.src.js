@@ -32,6 +32,7 @@ Model.prototype = {
     insert          : true,     // If true, all elements no present in array will be inserted automatically.
     html            : true,     // Auto detect and insert HTML instead of text
     data            : {},       // object to render. This object will be monitored for changes,
+    param           : null,     // param that will be passed when using cal()
     interval        : 0,        // how often to update data if data is a function. 
                                 // ... Also can be set as second parameter when calling: callback(data, interval). 
                                 // ... After render, it will become the timer, so it can be stopped if required.
@@ -72,8 +73,20 @@ Model.prototype = {
                 }
                 _this.render();
             });
+            _this._func = origFunc;
         } else {
             _this.render();
+        }
+    },
+    //TODO: merge code with init() as it is repetitive
+    call : function(param) {
+        if($.isFunction(_this._func)) {
+            _this._func(function(newData) {
+                _this._data = newData;
+                _this.render();
+            }, param);
+        } else {
+            console.log("call() can only be used when data is a function");
         }
     },
     /**
@@ -155,6 +168,8 @@ Model.prototype = {
     },
     //---- Private --
     _cache : null,
+    _data  : null,
+    _func  : null,
 	// HTML5 valid attributes and tags (2018)
 	_htmlGenTags : ["a","abbr","acronym","address","area","article","aside","audio","b","bdi","bdo","big","blockquote","body","br","button","canvas","caption","cite","code","col","colgroup","datalist","dd","del","details","dfn","div","dl","dt","em","embed","fieldset","figcaption","figure","footer","form","frame","frameset","h1","h2","h3","h4","h5","h6","head","header","hgroup","hr","html","i","img","input","ins","kbd","label","legend","li","map","mark","menu","meter","nav","ol","optgroup","option","output","p","pre","progress","q","rp","rt","ruby","samp","section","select","small","span","strong","sub","summary","sup","table","tbody","td","textarea","tfoot","th","thead","tr","tt","ul","var"],
     // Clone data object
@@ -314,7 +329,6 @@ Model.prototype = {
         return new Proxy(obj, handler);
 	},
     //----- setters and getters for data
-    _data           : null,
     set data(value) {
         var _this = this;
         _this._data = value;
