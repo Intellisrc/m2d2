@@ -113,6 +113,7 @@ Model.prototype = {
      * Returns data object
      */
     get : function() {
+        this._defineProp(this.data, "_model", this);
         return this.data;
     },
     /**
@@ -165,7 +166,7 @@ Model.prototype = {
         var _this = this;
         if(_this.data._proxy == undefined && ($.isPlainObject(_this._data) || $.isArray(_this.data))) {
             _this._data = _this._proxy(_this._data, function(obj, variable, value) {
-                if(variable != "_node") {
+                if(variable[0] != '_') { //Do not update if it starts with '_'
                     _this.update(obj, variable, value);
                 }
             });
@@ -266,21 +267,20 @@ Model.prototype = {
                 }
             }
     },
-	_setNode: function($node, obj) {
-		if(obj._node == undefined) {
-			Object.defineProperty(obj, "_node", {
+    _defineProp: function(obj, prop, def) {
+		if(obj[prop] == undefined) {
+			Object.defineProperty(obj, prop, {
 				enumerable: false,
 				writable: true
 			});
-			obj._node = $node;
+			obj[prop] = def;
 		}
+    },
+	_setNode: function($node, obj) {
+        this._defineProp(obj, "_node", $node);
 	},
 	_proxy : function(obj, onChange) {
-        Object.defineProperty(obj, "_proxy", {
-            enumerable: false,
-            writable: true
-        });
-        obj._proxy = true;
+        this._defineProp(obj, "_proxy", true);
         const handler = {
             get(target, property, receiver) {
                 if(property == "_node") {
