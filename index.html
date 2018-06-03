@@ -50,7 +50,7 @@ $(function($) {
     }).get();
     func = new Model({
         root : "#datetime",
-        data : function(callback) {
+        data : function(callback, param) {
             //We could retrieve the date from a remote server...
             var date = new Date();
             callback({

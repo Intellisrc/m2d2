@@ -56,35 +56,21 @@ Model.prototype = {
         _this.$root = $(this.root);
         _this.cache = _this.$root.html();
         if($.isFunction(_this._data)) {
-            var origFunc = _this._data;
-            origFunc(function(newData, refreshRate){
-                _this._data = newData;
-                if(refreshRate == undefined) {
-                    if(_this.interval*1 > 0) {
-                        refreshRate = _this.interval;
-                    }
-                }
-                if(refreshRate*1 > 0) {
-                    _this.interval = setInterval(function(){
-                        origFunc(function(updData) {
-                            _this.update(updData);
-                        });
-                    }, refreshRate);
-                }
+            _this._func = _this.data;
+            _this._doFunc(_this.data, _this.param, function(){
                 _this.render();
             });
-            _this._func = origFunc;
         } else {
             _this.render();
         }
     },
     //TODO: merge code with init() as it is repetitive
     call : function(param) {
+        var _this = this;
         if($.isFunction(_this._func)) {
-            _this._func(function(newData) {
-                _this._data = newData;
-                _this.render();
-            }, param);
+            _this._doFunc(_this._func, param || _this.param, function(){
+                //_this.update(_this._data); //it is not updating on call() //FIXME
+            });
         } else {
             console.log("call() can only be used when data is a function");
         }
@@ -175,6 +161,27 @@ Model.prototype = {
     // Clone data object
     _cloneData : function() {
         return JSON.parse(JSON.stringify(this._data));
+    },
+    _doFunc : function(origFunc, param, callback) {
+        var _this = this;
+        origFunc(function(newData, refreshRate){
+            _this._data = newData;
+            if(refreshRate == undefined) {
+                if(_this.interval*1 > 0) {
+                    refreshRate = _this.interval;
+                }
+            }
+            if(refreshRate*1 > 0) {
+                _this.interval = setInterval(function(){
+                    origFunc(function(updData) {
+                        _this.update(updData);
+                    }, param);
+                }, refreshRate);
+            }
+            if(callback != undefined) {
+                callback();
+            }
+        }, param);
     },
     // Render an element with its values
     _doRender : function($elem, value) {
@@ -337,5 +344,5 @@ Model.prototype = {
     get data() {
         var _this = this;
         return _this._data;
-    },
+    }
 }
