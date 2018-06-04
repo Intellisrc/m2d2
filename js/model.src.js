@@ -32,7 +32,6 @@ Model.prototype = {
     insert          : true,     // If true, all elements no present in array will be inserted automatically.
     html            : true,     // Auto detect and insert HTML instead of text
     data            : {},       // object to render. This object will be monitored for changes,
-    param           : null,     // param that will be passed when using cal()
     interval        : 0,        // how often to update data if data is a function. 
                                 // ... Also can be set as second parameter when calling: callback(data, interval). 
                                 // ... After render, it will become the timer, so it can be stopped if required.
@@ -57,22 +56,23 @@ Model.prototype = {
         _this.cache = _this.$root.html();
         if($.isFunction(_this._data)) {
             _this._func = _this.data;
-            _this._doFunc(_this.data, _this.param, function(){
+            _this._doFunc(_this.data, _this.param, function(newData, refreshRate){
+				if(refreshRate == undefined) {
+					if(_this.interval*1 > 0) {
+						refreshRate = _this.interval;
+					}
+				}
+				if(refreshRate*1 > 0) {
+					_this.interval = setInterval(function(){
+						_this._func(function(updData) {
+							_this._doRender(_this.$root, updData);
+						});
+					}, refreshRate);
+				}
                 _this.render();
             });
         } else {
             _this.render();
-        }
-    },
-    //TODO: merge code with init() as it is repetitive
-    call : function(param) {
-        var _this = this;
-        if($.isFunction(_this._func)) {
-            _this._doFunc(_this._func, param || _this.param, function(){
-                //_this.update(_this._data); //it is not updating on call() //FIXME
-            });
-        } else {
-            console.log("call() can only be used when data is a function");
         }
     },
     /**
@@ -81,17 +81,26 @@ Model.prototype = {
     update : function(data, property, valObj) {
         var _this = this;
         if(_this.rendered) {
-            if(data._node != undefined) {
-				var change = {}
-				change[property] = valObj.value;
-                _this._doRender(data._node, $.extend(data,change));
-            } else {
-                // Clear root element
-                if(_this.reset) {
-                    _this.clear();
-                }
-                _this._doRender(_this.$root, data);
-            }
+			var doUpdate = function(data) {
+				if(data._node != undefined) {
+					var change = {}
+					change[property] = valObj.value;
+					_this._doRender(data._node, $.extend(data,change));
+				} else {
+					// Clear root element
+					if(_this.reset) {
+						_this.clear();
+					}
+					_this._doRender(_this.$root, data);
+				}
+			}
+			if($.isFunction(_this._func)) {
+				_this._doFunc(_this._func, data, function(newData){
+					doUpdate(newData);
+				});
+			} else {
+				doUpdate(data);
+			}
         }
     },
     /**
@@ -112,7 +121,7 @@ Model.prototype = {
      * Returns data object
      */
     get : function() {
-        this._defineProp(this.data, "_model", this);
+        this._defineProp(this.data, "model", this);
         return this.data;
     },
     /**
@@ -166,20 +175,8 @@ Model.prototype = {
         var _this = this;
         origFunc(function(newData, refreshRate){
             _this._data = newData;
-            if(refreshRate == undefined) {
-                if(_this.interval*1 > 0) {
-                    refreshRate = _this.interval;
-                }
-            }
-            if(refreshRate*1 > 0) {
-                _this.interval = setInterval(function(){
-                    origFunc(function(updData) {
-                        _this.update(updData);
-                    }, param);
-                }, refreshRate);
-            }
             if(callback != undefined) {
-                callback();
+                callback(newData, refreshRate);
             }
         }, param);
     },
@@ -188,7 +185,7 @@ Model.prototype = {
         var _this = this;
         if(_this.data._proxy == undefined && ($.isPlainObject(_this._data) || $.isArray(_this.data))) {
             _this._data = _this._proxy(_this._data, function(obj, variable, value) {
-                if(variable[0] != '_') { //Do not update if it starts with '_'
+                if(variable != "model" && variable[0] != '_') { //Do not update if it starts with '_'
                     _this.update(obj, variable, value);
                 }
             });
@@ -204,10 +201,6 @@ Model.prototype = {
 				_this._setValues($item, value[i]);
 			}
 		} else { //Number, String or Objects
-            // If it has a template, insert it before processing
-            if($.isPlainObject(value) && value.template !== undefined) {
-				$elem.html(value.template);
-            }
 			_this._setValues($elem, value);
 		}
     },
@@ -216,7 +209,7 @@ Model.prototype = {
         var _this = this;
         // Search specific template
         var css = key == undefined ? "" : "." + key;
-        var $template = _this.$root.find("template" + css);
+        var $template = _this.template ? $("<div>"+_this.template+"</div>") : _this.$root.find("template" + css);
         if(!$template.length) {
             if(css) {
                 // if not found... Search by class
@@ -305,7 +298,7 @@ Model.prototype = {
         this._defineProp(obj, "_proxy", true);
         const handler = {
             get(target, property, receiver) {
-                if(property[0] == '_') {
+                if(property == "model" || property[0] == '_') {
                     return target[property];
                 } else {
                     try {

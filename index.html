@@ -34,23 +34,31 @@ var struc = {
     }
 }
 //These variables are set global, so you can play with them:
-var title, info, model, func
+var title, info, model, clock, user, users
 $(function($) {
+
+	// Most simple example using a String as data
 	title = new Model({
 		root : "h1",
 		data : "ModelJS Demo"
 	});
+
+	// Simple example using an object
     info = new Model({
 		root : ".info",
         data : struc
     }).get();
+
+	// This example is to show how to generate lists
 	model = new Model({
         root : "#items",
         data : list
     }).get();
-    func = new Model({
+
+	// This example, is to demonstrate how to use the interval
+    clock = new Model({
         root : "#datetime",
-        data : function(callback, param) {
+        data : function(callback) {
             //We could retrieve the date from a remote server...
             var date = new Date();
             callback({
@@ -62,7 +70,55 @@ $(function($) {
             }, 1000); //1000: call function each 1sec.
         }
     }).get();
-	// Events
+
+	// This is similar to "clock" example, but using a remote server and
+	//  it will use a parameter when updating
+	user = new Model({
+		root: "#user",
+		data : function(callback, param) {
+			if(param == undefined) {
+				param = 1;
+			}
+			$.get("https://jsonplaceholder.typicode.com/users?id="+param,function(json) {
+				json = json[0]; //get the first item
+				callback({
+					user : json.username,
+					name : json.name,
+					email: json.email,
+					zip  : json.address.zipcode,
+					url  : {
+						a:  {
+							href : "http://" + json.website,
+							text : json.website,
+							target : "_blank"
+						}
+					}
+				});
+			});
+		}
+	}).get();
+
+	// This example will use the inline "template" option.
+	users = new Model({
+		root: "#users",
+		template : "<option></option>",
+		data : function(callback) {
+			$.get("https://jsonplaceholder.typicode.com/users",function(json) {
+				var users = [];
+				for(var u in json) {
+					var usr = json[u];
+					users.push({
+						id		: usr.id,
+						text	: usr.username,
+						value	: usr.id
+					});
+				}
+				callback(users);
+			});
+		}
+	}).get();
+
+	// Events -------------------------------
 	$("#title").keyup(function(){
 		title.data = $(this).val();
 	});
@@ -83,12 +139,19 @@ $(function($) {
     $(".remove").click(function(){
         model.splice(0, 1);
     });
+	$("#users").change(function(){
+		user.model.update($(this).val());
+	});
 });
 </script>
 </head>
 <body>
 <h1>Title</h1>
 <div class="info"></div>
+<div class="controls">
+    <div>New Title: <input id="title" type="text" /></div>
+    <div>New Link: <input id="link" type="text" /></div>
+</div>
 <table id="checkout">
   <caption>My whish list:</caption>
   <tbody id="items">
@@ -105,11 +168,20 @@ $(function($) {
     </template>
   </tbody>
 </table>
-<div id="controls">
+<div class="controls">
     <div><button class="add">Add Row</button><button class="remove">Remove Row</button></div>
-    <div>New Title: <input id="title" type="text" /></div>
-    <div>New Link: <input id="link" type="text" /></div>
     <div>New Price: <input id="price" type="number" /></div>
+</div>
+<table id="user">
+  <caption>User Info:</caption>
+  <tr><th>Username</th><td class="user"></td></tr>
+  <tr><th>Name</th><td class="name"></td></tr>
+  <tr><th>E-Mail</th><td class="email"></td></tr>
+  <tr><th>Zip Code</th><td class="zip"></td></tr>
+  <tr><th>Website</th><td class="url"></td></tr>
+</table>
+<div class="controls">
+	<div>User: <select id="users"></select></div>
 </div>
 <div id="datetime">
     <time>Time Now</time>

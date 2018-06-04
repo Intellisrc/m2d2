@@ -18,14 +18,14 @@ div.info a {
     text-align: center;
     padding: 10px;
 }
-div.info dt, #checkout caption {
+div.info dt, caption {
     background: #EEE;
     padding: 10px;
 }
 div.info dd {
     padding: 10px;
 }
-#checkout {
+#checkout, #user {
     margin: 10px;
     border-spacing: 5px;
     border: 1px solid #EEE;
@@ -34,18 +34,25 @@ div.info dd {
 #checkout tr td:last-child {
     text-align: right;
 }
-#controls {
+.controls {
     margin: 10px;
     padding: 10px;
     border-top: 2px solid #EEE;
+	text-align: center;
 }
-#controls div {
+.controls div {
     margin: 10px 0;
 }
 #datetime {
     display: block;
     text-align: center;
     color: blue;
+}
+#user th {
+	text-align: right;
+	border-right: 2px solid #ccc;
+	padding-right: 10px;
+	width: 10%;
 }
 button {
     color: #EEE;

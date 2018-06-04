@@ -47,7 +47,7 @@ var title = new Model({
   data: "Hello World" 
  });
 //To modify it:
-title.data.h1 = "Great!";
+title.data = "Great!";
 ```
 In here, we will set `<h1>` as our element root (instead `<body>`)
 
@@ -83,6 +83,7 @@ var a = new Model({
         title : "I told you so...",
         href  : "http://ur.special",
         target: "_blank"
+	  }
     }  
 }).get(); // .get() explained below.
 ```
@@ -90,10 +91,34 @@ Any attribute is possible. In this case, we use the `text` key to setup the text
 ```html
 <a class="special" title="I told you so..." href="http://ur.special" target="_blank">You are special</a>
 ```
-**Note**: if you add `.get()` (which is recommended for objects and arrays), the data object will be returned, so instead of using `a.data` you can use a shorter version to update the values:
+## About .get()
+
+if you add `.get()` (which is recommended for objects and arrays), the data object will be returned, so instead of using `a.data` you can use a shorter version to update the values:
 ```js
 a.special.title = "This is much simpler!";
 ```
+
+You can still access the `Model` object through its property: `.model`:
+```js
+console.log(a.model)
+```
+
+## Replacing data
+
+If you need to replace the whole data object, there is a special function for that: `update()`:
+(following the previous example...)
+
+```js
+a.model.update({
+  special : {
+	text  : "I'm special too!",
+	title : "You told me so...",
+	href  : "http://iam.special",
+	target: "_blank"
+  }
+});
+```
+
 ## Generating DOM
 
 If we want to add HTML into an element, we can either pass the string in `html` as previously explained, or generating it using an object:
@@ -239,7 +264,7 @@ To update the data, is the same as before:
 location.place = "Great Britain";
 ```
 
-If you are using intervals and you want to stop it, you will need to keep a reference to the Model:
+If you are using intervals and you want to stop it, you can keep a reference to the Model:
 ```js
 var locationModel = new Model({
   root: "#location",
@@ -251,3 +276,51 @@ var location = locationModel.get();
 //Then you can stop it with:
 clearInterval(locationModel.interval);
 ```
+... or use the property "model" of your object:
+```js
+var location = new Model({
+  root: "#location",
+  data: ...,
+  interval: 10000 //Every 10 seconds
+}).get();
+//Then you can stop it with:
+clearInterval(location.model.interval);
+```
+
+## Updating data using
+
+What if you want to call your function on demand, and with a parameter?
+Let's modify our previous example:
+
+```js
+var location = new Model({
+  root: "#location",
+  data: function(callback, param) {
+	  if(param == undefined) { 
+		param = "tokyo";
+	  }
+      $.get("https://www.metaweather.com/api/location/search/?query="+param, function(json) {
+        callback({
+            place : json.title,
+            type  : json.location_type,
+            lat   : json.latt_long.split(',')[0],
+            lng   : json.latt_long.split(',')[1]
+        });
+      });
+  }
+}).get();
+```
+With that small modification, we can now call the function on demand with a parameter:
+
+```js
+	location.model.update("london");
+```
+
+**NOTE**: During initialization, the parameter is undefined. That is why you need to setup your default value by checking if its undefined or not.
+
+To reset it to the default value, just call it without parameters:
+
+```js
+	location.model.update();
+```
+
