@@ -16,8 +16,8 @@ var m2d2 = function(options) {
 //---- Class ---
 var M2D2 = function(options) {
     var model = this;
-    if ( !(model instanceof Model) )  {
-        model = new Model(options);
+    if ( !(model instanceof M2D2) )  {
+        model = new M2D2(options);
         return model;
     } else {
         // CUSTOM OPTIONS
@@ -88,9 +88,7 @@ M2D2.prototype = {
 					_this._doRender(data._node, $.extend(data,change));
 				} else {
 					// Clear root element
-					if(_this.reset) {
-						_this.clear();
-					}
+					_this.clear();
 					_this._doRender(_this.$root, data);
 				}
 			}
@@ -121,8 +119,11 @@ M2D2.prototype = {
      * Returns data object
      */
     get : function() {
+		if(typeof this.data != "object") {
+			this.data = { text : this.data };
+		}
         this._defineProp(this.data, "m2d2", this);
-        return this.data;
+	    return this.data;
     },
     /**
      * Removes added model items
