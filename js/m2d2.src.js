@@ -13,6 +13,10 @@ if($.fn.hasAttr == undefined) {
 var m2d2 = function(options) {
 	return new M2D2(options).get();
 };
+// Extensions:
+m2d2.ext = function(properties) {
+	M2D2.prototype._ext = $.extend(M2D2.prototype._ext, properties);
+}; 
 //---- Class ---
 var M2D2 = function(options) {
     var model = this;
@@ -147,6 +151,7 @@ M2D2.prototype = {
     _cache : null,
     _data  : null,
     _func  : null,
+	_ext   : {},
 	// HTML5 valid attributes and tags (2018)
 	_htmlGenTags : ["a","abbr","acronym","address","area","article","aside","audio","b","bdi","bdo","big","blockquote","body","br","button","canvas","caption","cite","code","col","colgroup","datalist","dd","del","details","dfn","div","dl","dt","em","embed","fieldset","figcaption","figure","footer","form","frame","frameset","h1","h2","h3","h4","h5","h6","head","header","hgroup","hr","html","i","img","input","ins","kbd","label","legend","li","map","mark","menu","meter","nav","ol","optgroup","option","output","p","pre","progress","q","rp","rt","ruby","samp","section","select","small","span","strong","sub","summary","sup","table","tbody","td","textarea","tfoot","th","thead","tr","tt","ul","var"],
     // Clone data object
@@ -214,7 +219,12 @@ M2D2.prototype = {
             _this._setNode($elem, value);
             for(var key in value) {
                 if(key != "template") {
-                    if(key == "text" || key == "html") {
+					if(_this._ext[key] != undefined && $.isFunction(_this._ext[key])) {
+						var ret = _this._ext[key](value[key], $elem);
+						if(ret) {
+							_this._setValues($elem, ret);
+						}
+					} else if(key == "text" || key == "html") {
                         _this._setValue($elem, value[key]);
                     } else if($elem.hasAttr(key)) {
                         $elem.attr(key, value[key]);
