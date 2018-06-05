@@ -3,7 +3,7 @@ A class to easily place data in DOM and update them immediately upon change.
 This is my second version of "Model", that is why I named it M2D2. Also, for those Start Wars fans, it also kind of a joke.
 
 Live Example:
-https://rawgit.com/lepe/modeljs/master/index.html
+https://gl.githack.com/lepe/m2d2/raw/master/index.html
 
 ## Requirements
 
