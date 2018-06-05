@@ -3,7 +3,7 @@
 <title>Demo using Model</title>
 <link rel="stylesheet" href="css/style.css" type="text/css" />
 <script src="js/jquery.js"></script>
-<script src="js/model.src.js" type="text/javascript"></script>
+<script src="js/m2d2.src.js" type="text/javascript"></script>
 <script type="text/javascript">
 var list = [
     {
@@ -38,25 +38,25 @@ var title, info, model, clock, user, users
 $(function($) {
 
 	// Most simple example using a String as data
-	title = new Model({
+	title = m2d2({
 		root : "h1",
 		data : "ModelJS Demo"
 	});
 
 	// Simple example using an object
-    info = new Model({
+    info = m2d2({
 		root : ".info",
         data : struc
-    }).get();
+    });
 
 	// This example is to show how to generate lists
-	model = new Model({
+	model = m2d2({
         root : "#items",
         data : list
-    }).get();
+    });
 
 	// This example, is to demonstrate how to use the interval
-    clock = new Model({
+    clock = m2d2({
         root : "#datetime",
         data : function(callback) {
             //We could retrieve the date from a remote server...
@@ -69,11 +69,11 @@ $(function($) {
                 }
             }, 1000); //1000: call function each 1sec.
         }
-    }).get();
+    });
 
 	// This is similar to "clock" example, but using a remote server and
 	//  it will use a parameter when updating
-	user = new Model({
+	user = m2d2({
 		root: "#user",
 		data : function(callback, param) {
 			if(param == undefined) {
@@ -96,10 +96,10 @@ $(function($) {
 				});
 			});
 		}
-	}).get();
+	});
 
 	// This example will use the inline "template" option.
-	users = new Model({
+	users = m2d2l({
 		root: "#users",
 		template : "<option></option>",
 		data : function(callback) {
@@ -116,11 +116,11 @@ $(function($) {
 				callback(users);
 			});
 		}
-	}).get();
+	});
 
 	// Events -------------------------------
 	$("#title").keyup(function(){
-		title.data = $(this).val();
+		title.text = $(this).val();
 	});
 	$("#link").keyup(function(){
 		info.a.text = $(this).val();
@@ -140,7 +140,7 @@ $(function($) {
         model.splice(0, 1);
     });
 	$("#users").change(function(){
-		user.model.update($(this).val());
+		user.m2d2.update($(this).val());
 	});
 });
 </script>
