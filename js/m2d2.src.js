@@ -1,6 +1,6 @@
 /**
  * @author: A. Lepe
- * @url : https://github.com/lepe/modeljs/
+ * @url : https://gitlab.com/lepe/m2d2/
  * @since: May, 2018
  * @version: 1.0.0
  */
@@ -9,8 +9,12 @@
 if($.fn.hasAttr == undefined) {
 	$.fn.hasAttr = function(attr) { return $(this).is("["+attr+"]"); }
 }
+//---- Shortcut ---
+var m2d2 = function(options) {
+	return new M2D2(options).get();
+};
 //---- Class ---
-var Model = function(options) {
+var M2D2 = function(options) {
     var model = this;
     if ( !(model instanceof Model) )  {
         model = new Model(options);
@@ -23,13 +27,10 @@ var Model = function(options) {
         }
     }
 }
-Model.prototype = {
+M2D2.prototype = {
     //------- options ---------------
     root            : "body",   // DOM baseline to perform searches and replacements. The outer element.
-    filler          : false,    // If true, will add an empty model after rendering
-    auto_init       : true,     // If true, it will render automatically on initialization, otherwise, call model.render()
-    reset           : true,     // If true, it will remove previously added model copies and start over. It will try to update current ones or add if not found
-    insert          : true,     // If true, all elements no present in array will be inserted automatically.
+    auto_init       : true,     // If true, it will render automatically on initialization, otherwise, call render()
     html            : true,     // Auto detect and insert HTML instead of text
     data            : {},       // object to render. This object will be monitored for changes,
     interval        : 0,        // how often to update data if data is a function. 
@@ -39,7 +40,6 @@ Model.prototype = {
     preRender  : function(instance) {},       // This is executed before we start rendering
     beforeDataRender   : function(instance, $elem, row) {},  // This is executed just before rendering a row. "row" can be changed before it is rendered. (return false to skip)
     afterDataRender    : function(instance, $elem, row) {},  // This is executed just after rendering a row. "row" is not longer after this, so modifying it won't take any effect.
-    onFillerRender  : function(instance, $elem) {},       // This is executed before filler (empty instance) is placed.
     postRender   : function(instance) {},       // This is executed after all has been rendered
     //------- read only -----
     rendered        : false,    // true if the data has been rendered
@@ -121,7 +121,7 @@ Model.prototype = {
      * Returns data object
      */
     get : function() {
-        this._defineProp(this.data, "model", this);
+        this._defineProp(this.data, "m2d2", this);
         return this.data;
     },
     /**
@@ -132,25 +132,6 @@ Model.prototype = {
         if(_this.rendered) {
             _this.$root.html(_this.cache);
         }
-    },
-    // Adds an empty model (filler)
-    addEmpty : function() {
-        var _this = this;
-        var item = this._getFirstItem();
-        for(var i in item) {
-            switch($.type(item[i])) {
-                case "string":  item[i] = "";
-                case "boolean": item[i] = false;
-                case "number":  item[i] = 0;
-                case "object":	item[i] = [];
-                default:
-                    item[i] = null;
-            }
-        }
-        var $item = _this._getNewModel(); //TODO: key is missing
-        _this._fillElement($item, item);
-        _this.$root.append($item);
-        _this.onFillerRender(this, $item);
     },
     //---- For items: -----
     // Get ID of current $model
@@ -185,7 +166,7 @@ Model.prototype = {
         var _this = this;
         if(_this.data._proxy == undefined && ($.isPlainObject(_this._data) || $.isArray(_this.data))) {
             _this._data = _this._proxy(_this._data, function(obj, variable, value) {
-                if(variable != "model" && variable[0] != '_') { //Do not update if it starts with '_'
+                if(variable != "m2d2" && variable[0] != '_') { //Do not update if it starts with '_'
                     _this.update(obj, variable, value);
                 }
             });
@@ -298,7 +279,7 @@ Model.prototype = {
         this._defineProp(obj, "_proxy", true);
         const handler = {
             get(target, property, receiver) {
-                if(property == "model" || property[0] == '_') {
+                if(property == "m2d2" || property[0] == '_') {
                     return target[property];
                 } else {
                     try {

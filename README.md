@@ -1,5 +1,6 @@
-# modeljs
+# M2D2 JS (Model to DOM 2)
 A class to easily place data in DOM and update them immediately upon change.
+This is my second version of "Model", that is why I named it M2D2. Also, for those Start Wars fans, it also kind of a joke.
 
 Live Example:
 https://rawgit.com/lepe/modeljs/master/index.html
@@ -7,7 +8,7 @@ https://rawgit.com/lepe/modeljs/master/index.html
 ## Requirements
 
 * JQuery or similar library.
-* Download (5Kb): [model.min.js](https://raw.githubusercontent.com/lepe/modeljs/master/js/model.min.js) (and set it in the HTML head after jquery)
+* Download (5Kb): m2d2.min.js (and set it in the HTML head after jquery)
 * Create Model objects after DOM is ready
 
 ## Hello World
@@ -16,13 +17,13 @@ https://rawgit.com/lepe/modeljs/master/index.html
 <body></body>
 ```
 ```js
-var body = new Model({ data: "Hello World" });
+var body = m2d2({ data: "Hello World" });
 ```
 That line will render "Hello World" into `<body>`.
 
 In order to modify the content from javascript, set a variable as:
 ```js
-body.data = "World replies 'Hello'"
+body.text = "World replies 'Hello'"
 ```
 Cool! But not very useful, so let's set it inside some element:
 ```html
@@ -31,31 +32,31 @@ Cool! But not very useful, so let's set it inside some element:
 </body>
 ```
 ```js
-var title = new Model({ 
+var title = m2d2({ 
     data: {
          h1 : "Hello World"
     }
 });
 //To modify it:
-title.data.h1 = "Great!";
+title.h1 = "Great!";
 ```
 It will search inside `<body>` for a tagname `<h1>` and place the text in it.
 You can alternatively use this way:
 ```js
-var title = new Model({ 
+var title = m2d2({ 
   root: "h1",
   data: "Hello World" 
  });
 //To modify it:
-title.data = "Great!";
+title.text = "<b>Great!</b>";
 ```
-In here, we will set `<h1>` as our element root (instead `<body>`)
+In here, we will set `<h1>` as our element root (instead `<body>`). If HTML is detected, it will be treated as HTML.
 
 ## Using an ID or class
 
 What if you have more than one `h1`? You can use a class name or an ID to search for it:
 ```js
-var title = new Model({ 
+var title = m2d2({ 
     data: {
       "#title"      : "Hello World",  //Example using an ID
       ".titleClass" : "Hello World",  //Example using a class name
@@ -63,9 +64,9 @@ var title = new Model({
     }  
 });
 // To modify it:
-title.data["#title"] = "New text";
-title.data[".titleClass"] = "New text";
-title.data.titleClass = "New text";
+title["#title"] = "New text";
+title[".titleClass"] = "New text";
+title.titleClass = "New text";
 ```
 Class names may or may not contain `.` at the begining.
 
@@ -76,7 +77,7 @@ You can set attributes very easy in this way:
 <a class="special"></a>
 ```
 ```js
-var a = new Model({ 
+var a = m2d2({ 
     data: {
       special : {
         text  : "You are special",
@@ -85,31 +86,29 @@ var a = new Model({
         target: "_blank"
 	  }
     }  
-}).get(); // .get() explained below.
+});
 ```
 Any attribute is possible. In this case, we use the `text` key to setup the text. You can use `html` to insert HTML if you want. It will become:
 ```html
 <a class="special" title="I told you so..." href="http://ur.special" target="_blank">You are special</a>
 ```
-## About .get()
-
-if you add `.get()` (which is recommended for objects and arrays), the data object will be returned, so instead of using `a.data` you can use a shorter version to update the values:
 ```js
-a.special.title = "This is much simpler!";
-```
-
-You can still access the `Model` object through its property: `.model`:
-```js
-console.log(a.model)
+//To modify it:
+a.special.title = "This is simple!";
 ```
 
 ## Replacing data
 
-If you need to replace the whole data object, there is a special function for that: `update()`:
+If you need to replace the whole data object, there is a special function for that: `update()`.
+You will need to access the `M2D2` object through its property: `.m2d2`:
+```js
+console.log(a.m2d2)
+```
+So, using the `M2D2` object, you can update like this:
 (following the previous example...)
 
 ```js
-a.model.update({
+a.m2d2.update({
   special : {
 	text  : "I'm special too!",
 	title : "You told me so...",
@@ -119,12 +118,28 @@ a.model.update({
 });
 ```
 
+**NONE**: By replacing the whole data, it will clear the contents of the root element automatically.
+
 ## Generating DOM
 
-If we want to add HTML into an element, we can either pass the string in `html` as previously explained, or generating it using an object:
+If we want to add HTML into an element, we can either pass the string to the `html` property: 
 
 ```js
-var a = new Model({ 
+var a = m2d2({ 
+    data: {
+      special : {
+        title : "I told you so...",
+        href  : "http://ur.special",
+        target: "_blank",
+		html : "<img src='' />"
+    }  
+ });
+```
+
+... or generating it using an object: (recommended)
+
+```js
+var a = m2d2({ 
     data: {
       special : {
         title : "I told you so...",
@@ -138,7 +153,7 @@ var a = new Model({
             height: 32
         }
     }  
- }).get();
+ });
 ```
 The above example will create : 
 ```html
@@ -146,11 +161,10 @@ The above example will create :
   <img src="http://ur.special/logo.png" width="32" height="32" class="thumbnail" />
 </a>
 ```
-To modify it:
+The main advantage of using an object (vs HTML) is that you can update its properties in this way:
 ```js
 a.special.img.src = "http://ur.special/logo_alt.png";
 ```
-
 ## Creating lists
 
 You can generate elements based in an array. In order to do so, the recommended way is to add `<template>` child element (which is not displayed by the browser). For example:
@@ -162,7 +176,7 @@ You can generate elements based in an array. In order to do so, the recommended 
 ```
 
 ```js
-var list = new Model({ 
+var list = m2d2({ 
     root: "#list",
     data: [
             { 
@@ -181,7 +195,7 @@ var list = new Model({
                 text: "Third item"
             }           
           ]
- }).get();
+ });
 ```
 The HTML inside `<template>` is used to generate the list:
 
@@ -227,7 +241,7 @@ Original JSON:
 </table>
 ```
 ```js
-var location = new Model({
+var location = m2d2({
   root: "#location",
   data: function(callback) {
       $.get("https://www.metaweather.com/api/location/search/?query=london",function(json) {
@@ -239,15 +253,15 @@ var location = new Model({
         });
       });
   }
-}).get();
+});
 ```
 In this example, we use a service to get our `json` data and convert it into our data object. If you are planning to call such function in an interval, you can either specify it with the option `interval` or as second argument of the callback:
 ```js
-var location = new Model({
+var location = m2d2({
   root: "#location",
   data: ...,
   interval: 10000 //Every 10 seconds
-}).get();
+});
 ```
 ```js
 ...
@@ -264,27 +278,15 @@ To update the data, is the same as before:
 location.place = "Great Britain";
 ```
 
-If you are using intervals and you want to stop it, you can keep a reference to the Model:
+If you are using intervals and you want to stop it, you can use the property `interval` of your `M2D2` object:
 ```js
-var locationModel = new Model({
+var location = m2d2({
   root: "#location",
   data: ...,
   interval: 10000 //Every 10 seconds
 });
-var location = locationModel.get();
-...
 //Then you can stop it with:
-clearInterval(locationModel.interval);
-```
-... or use the property "model" of your object:
-```js
-var location = new Model({
-  root: "#location",
-  data: ...,
-  interval: 10000 //Every 10 seconds
-}).get();
-//Then you can stop it with:
-clearInterval(location.model.interval);
+clearInterval(location.m2d2.interval);
 ```
 
 ## Updating data using
@@ -293,7 +295,7 @@ What if you want to call your function on demand, and with a parameter?
 Let's modify our previous example:
 
 ```js
-var location = new Model({
+var location = m2d2({
   root: "#location",
   data: function(callback, param) {
 	  if(param == undefined) { 
@@ -308,19 +310,19 @@ var location = new Model({
         });
       });
   }
-}).get();
+});
 ```
 With that small modification, we can now call the function on demand with a parameter:
 
 ```js
-	location.model.update("london");
+	location.m2d2.update("london");
 ```
 
-**NOTE**: During initialization, the parameter is undefined. That is why you need to setup your default value by checking if its undefined or not.
+**NOTE**: During initialization, the parameter is undefined. That is why you need to set your default value by checking if its undefined or not.
 
 To reset it to the default value, just call it without parameters:
 
 ```js
-	location.model.update();
+	location.m2d2.update();
 ```
 
