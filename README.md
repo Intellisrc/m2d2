@@ -44,7 +44,7 @@ var title = m2d2({
 title.h1 = "Great!";
 ```
 It will search inside `<body>` for a tagname `<h1>` and place the text in it.
-You can alternatively use this way:
+You can alternatively use this way, in which `h1` is used as root instead of `body`:
 ```js
 var title = m2d2({ 
   root: "h1",
@@ -53,7 +53,7 @@ var title = m2d2({
 //To modify it:
 title.text = "<b>Great!</b>";
 ```
-In here, we will set `<h1>` as our element root (instead `<body>`). If HTML is detected, it will be treated as HTML.
+If HTML is detected, it will be treated as HTML.
 
 ## Using an ID or class
 
@@ -98,6 +98,13 @@ Any attribute is possible. In this case, we use the `text` key to setup the text
 ```js
 //To modify it:
 a.special.title = "This is simple!";
+a.special.html = "<img src='/img.jpg' />";
+```
+
+You can add non-existant attributes simply like this:
+```js
+a.special.hreflang = "en";
+a.special['class'] = "active";
 ```
 
 ## Replacing data
@@ -328,4 +335,8 @@ To reset it to the default value, just call it without parameters:
 ```js
 	location.m2d2.update();
 ```
+
+## Extending M2D2
+
+
 

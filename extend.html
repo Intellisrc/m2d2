@@ -1,6 +1,10 @@
 <html>
 <head>
 <title>Demo extending M2D2</title>
+<meta name="HandheldFriendly" content="1">
+<meta name="viewport" content="width=device-width, maximum-scale=1.0">
+<meta name="theme-color" content="#333333">
+<link rel="stylesheet" href="css/common.css" type="text/css" />
 <style type="text/css">
 	p.myclass {
 		text-decoration: underline;
@@ -15,8 +19,10 @@ var body;
 jQuery(function($) {
 	body = m2d2({
 		data : {
-			p : {
-				text : "Replaced text",
+			original : {
+				show : true
+			},
+			replace : {
 				css : "myclass",
 				color: "blue",
 				show : false
@@ -24,12 +30,34 @@ jQuery(function($) {
 		}
 	});
 	setTimeout(function(){
-		body.p.show = true;
-	}, 2000);
+		body.original.show = false;
+		body.replace.show = true;
+	}, 5000);
 });
 </script>
 </head>
 <body>
-	<p>Some text here</p>
+	<h1>Extending M2D2 Demo</h1>
+	<p class="original">This text will be replaced in 5 seconds... wait for it.</p>
+	<p class="replace">This text was shown using an extension property 'show', and added some style.</p>
+	<h3>Source code:</h3>
+	<pre>
+body = m2d2({
+	data : {
+		original : {
+			show : true
+		},
+		replace : {
+			css : "myclass",
+			color: "blue",
+			show : false
+		}
+	}
+});
+setTimeout(function(){
+	body.original.show = false;
+	body.replace.show = true;
+}, 5000);
+	</pre>
 </body>
 </html>

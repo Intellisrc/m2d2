@@ -1,0 +1,23 @@
+body {
+    max-width: 600px;
+    margin: auto;
+    border: 1px solid #CCC;
+    padding: 20px;
+}
+body {
+	font-size: 16px;
+}
+h1 {
+    font-family: verdana, tahoma;
+    color: #333;
+}
+button {
+    color: #EEE;
+    border: 1px solid #CCC;
+    border-radius: 4px;
+    padding: 10px;
+    width: 200px;
+    margin: 0 10px;
+    color: #333;
+    cursor: pointer;
+}

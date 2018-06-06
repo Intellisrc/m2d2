@@ -4,6 +4,9 @@ body {
     border: 1px solid #CCC;
     padding: 20px;
 }
+body {
+	font-size: 16px;
+}
 h1 {
     font-family: verdana, tahoma;
     color: #333;
