@@ -7,12 +7,15 @@
 "use strict";
 var m2d2 = (function() {
 	// main function
-	var m2d2 = function(options) {
+	var m2d2 = function(options, callback) {
+		if(callback != undefined) {
+			options.onRenderDone = callback;
+		}
 		return new M2D2(options).get();
 	};
 	// Extensions:
 	m2d2.ext = function(properties) {
-		M2D2.prototype._ext = $.extend(M2D2.prototype._ext, properties);
+		M2D2.prototype._ext = extend(M2D2.prototype._ext, properties);
 	}; 
 	//---- Class ---
 	var M2D2 = function(options) {
@@ -22,7 +25,7 @@ var m2d2 = (function() {
 			return model;
 		} else {
 			// CUSTOM OPTIONS
-			model = $.extend(model, options || {});
+			model = extend(model, options || {});
 			if(model.auto_init) {
 				model.init();
 			}
@@ -34,6 +37,7 @@ var m2d2 = (function() {
 		auto_init       : true,     // If true, it will render automatically on initialization, otherwise, call render()
 		html            : true,     // Auto detect and insert HTML instead of text
 		data            : {},       // object to render. This object will be monitored for changes,
+	//	template		: undefined,// root template. It can be a string (HTML) or an object.
 		interval        : 0,        // how often to update data if data is a function. 
 									// ... Also can be set as second parameter when calling: callback(data, interval). 
 									// ... After render, it will become the timer, so it can be stopped if required.
@@ -42,6 +46,7 @@ var m2d2 = (function() {
 		beforeDataRender   : function(instance, $elem, row) {},  // This is executed just before rendering a row. "row" can be changed before it is rendered. (return false to skip)
 		afterDataRender    : function(instance, $elem, row) {},  // This is executed just after rendering a row. "row" is not longer after this, so modifying it won't take any effect.
 		postRender   : function(instance) {},       // This is executed after all has been rendered
+		onRenderDone : function(data) {},
 		//------- read only -----
 		rendered        : false,    // true if the data has been rendered
 		//----- accessible during rendering:
@@ -56,8 +61,8 @@ var m2d2 = (function() {
 			_this.$root = $(this.root);
 			_this.cache = _this.$root.html();
 			if($.isFunction(_this._data)) {
-				_this._func = _this.data;
-				_this._doFunc(_this.data, _this.param, function(newData, refreshRate){
+				_this._func = _this._data;
+				_this._doFunc(_this._data, _this.param, function(newData, refreshRate){
 					if(refreshRate == undefined) {
 						if(_this.interval*1 > 0) {
 							refreshRate = _this.interval;
@@ -74,8 +79,8 @@ var m2d2 = (function() {
 				});
 			} else {
 				// In case its a Number of String, wrap it.
-				if(typeof this.data != "object") {
-					this._data = { text : this.data };
+				if(typeof this._data != "object") {
+					this._data = { text : this._data };
 				}
 				_this.render();
 			}
@@ -90,14 +95,14 @@ var m2d2 = (function() {
 					if(data._node != undefined) {
 						var change = {}
 						change[property] = valObj.value;
-						_this._doRender(data._node, $.extend(data,change));
+						_this._doRender(data._node, extend(data,change));
 					} else {
 						// Clear root element
 						_this.clear();
 						_this._doRender(_this.$root, data);
 					}
 				}
-				if($.isFunction(_this._func)) {
+				if(property == undefined && $.isFunction(_this._func)) {
 					_this._doFunc(_this._func, data, function(newData){
 						doUpdate(newData);
 					});
@@ -119,13 +124,19 @@ var m2d2 = (function() {
 			_this.postRender(this);
 			// Set trigger on modifications 
 			_this.rendered = true;
+			// When we are done
+			_this.onRenderDone(_this.get());
 		},
 		/**
 		 * Returns data object
 		 */
 		get : function() {
-			this._defineProp(this.data, "m2d2", this);
-			return this.data;
+			var _this = this;
+			if($.isFunction(_this._data)) {
+				_this._data = {}; //Not ready yet
+			}
+			_this._defineProp(_this._data, "m2d2", this);
+			return this._data;
 		},
 		/**
 		 * Removes added model items
@@ -168,7 +179,7 @@ var m2d2 = (function() {
 		// Render an element with its values
 		_doRender : function($elem, value) {
 			var _this = this;
-			if(_this.data._proxy == undefined && ($.isPlainObject(_this._data) || $.isArray(_this.data))) {
+			if(_this._data._proxy == undefined && ($.isPlainObject(_this._data) || $.isArray(_this._data))) {
 				_this._data = _this._proxy(_this._data, function(obj, variable, value) {
 					if(variable != "m2d2" && variable[0] != '_') { //Do not update if it starts with '_'
 						_this.update(obj, variable, value);
@@ -176,7 +187,7 @@ var m2d2 = (function() {
 				});
 			}
 			if($.isArray(value)) {
-				_this.doArray($elem, value);
+				_this._doArray($elem, _this, value);
 			} else { //Number, String or Objects
 				_this._setValues($elem, value);
 			}
@@ -221,11 +232,11 @@ var m2d2 = (function() {
 				}
 				// If not template is found, use html as of element
 				if($template.length) {
-					var html = $template.html();
+					var html = $template.html().trim();
 					_this._defineProp(obj, "_template", html);
 					return html;
 				} else {
-					return $elem.html();
+					return $elem.html().trim();
 				}
 			}
 		},
@@ -260,8 +271,8 @@ var m2d2 = (function() {
 						// Date / Time:
 						} else if(value[key] instanceof Date) {
 							_this._setValue($elem, key, value[key]);
-						// Attributes:
-						} else if(_this._hasAttr($elem, key)) {
+						// Attributes: --Do not set ID with a numeric value
+						} else if(_this._hasAttr($elem, key) && !(key == "id" && $.isNumeric(value[key]))) {
 							$elem.attr(key, value[key]);
 						// Search child elements:
 						} else {
@@ -342,17 +353,20 @@ var m2d2 = (function() {
 			return hasAttr;
 		},
 		_defineProp: function(obj, prop, def) {
-			if(obj[prop] == undefined) {
-				Object.defineProperty(obj, prop, {
-					enumerable: false,
-					writable: true
-				});
-				obj[prop] = def;
+			if(typeof obj == "object") {
+				if(obj[prop] == undefined) {
+					Object.defineProperty(obj, prop, {
+						enumerable: false,
+						writable: true
+					});
+					obj[prop] = def;
+				}
 			}
 		},
 		_setNode: function($node, obj) {
 			this._defineProp(obj, "_node", $node);
 		},
+		//FIXME: target contains initial values so replacing any property replace all with the initial ones
 		_proxy : function(obj, onChange) {
 			this._defineProp(obj, "_proxy", true);
 			const handler = {
@@ -398,5 +412,18 @@ var m2d2 = (function() {
 			return _this._data;
 		}
 	}
+	// ------- Functions -------
+	// from: https://stackoverflow.com/questions/11197247
+	function extend() {
+	    for(var i=1; i<arguments.length; i++) {
+	        for(var key in arguments[i]) {
+		        if(arguments[i].hasOwnProperty(key)) {
+			        arguments[0][key] = arguments[i][key];
+				}
+			}
+		}
+	    return arguments[0];
+	}
+
 	return m2d2;
 })();

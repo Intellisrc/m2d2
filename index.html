@@ -28,7 +28,17 @@ var list = [
     }
 ];
 var struc = {
-	template : "<dt></dt><dd></dd><div>Visit: <a></a></div>",
+	template : "<dt></dt><dd></dd><div>Visit: <a></a></div>", 
+	/* Template can also be written as :
+	template: {
+		dt : '',
+		dd : '',
+		div : {
+			text : 'Visit: ',
+			a : ''
+		}
+	}
+	*/
 	dt : "Simple is best",
 	dd : "Isn't great to be able to have such freedom, flexibility and simplicity?",
 	a  : {
@@ -71,12 +81,14 @@ $(function($) {
                     datetime : date,
                     title: "Attribute datetime is also changing!"
                 }
-            }, 1000); //1000: call function each 1sec.
+            //}, 1000); //1000: call function each 1sec.
+            }); //1000: call function each 1sec.
         }
     });
 
 	// This is similar to "clock" example, but using a remote server and
 	//  it will use a parameter when updating
+	// Also, because is Asynchronous, we need to pass a function as second parameter to update the object once its ready.
 	user = m2d2({
 		root: "#user",
 		data : function(callback, param) {
@@ -100,27 +112,26 @@ $(function($) {
 				});
 			});
 		}
-	});
+	}, function(data) { user = data; });
 
-	// This example will use the inline "template" option.
+	// This example uses the content inside <select> as template. 
 	users = m2d2({
 		root: "#users",
-		template : "<option></option>",
 		data : function(callback) {
 			$.get("https://jsonplaceholder.typicode.com/users",function(json) {
-				var users = [];
+				var usersList = [];
 				for(var u in json) {
 					var usr = json[u];
-					users.push({
+					usersList.push({
 						id		: usr.id,
 						text	: usr.username,
 						value	: usr.id
 					});
 				}
-				callback(users);
+				callback(usersList);
 			});
 		}
-	});
+	}, function(data) { users = data; });
 
 	// Events -------------------------------
 	$("#title").keyup(function(){
@@ -161,13 +172,9 @@ $(function($) {
   <tbody id="items">
     <template>
         <tr>
-          <td class="id" />
-          <td>
-            <a class="name"></a>
-          </td>
-          <td>
-            $ <span class="price"></span>
-          </td>
+          <td class="id"></td>
+          <td><a class="name"></a></td>
+          <td>$ <span class="price"></span></td>
         </tr>
     </template>
   </tbody>
@@ -185,7 +192,11 @@ $(function($) {
   <tr><th>Website</th><td class="url"></td></tr>
 </table>
 <div class="controls">
-	<div>User: <select id="users"></select></div>
+	<div>User: 
+		<select id="users">
+			<option>Choose one:</option>
+		</select>
+	</div>
 </div>
 <div id="datetime">
     <time>Time Now</time>
