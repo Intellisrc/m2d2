@@ -424,7 +424,7 @@ var location = m2d2({
 clearInterval(location.m2d2.interval);
 ```
 
-## Updating data using
+## Updating data (function) on command
 
 What if you want to call your function on demand, and with a parameter?
 Let's modify our previous example:
