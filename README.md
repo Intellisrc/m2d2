@@ -8,10 +8,13 @@ https://gl.githack.com/lepe/m2d2/raw/master/index.html
 Extension Demo:
 https://gl.githack.com/lepe/m2d2/raw/master/extend.html
 
+Form Demo:
+https://gl.githack.com/lepe/m2d2/raw/master/form.html
+
 ## Requirements
 
 * JQuery or similar library.
-* Download (5Kb): m2d2.min.js (and set it in the HTML head after jquery)
+* Download (6Kb): m2d2.min.js (and set it in the HTML head after jquery)
 * Create Model objects after DOM is ready
 
 ## Hello World
@@ -175,12 +178,98 @@ The main advantage of using an object (vs HTML) is that you can update its prope
 ```js
 a.special.img.src = "http://ur.special/logo_alt.png";
 ```
+
+## Using Templates
+
+Sometimes may be useful to keep a template together with your data structure to be sure that it won't be 'accidentally' changed by the designers. In those cases, you can specify the `template` property:
+
+```html
+<div id="clock"></div>
+```
+```js
+var clock = m2d2({
+	root : "#clock",
+	template: "<time><span></span><a href='http://www.thetimezoneconverter.com/'>Convert Time</a></time>",
+	data : {
+		time : {
+			datetime : date
+			span : "Now: " + date
+		}
+	}
+});
+```
+The `template` property also accepts an object:
+```js
+	template : {
+		time : {
+			span : "",
+			a : {
+				href : "http://www.thetimezoneconverter.com/",
+				text : "Convert Time"
+			}
+		}
+	}
+```
+Templates are not always required as this library will try to build the HTML based in your data, so the following will do exactly the same as the above examples:
+
+```js
+var clock = m2d2({
+	root : "#clock",
+	data : {
+		time : {
+			datetime : date
+			span : "Now: " + date
+			a : {
+				href : "http://www.thetimezoneconverter.com/",
+				text : "Convert Time"
+			}
+		}
+	}
+}
+```
+So, when do you really need the `template` property? I can only think of 2 situations: 
+
+1. You have more HTML than what you want to specify in your data, and you want to keep your data object as small as possible. 
+2. When using lists: explained below.
+
 ## Creating lists
 
-You can generate elements based in an array. In order to do so, the recommended way is to add `<template>` child element (which is not displayed by the browser). For example:
+You can generate elements based in an array. In order to do so, we will need a template that we will use as model for each item.
+There are 3 ways to specify a template:
+
+1. as `template` property (as explained in the previous topic).
+2. as HTML inside a `<template>` tag inside your root element.
+3. as HTML inside your root element.
+
+The code will search for it in that order. 
+
+In the following example, you don't need to specify any template. The default option will be used, duplicated and replaced by those specified inside `data`.
+```html
+<select>
+	<option>Select one</option>
+</select>
+```
+```js
+var options = m2d2({
+	root: "select",
+	data : [
+		{
+			text : "First option",
+			value : 1
+		},
+		{
+			text : "Second option",
+			value : 2
+		}
+	]
+});
+```
+
+As the `<template>` child element, it is not displayed by the browsers, you can use it to specify only the part of the HTML you want to replicate:
 
 ```html
 <ul id="list">
+  <li class="fixed">This item its fixed and won't be duplicated</li>
   <template><li class="item"></li></template>
 </ul>
 ```
@@ -211,10 +300,11 @@ The HTML inside `<template>` is used to generate the list:
 
 ```html
 <ul id="list">
+  <li class="fixed">This item its fixed and won't be duplicated</li>
+  <template><li class="item"></li></template>
   <li class="item" style="color:red" data-id="1">First item</li>
   <li class="item" style="color:green" data-id="2">Second item</li>
   <li class="item" style="color:blue" data-id="3">Third item</li>
-  <template><li class="item"></li></template>
 </ul>
 ```
 Note: Any `id` field is converted automatically to `data-id`.
@@ -233,6 +323,41 @@ list.push({
 list.splice(1,1);
 ```
 And the HTML will be updated accordingly.
+
+## List inside object
+
+If you want to specify a list inside an object, you need to specify the `template` and the `data` properties:
+
+```js
+var form = m2d2({
+	root : "form",
+	data : {
+		options : {
+			legend : "Your options:",
+			template : {
+				label : "",
+				input : {
+					type	: "radio",
+					'class' : "pickone",
+					required: true,
+					disabled: false
+				}
+			},
+			data : [
+				{ label : "First",  input : { value : "one", checked : true } },
+				{ label : "Second", input : { value : "two", disabled: true } },
+				{ label : "Third",  input : { value : "three" } },
+			]
+		}
+	}
+});
+```
+```html
+<form>
+	<fieldset class="options">
+	</fieldset>
+</form>
+```
 
 ## Using a function as data
 
@@ -335,8 +460,4 @@ To reset it to the default value, just call it without parameters:
 ```js
 	location.m2d2.update();
 ```
-
-## Extending M2D2
-
-
 

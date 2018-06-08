@@ -6,5 +6,11 @@
  * This is an extension to use the property "show" to hide/show elements
  */
 m2d2.ext({
-	show : function(show, $node) { if(show) { $node.show(); } else { $node.hide();} }
+	show : function(show, $node) { 
+		if(show) { 
+			$node.show(); 
+		} else { 
+			$node.hide();
+		} 
+	}
 });

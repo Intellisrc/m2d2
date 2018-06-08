@@ -62,7 +62,8 @@ var m2d2 = (function() {
 			_this.cache = _this.$root.html();
 			if($.isFunction(_this._data)) {
 				_this._func = _this._data;
-				_this._doFunc(_this._data, _this.param, function(newData, refreshRate){
+				_this._data = $.isArray(_this._data) ? [] : {};
+				_this._doFunc(_this._func, _this.param, function(newData, refreshRate){
 					if(refreshRate == undefined) {
 						if(_this.interval*1 > 0) {
 							refreshRate = _this.interval;
@@ -170,7 +171,16 @@ var m2d2 = (function() {
 		_doFunc : function(origFunc, param, callback) {
 			var _this = this;
 			origFunc(function(newData, refreshRate){
-				_this._data = newData;
+				if(typeof newData == "object") {
+					// The first time, _this._data may be object. Fix it.
+					if($.isArray(newData) && $.isPlainObject(_this._data)) {
+						_this._data = newData;
+					} else {
+						for(var n in newData) {
+							_this._data[n] = newData[n];
+						}
+					}
+				}
 				if(callback != undefined) {
 					callback(newData, refreshRate);
 				}
@@ -286,7 +296,7 @@ var m2d2 = (function() {
 										$elem.append($newElem);
 										_this._doRender($newElem, value[key]);
 									// Set a new attribute:
-									} else {
+									} else if(!$.isNumeric(key)) {
 										$elem.attr(key, value[key]);
 									}
 									continue;
@@ -342,13 +352,15 @@ var m2d2 = (function() {
 		},
 		_hasAttr : function($elem, attr) {
 			var node = $elem.get(0);
-			var hasAttr;
-			switch(attr) {
-				case "checked":
-					hasAttr = (node.type != undefined && (node.type == "radio" || node.type == "checkbox"));
-				break;
-				default:
-					hasAttr = node[attr] != undefined || node.hasAttribute(attr);
+			var hasAttr = false;
+			if(!$.isNumeric(attr)) {
+				switch(attr) {
+					case "checked":
+						hasAttr = (node.type != undefined && (node.type == "radio" || node.type == "checkbox"));
+					break;
+					default:
+						hasAttr = node[attr] != undefined || node.hasAttribute(attr);
+				}
 			}
 			return hasAttr;
 		},
@@ -366,11 +378,10 @@ var m2d2 = (function() {
 		_setNode: function($node, obj) {
 			this._defineProp(obj, "_node", $node);
 		},
-		//FIXME: target contains initial values so replacing any property replace all with the initial ones
 		_proxy : function(obj, onChange) {
 			this._defineProp(obj, "_proxy", true);
-			const handler = {
-				get(target, property, receiver) {
+			var handler = {
+				get : function(target, property, receiver) {
 					if(property == "m2d2" || property[0] == '_') {
 						return target[property];
 					} else {
@@ -385,15 +396,15 @@ var m2d2 = (function() {
 						}
 					}
 				},
-				defineProperty(target, property, descriptor) {
+				defineProperty : function(target, property, descriptor) {
 					onChange(target, property, descriptor);
 					return Reflect.defineProperty(target, property, descriptor);
 				},
-				deleteProperty(target, property) {
+				deleteProperty : function(target, property) {
 					onChange(target, property);
 					return Reflect.deleteProperty(target, property);
 				},
-				set(target, property, value, receiver) {      
+				set : function(target, property, value) {
 					target[property] = value;
 					onChange(target, property, { value: value });
 					return true;
