@@ -1,5 +1,6 @@
 # M2D2 JS (Model to DOM 2)
 A class to easily place data in DOM and update them immediately upon change.
+
 This is my second version of "Model", that is why I named it M2D2. Also, for those Start Wars fans, it also kind of a joke.
 
 Live Demo:
@@ -15,7 +16,6 @@ https://gl.githack.com/lepe/m2d2/raw/master/form.html
 
 * JQuery or similar library.
 * Download (6Kb): m2d2.min.js (and set it in the HTML head after jquery)
-* Create Model objects after DOM is ready
 
 ## Hello World
 
@@ -131,7 +131,7 @@ a.m2d2.update({
 });
 ```
 
-**NONE**: By replacing the whole data, it will clear the contents of the root element automatically.
+**NOTE**: By replacing the whole data, it will clear the contents of the root element automatically.
 
 ## Generating DOM
 
@@ -307,7 +307,7 @@ The HTML inside `<template>` is used to generate the list:
   <li class="item" style="color:blue" data-id="3">Third item</li>
 </ul>
 ```
-Note: Any `id` field is converted automatically to `data-id`.
+**NOTE**: Any `id` field is converted automatically to `data-id`.
 
 To modify it:
 ```js
