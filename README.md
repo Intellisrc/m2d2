@@ -180,6 +180,29 @@ The main advantage of using an object (vs HTML) is that you can update its prope
 a.special.img.src = "http://ur.special/logo_alt.png";
 ```
 
+## Adding Events
+
+To add an event to an element, its as simple as specifying it inside your data:
+
+```js
+var a = m2d2({
+    data: {
+      special : {
+        onclick : function(elem, event) {
+            alert("You just clicked this link!");
+        }
+    }
+ });
+```
+**NOTE** : `elem` in the above example is a DOM object. So if you are using jQuery, you can use it as:
+```js
+...
+        onclick : function(elem, event) {
+            $(elem).css("color", "green");
+        }
+...
+```
+
 ## Using Templates
 
 Sometimes may be useful to keep a template together with your data structure to be sure that it won't be 'accidentally' changed by the designers. In those cases, you can specify the `template` property:

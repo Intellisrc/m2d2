@@ -132,6 +132,7 @@ var m2d2 = (function() {
 		get : function() {
 			var _this = this;
 			_this._defineProp(_this._data, "m2d2", this);
+            _this._setProxy();
 			return this._data;
 		},
 		/**
@@ -174,8 +175,7 @@ var m2d2 = (function() {
 				}
 			}, param);
 		},
-		// Render an element with its values
-		_doRender : function($elem, value) {
+        _setProxy : function() {
 			var _this = this;
 			if(_this._data._proxy === undefined && (isPlainObject(_this._data) || isArray(_this._data))) {
 				_this._data = _this._proxy(_this._data, function(obj, variable, value) {
@@ -184,6 +184,11 @@ var m2d2 = (function() {
 					}
 				});
 			}
+        },
+		// Render an element with its values
+		_doRender : function($elem, value) {
+			var _this = this;
+            _this._setProxy();
 			if(isArray(value)) {
 				_this._doArray($elem, _this, value);
 			} else { //Number, String or Objects

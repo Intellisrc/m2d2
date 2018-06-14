@@ -96,8 +96,7 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 
     // This is similar to "clock" example, but using a remote server and
-    //  it will use a parameter when updating
-    // Also, because is Asynchronous, we need to pass a function as second parameter to update the object once its ready.
+    // it will use a parameter when updating
     var user = m2d2({
         root: "#user",
         data : function(callback, param) {
@@ -121,9 +120,9 @@ document.addEventListener("DOMContentLoaded", function() {
                 });
             });
         }
-    }, function(data) { user = data;  });
+    });
 
-    // This example uses the content inside <select> as template. 
+    // This example uses the content inside <select> as template, which is an <option> tag.
     var users = m2d2({
         root: "#users",
         data : function(callback) {
@@ -140,12 +139,14 @@ document.addEventListener("DOMContentLoaded", function() {
                 callback(usersList);
             });
         }
-    }, function(data) { users = data; });
+    });
 
     var events = m2d2({
         data : {
             "#title" : {
                 onkeyup : function(elem, event) {
+                    console.log(user);
+                    user.email = elem.value;
                     title.text = elem.value;
                 }
             },
