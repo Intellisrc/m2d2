@@ -12,10 +12,11 @@ https://gl.githack.com/lepe/m2d2/raw/master/extend.html
 Form Demo:
 https://gl.githack.com/lepe/m2d2/raw/master/form.html
 
-## Requirements
+## Install
 
-* JQuery or similar library.
-* Download (6Kb): m2d2.min.js (and set it in the HTML head after jquery)
+* Download (6Kb): m2d2.min.js and set it in the HTML head.
+
+**NOTE** As it has no dependencies, It can be used together with any other library or framework (e.g. JQuery)
 
 ## Hello World
 
