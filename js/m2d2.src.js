@@ -324,7 +324,8 @@ var m2d2 = (function() {
 			if(isHtml) {
 				$elem.innerHTML = value;
 			} else {
-				if(key == "value" || (key == null && _this._hasAttr($elem, "value"))) {
+                 // As <li> can have "value", it won't be assigned if key is null
+                if(key == "value" || (key == null && _this._hasAttr($elem, "value") && ($elem.tagName != "LI"))) {
 					if(_this._hasAttr($elem, "checked")) {
 						if(value == true || value == "true" || value == 1) {
 							$elem.setAttribute("checked",true);
