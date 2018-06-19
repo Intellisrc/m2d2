@@ -188,17 +188,17 @@ To add an event to an element, its as simple as specifying it inside your data:
 var a = m2d2({
     data: {
       special : {
-        onclick : function(elem, event) {
+        onclick : function(event) {
             alert("You just clicked this link!");
         }
     }
  });
 ```
-**NOTE** : `elem` in the above example is a DOM object. So if you are using jQuery, you can use it as:
+**NOTE** : You can access the target DOM element through `this`. So if you are using jQuery, you can use it as usual:
 ```js
 ...
-        onclick : function(elem, event) {
-            $(elem).css("color", "green");
+        onclick : function(event) {
+            $(this).css("color", "green");
         }
 ...
 ```

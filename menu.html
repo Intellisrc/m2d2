@@ -1,0 +1,103 @@
+<html>
+<head>
+<title>Demo menu M2D2</title>
+<meta name="HandheldFriendly" content="1">
+<meta name="viewport" content="width=device-width, maximum-scale=1.0">
+<meta name="theme-color" content="#333333">
+<link rel="stylesheet" href="css/common.css" type="text/css" />
+<style type="text/css">
+	a {
+		display: block;
+		border: 1px solid #CCC;
+		padding: 5px 10px;
+		margin: 2px;
+		width: 150px;
+		color: #333;
+		font-family: monospace;
+		text-transform: uppercase;
+		text-decoration: none;
+	}
+	a:hover {
+		background-color: #EEE;
+	}
+	a.login {
+		background-color: #bfffa8;
+	}
+	a.logout {
+		background-color: #ffbfa8;
+	}
+</style>
+<script src="js/jquery.js"></script>
+<script src="js/m2d2.src.js" type="text/javascript"></script>
+<script src="js/m2d2.style.src.js" type="text/javascript"></script>
+<script src="js/m2d2.show.src.js" type="text/javascript"></script>
+<script type="text/javascript">
+var nav;
+jQuery(function($) {
+	nav = m2d2({
+		root : "nav",
+		data : {
+			profile :{ 
+				href: "/user/profile",
+				text: "Profile",
+				onclick : function(){ return false; }
+			},
+			settings : { 
+				href: "/user/settings",
+				text: "Settings",
+				onclick : function(){ return false; }
+			},
+			users :{ 
+				href: "/admin/users",
+				text: "Manage Users",
+				show: false,
+				onclick : function(){ return false; }
+			},
+			groups :{ 
+				href: "/admin/groups",
+				text: "Manage Groups",
+				show: false,
+				onclick : function(){ return false; }
+			},
+			logout : { 
+				css : "logout",
+				href: "/logout",
+				text: "Logout",
+				show: false,
+				onclick: function() { 
+					nav.users.show = false;
+					nav.groups.show = false;
+					nav.logout.show = false;
+					nav.login.show = true;
+					return false; 
+				}
+			},
+			login : { 
+				href: "/login",
+				text: "Admin Login",
+				show: true,
+				onclick: function() { 
+					nav.users.show = true;
+					nav.groups.show = true;
+					nav.logout.show = true;
+					nav.login.show = false;
+					return false; 
+				}
+			},
+		}
+	});
+});
+</script>
+</head>
+<body>
+	<h1>Menu Example</h1>
+	<nav>
+		<a class="profile"></a>
+		<a class="settings"></a>
+		<a class="users"></a>
+		<a class="groups"></a>
+		<a class="login"></a>
+		<a class="logout"></a>
+	</nav>
+</body>
+</html>

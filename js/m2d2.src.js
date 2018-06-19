@@ -206,7 +206,7 @@ var m2d2 = (function() {
 					}
 					var $item = htmlNode(template);
 					$item.setAttribute("data-id", i);
-					$elem.append($item);    //FIXME
+					$elem.append($item);
 					_this._setValues($item, values[i]);
 				}
 			} else {
@@ -273,7 +273,7 @@ var m2d2 = (function() {
 							_this._setValue($elem, key, value[key]);
                         // Events
 						} else if(key.indexOf("on") == 0 && isFunction(value[key])) {
-							$elem[key] = function(event) { value[key](event.target, event); }
+							$elem[key] = function(event) { return value[key](event); }
 						// Date / Time:
 						} else if(value[key] instanceof Date) {
 							_this._setValue($elem, key, value[key]);
