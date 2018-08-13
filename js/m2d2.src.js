@@ -270,7 +270,7 @@ var m2d2 = (function() {
 							_this._setValue($elem, key, value[key]);
                         // Events
 						} else if(key.indexOf("on") == 0 && isFunction(value[key])) {
-							$elem[key] = function(event) { return value[key](event); }
+							$elem[key] = value[key];
 						// Date / Time:
 						} else if(value[key] instanceof Date) {
 							_this._setValue($elem, key, value[key]);
@@ -310,7 +310,7 @@ var m2d2 = (function() {
 			// If key is null, it means is not specified, so we try to guess what it is
             var isHtml = false;
             if(key == null) {
-                if(value == undefined) {
+                if(value == undefined || value == null) {
                     console.log("Value was undefined in element :");
                     console.log($elem);
                 } else if(isPlainObject(value) && value.text !== undefined) {

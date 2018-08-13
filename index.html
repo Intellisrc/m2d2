@@ -91,7 +91,8 @@ document.addEventListener("DOMContentLoaded", function() {
                     datetime : date,
                     title: "Attribute datetime is also changing!"
                 }
-            }, 1000); // call function each 1sec.
+            }); // call function each 1sec.
+            //}, 1000); // call function each 1sec.
         }
     });
 
@@ -144,24 +145,22 @@ document.addEventListener("DOMContentLoaded", function() {
     var events = m2d2({
         data : {
             "#title" : {
-                onkeyup : function(elem, event) {
-                    console.log(user);
-                    user.email = elem.value;
-                    title.text = elem.value;
+                onkeyup : function(event) {
+                    title.text = this.value;
                 }
             },
             "#link"  : {
-                onkeyup : function(elem, event) {
-                    info.a.text = elem.value;
+                onkeyup : function(event) {
+                    info.a.text = this.value;
                 }
             },
             "#price" : {
-                onkeyup : function(elem, event) {
-                    model[1].price = elem.value * 1;
+                onkeyup : function(event) {
+                    model[1].price = this.value * 1;
                 }
             },
             ".add" : {
-                onclick : function(elem, event) {
+                onclick : function(event) {
                     model.push({
                       id    : Math.round((Math.random() * 1000 / 100)),
                       price : Math.round((Math.random() * 100000 / 100)),
@@ -171,13 +170,13 @@ document.addEventListener("DOMContentLoaded", function() {
                 }
             },
             ".remove" : { 
-                onclick : function(elem, event) {
+                onclick : function(event) {
                     model.splice(0, 1);
                 }
             },
             "#users" : {
-                onchange : function(elem, event) {
-                    user.m2d2.update(elem.value);
+                onchange : function(event) {
+                    user.m2d2.update(this.value);
                 }
             }
         }
