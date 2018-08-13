@@ -248,17 +248,14 @@ var m2d2 = (function() {
 			var _this = this;
 			if(isPlainObject(value)) {
 				_this._setNode($elem, value);
-				// Arrays
-				if(value.data != undefined) {
-					_this._doArray($elem, value, value.data);
-					return;
-				}
-				// If it contains a template property, add it as HTML
-				if(value.template != undefined) {
-					$elem.innerHTML = _this._getTemplate($elem, value);
-				}
 				for(var key in value) {
-					if(["template","data"].indexOf(key) == -1) {
+                    // Arrays
+                    if(key == "data") {
+                        _this._doArray($elem, value, value[key]);
+                    } else if(key == "template") {
+                        // If it contains a template property, add it as HTML
+                        $elem.innerHTML = _this._getTemplate($elem, value);
+                    } else {
 						// Apply extensions:
 						if(_this._ext[key] != undefined && isFunction(_this._ext[key])) {
 							var ret = _this._ext[key](value[key], $elem);
@@ -313,7 +310,10 @@ var m2d2 = (function() {
 			// If key is null, it means is not specified, so we try to guess what it is
             var isHtml = false;
             if(key == null) {
-                if(isPlainObject(value) && value.text !== undefined) {
+                if(value == undefined) {
+                    console.log("Value was undefined in element :");
+                    console.log($elem);
+                } else if(isPlainObject(value) && value.text !== undefined) {
                     value = value.text;
                 } else if(!isNumeric(value) && value.trim().indexOf("<") !== -1) {
                     isHtml = true;
