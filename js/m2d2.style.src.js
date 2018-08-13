@@ -7,5 +7,6 @@
  */
 m2d2.ext({
 	color : function(value) { return { style : "color:"+value }; },
+	bgcolor : function(value) { return { style : "background-color:"+value }; },
 	css	  : function(value) { return { 'class' : value }; }
 });
