@@ -6,7 +6,7 @@
  * This is an extension to use propertes to set style in elements
  */
 m2d2.ext({
-	color   : function(value, elem) { this.style.color = value; },
-	bgcolor : function(value, elem) { this.style.backgroundColor = value; },
+	color   : function(value, elem) { elem.style.color = value; },
+	bgcolor : function(value, elem) { elem.style.backgroundColor = value; },
 	css	    : function(value)       { return { 'class' : value }; }
 });
