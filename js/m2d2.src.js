@@ -2,7 +2,7 @@
  * @author: A. Lepe
  * @url : https://gitlab.com/lepe/m2d2/
  * @since: May, 2018
- * @version: 1.0.0
+ * @version: 1.0.1
  */
 "use strict";
 var m2d2 = (function() {
