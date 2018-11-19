@@ -1,0 +1,85 @@
+<html>
+<head>
+<title>Demo using M2D2 : Async</title>
+<meta name="HandheldFriendly" content="1">
+<meta name="viewport" content="width=device-width, maximum-scale=1.0">
+<meta name="theme-color" content="#333333">
+<link rel="stylesheet" href="css/common.css" type="text/css" />
+<link rel="stylesheet" href="css/index.css" type="text/css" />
+<script src="js/xhr.js" type="text/javascript"></script>
+<script src="js/m2d2.src.js" type="text/javascript"></script>
+<script type="text/javascript">
+	//On ready..
+	document.addEventListener("DOMContentLoaded", function() {
+		// This is similar to "timer" example, but using a remote server and
+		// it will use a parameter when updating
+		var user = m2d2({
+			root: "#user",
+			data : function(callback, param) {
+				if(param == undefined) {
+					param = 1;
+				}
+				getXHR("https://jsonplaceholder.typicode.com/users?id="+param,function(json) {
+					json = json[0]; //get the first item
+					callback({
+						user : json.username,
+						name : json.name,
+						email: json.email,
+						zip  : json.address.zipcode,
+						url  : {
+							a:  {
+								href : "http://" + json.website,
+								text : json.website,
+								target : "_blank"
+							}
+						}
+					});
+				});
+			}
+		});
+
+		// This example uses the content inside <select> as template, which is an <option> tag.
+		var users = m2d2({
+			root: "#users",
+			data : function(callback) {
+				getXHR("https://jsonplaceholder.typicode.com/users",function(json) {
+					var usersList = [];
+					for(var u in json) {
+						var usr = json[u];
+						usersList.push({
+							id		: usr.id,
+							text	: usr.username,
+							value	: usr.id
+						});
+					}
+					callback(usersList);
+				});
+			},
+			events : {
+				onchange : function(event) {
+					user.m2d2.update(this.value);
+				}
+			}
+		});
+	});
+</script>
+</head>
+<body>
+<h1>M2D2 Async examples</h1>
+<table id="user">
+  <caption>User Info:</caption>
+  <tr><th>Username</th><td class="user"></td></tr>
+  <tr><th>Name</th><td class="name"></td></tr>
+  <tr><th>E-Mail</th><td class="email"></td></tr>
+  <tr><th>Zip Code</th><td class="zip"></td></tr>
+  <tr><th>Website</th><td class="url"></td></tr>
+</table>
+<div class="controls">
+	<div>User: 
+		<select id="users">
+			<option>Choose one:</option>
+		</select>
+	</div>
+</div>
+</body>
+</html>

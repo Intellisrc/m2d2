@@ -2,7 +2,7 @@
  * @author: A. Lepe
  * @url : https://gitlab.com/lepe/m2d2/
  * @since: May, 2018
- * @version: 1.0.1
+ * @version: 1.0.2 : 2018-11-19
  */
 "use strict";
 var m2d2 = (function() {
@@ -16,7 +16,7 @@ var m2d2 = (function() {
 	// Extensions:
 	m2d2.ext = function(properties) {
 		M2D2.prototype._ext = extend(M2D2.prototype._ext, properties);
-	}; 
+	};
 	//---- Class ---
 	var M2D2 = function(options) {
 		var model = this;
@@ -37,8 +37,9 @@ var m2d2 = (function() {
 		auto_init       : true,     // If true, it will render automatically on initialization, otherwise, call render()
 		html            : true,     // Auto detect and insert HTML instead of text
 		data            : {},       // object to render. This object will be monitored for changes,
-	//	template		: undefined,// root template. It can be a string (HTML) or an object.
-		interval        : 0,        // how often to update data if data is a function. 
+	//	template		: undefined,// root template. It can be a string (tagName, ID selector (#) or HTML) or an object. When not specified, it will be generated from array.
+	//  events          : undefined,// if set, it will attach events to root. Example: { onclick : function(ev) {} , onkeyup : function(ev) {} }
+		interval        : 0,        // how often to update data if data is a function.
 									// ... Also can be set as second parameter when calling: callback(data, interval). 
 									// ... After render, it will become the timer, so it can be stopped if required.
 		//------- events ------------------
@@ -60,8 +61,7 @@ var m2d2 = (function() {
 			var _this = this;
             if(isFunction(_this._data)) {
                 _this._func = _this._data;
-                _this._data = isArray(_this._data) ? [] : {};
-                _this._doFunc(_this._func, _this.param, function(newData, refreshRate){
+                _this.data = _this._doFunc(_this._func, _this.param, function(newData, refreshRate){
                     _this._onReady();
                     if(refreshRate === undefined) {
                         if(_this.interval*1 > 0) {
@@ -115,6 +115,10 @@ var m2d2 = (function() {
 		 */
 		render : function() {
 			var _this = this;
+			if(_this._data == undefined) {
+			    console.log("data is missing in m2d2 object. Be sure the key 'data' is set.")
+			    return false;
+			}
             // Initial trigger
             _this.preRender(_this);
             // Render data
@@ -159,7 +163,7 @@ var m2d2 = (function() {
         },
 		_doFunc : function(origFunc, param, callback) {
 			var _this = this;
-			origFunc(function(newData, refreshRate){
+			var type = origFunc(function(newData, refreshRate){
 				if(isObject(newData)) {
 					// The first time, _this._data may be object. Fix it.
 					if(isArray(newData) && isPlainObject(_this._data)) {
@@ -173,9 +177,13 @@ var m2d2 = (function() {
 				if(callback != undefined) {
 					callback(newData, refreshRate);
 				}
-			}, param);
+			}, param) || (_this._getTemplate(node(_this.root), _this)) ? [] : {};
+			if(!isPlainObject(type) &&! isArray(type)) {
+			    console.log("Undefined type of 'data'. For automatic detection do not set any 'return' in the data's function. Or explicitly return '[]' for arrays or '{}' for objects.")
+			}
+			return type;
 		},
-        _setProxy : function() {
+        _setProxy : function(force) {
 			var _this = this;
 			if(_this._data._proxy === undefined && (isPlainObject(_this._data) || isArray(_this._data))) {
 				_this._data = _this._proxy(_this._data, function(obj, variable, value) {
@@ -188,6 +196,12 @@ var m2d2 = (function() {
 		// Render an element with its values
 		_doRender : function($elem, value) {
 			var _this = this;
+			//Add events to root
+			if(_this.events !== undefined) {
+			    for(var e in _this.events) {
+			        $elem[e] = _this.events[e];
+			    }
+			}
             _this._setProxy();
 			if(isArray(value)) {
 				_this._doArray($elem, _this, value);
@@ -199,20 +213,42 @@ var m2d2 = (function() {
 		_doArray : function($elem, obj, values) {
 			var _this = this;
 			var template = _this._getTemplate($elem, obj);
-			if(template) {
-				for(var i = 0; i < values.length; i++) {
-					if(values[i]._node != undefined) {
-						values[i]._node = undefined;
-					}
-					var $item = htmlNode(template);
-					$item.setAttribute("data-id", i);
-					$elem.append($item);
-					_this._setValues($item, values[i]);
-				}
-			} else {
-				console.log("No template found to apply array:");
-				console.log(obj);
-			}
+            for(var i = 0; i < values.length; i++) {
+                var val = values[i];
+                if(val._node != undefined) {
+                    val._node = undefined;
+                }
+                if(!template) {
+                    if(isPlainObject(val)) {
+                        if(Object.keys(val).length == 1) {
+                            if(isSelectorID(val)) {
+                                var idNode = document.querySelector(val);
+                                if(idNode) {
+                                    template = idNode.outerHTML;
+                                } else {
+                                    console.log("Warning: ID selector for template not found: "+val+" . Object:");
+                                    console.log(obj);
+                                    return
+                                }
+                            } else {
+                                template = newNode(Object.keys(val)[0]).outerHTML;
+                            }
+                        } else {
+                            console.log("Warning: Multiple keys in data without template is not supported yet. Object:");
+                            console.log(obj);
+                            return
+                        }
+                    } else {
+                        console.log("Warning: No template found for object:");
+                        console.log(obj);
+                        return
+                    }
+                }
+                var $item = htmlNode(template);
+                $item.setAttribute("data-id", i);
+                $elem.append($item);
+                _this._setValues($item, val);
+            }
 		},
 		// Returns a copy of the model to duplicate
 		// $elem is to search in DOM for <template>
@@ -227,8 +263,12 @@ var m2d2 = (function() {
 					if(isPlainObject(obj.template)) {
 						$template = newNode("div");
 						_this._setValues($template, obj.template);
-					} else {
+					} else if(isSelectorID(obj.template)) {
+					    $template = document.querySelector(obj.template);
+					} else if(isHtml(obj.template)) {
 						$template = htmlNode("<div>"+obj.template+"</div>");
+					} else {
+					    $template = htmlNode("<div>"+newNode(obj.template).outerHTML+"</div>");
 					}
 				} else {
 					$template = node("template", $elem);
@@ -249,53 +289,65 @@ var m2d2 = (function() {
 			if(isPlainObject(value)) {
 				_this._setNode($elem, value);
 				for(var key in value) {
+				    var item = value[key];
                     // Arrays
                     if(key == "data") {
-                        _this._doArray($elem, value, value[key]);
+                        _this._doArray($elem, value, item);
                     } else if(key == "template") {
                         // If it contains a template property, add it as HTML
-                        $elem.innerHTML = _this._getTemplate($elem, value);
+                        $elem.innerHTML = "<template>" + _this._getTemplate($elem, value) + "</template>";
                     } else {
 						// Apply extensions:
 						if(_this._ext[key] != undefined && isFunction(_this._ext[key])) {
-							var ret = _this._ext[key](value[key], $elem);
+							var ret = _this._ext[key](item, $elem);
 							if(ret) {
 								_this._setValues($elem, ret);
 							}
 						// ID defined:
 						} else if(key[0] == "#") { 
-							_this._doRender(node(key), value[key]);
+							_this._doRender(node(key), item);
 						// Text or Html specified:
 						} else if(key == "text" || key == "html") {
-							_this._setValue($elem, key, value[key]);
+							_this._setValue($elem, key, item);
+						// Import dataset: Setting dataset : { id : 'custom' } will override the id set automatically in arrays.
+						} else if(key == "dataset" && isPlainObject(item)) {
+                            for(var d in item) {
+                                $elem.setAttribute("data-"+d, item[d]);
+                            }
                         // Events
-						} else if(key.indexOf("on") == 0 && isFunction(value[key])) {
-							$elem[key] = value[key];
+						} else if(key.indexOf("on") == 0 && isFunction(item)) {
+							$elem[key] = item;
 						// Date / Time:
-						} else if(value[key] instanceof Date) {
-							_this._setValue($elem, key, value[key]);
+						} else if(item instanceof Date) {
+							_this._setValue($elem, key, item);
 						// Attributes: --Do not set ID with a numeric value
-						} else if(_this._hasAttr($elem, key) && !(key == "id" && isNumeric(value[key]))) {
-							$elem.setAttribute(key, value[key]);
+						} else if(_this._hasAttr($elem, key) && !(key == "id" && isNumeric(item))) {
+							$elem.setAttribute(key, item);
 						// Search child elements:
 						} else {
+						    // Search by tag name first
 							var $subelem = node(key, $elem);
 							if(!$subelem) {
-								$subelem = node("."+key, $elem);
+							    // Search by ID
+								$subelem = node("#"+key, $elem);
+								if(!$subelem) {
+								    // Search by class
+								    $subelem = node("."+key, $elem);
+								}
 								if(!$subelem) {
 									// Generate new element:
 									if(_this._htmlGenTags.indexOf(key) != -1) {
 										var $newElem = newNode(key);
 										$elem.append($newElem);
-										_this._doRender($newElem, value[key]);
+										_this._doRender($newElem, item);
 									// Set a new attribute:
 									} else if(!isNumeric(key)) {
-										$elem.setAttribute(key, value[key]);
+										$elem.setAttribute(key, item);
 									}
 									continue;
 								}
 							}
-							_this._doRender($subelem, value[key]);
+							_this._doRender($subelem, item);
 						}
 					}
 				}
@@ -308,20 +360,20 @@ var m2d2 = (function() {
 		_setValue : function($elem, key, value) {
 			var _this = this;
 			// If key is null, it means is not specified, so we try to guess what it is
-            var isHtml = false;
+            var html = false;
             if(key == null) {
                 if(value == undefined || value == null) {
                     console.log("Value was undefined in element :");
                     console.log($elem);
                 } else if(isPlainObject(value) && value.text !== undefined) {
                     value = value.text;
-                } else if(!isNumeric(value) && value.trim().indexOf("<") !== -1) {
-                    isHtml = true;
+                } else if(!isNumeric(value) && isHtml(value)) {
+                    html = true;
                 }
             } else if(key == "html") {
-                isHtml = true;
+                html = true;
             }
-			if(isHtml) {
+			if(html) {
 				$elem.innerHTML = value;
 			} else {
                  // As <li> can have "value", it won't be assigned if key is null
@@ -441,6 +493,9 @@ var m2d2 = (function() {
 		}
 	    return arguments[0];
 	}
+	var isHtml = function(s) {
+	    return (s + "").trim().indexOf("<") !== -1;
+	}
     var isFunction = function(f) {
         return typeof f === 'function';
     }
@@ -452,6 +507,9 @@ var m2d2 = (function() {
     }
     var isPlainObject = function(o) {
         return isObject(o) &&! isArray(o);
+    }
+    var isSelectorID = function(s) {
+        return (s + "").trim().indexOf("#") == 0;
     }
     var isNumeric = function(n) { 
         return !isNaN(parseFloat(n)) && isFinite(n); 

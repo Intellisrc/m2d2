@@ -1,0 +1,89 @@
+<html>
+<head>
+<title>Demo using M2D2 : Lists</title>
+<meta name="HandheldFriendly" content="1">
+<meta name="viewport" content="width=device-width, maximum-scale=1.0">
+<meta name="theme-color" content="#333333">
+<link rel="stylesheet" href="css/common.css" type="text/css" />
+<link rel="stylesheet" href="css/index.css" type="text/css" />
+<script src="js/m2d2.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+// These is dummy data:
+var items = [
+    {
+          id : 1,
+          price: 100,
+          name : "Doggy Bag",
+          style : "color: #713c3c"
+    },{
+          id : 2,
+          price: 200,
+          name : "Skateboard",
+          style : "color: #3c7141"
+    },{
+          id    : 5,
+          price : 500,
+          name  : "Sassy Pants",
+          style : "color: #3c3f71"
+    }
+];
+
+//On ready...
+document.addEventListener("DOMContentLoaded", function() {
+    // This example is to show how to generate lists
+    var list = m2d2({
+        root : "#items",
+        data : items
+    });
+    var actions = m2d2({
+		root : "#actions",
+        data : {
+            ".price" : {
+                onkeyup : function(event) {
+                    list[1].price = this.value * 1;
+                }
+            },
+            ".add" : {
+                onclick : function(event) {
+                    list.push({
+                      id    : Math.round((Math.random() * 1000 / 100)),
+                      price : Math.round((Math.random() * 100000 / 100)),
+                      name  : "Extra Item",
+                      style : "color: #B17E28"
+                    });
+                }
+            },
+            ".remove" : { 
+                onclick : function(event) {
+                    list.splice(0, 1);
+                }
+            }
+        }
+    });
+});
+</script>
+</head>
+<body>
+<h1>M2D2 List example</h1>
+<table id="checkout">
+  <caption>My whish list:</caption>
+  <tbody id="items">
+    <template>
+        <tr>
+          <td class="id"></td>
+          <td><a class="name"></a></td>
+          <td>$ <span class="price"></span></td>
+        </tr>
+    </template>
+  </tbody>
+</table>
+<div id="actions" class="controls">
+    <div>
+		<button class="add">Add Row</button>
+		<button class="remove">Remove Row</button>
+	</div>
+    <div>Change Price: <input class="price" type="number" /></div>
+</div>
+Next: <a href="async.html">Async example</a>
+</body>
+</html>
