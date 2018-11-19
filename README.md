@@ -5,6 +5,10 @@ This is my second version of "Model", that is why I named it M2D2. Also, for tho
 
 Live Demo:
 https://gl.githack.com/lepe/m2d2/raw/master/index.html
+https://gl.githack.com/lepe/m2d2/raw/master/object.html
+https://gl.githack.com/lepe/m2d2/raw/master/timer.html
+https://gl.githack.com/lepe/m2d2/raw/master/list.html
+https://gl.githack.com/lepe/m2d2/raw/master/async.html
 
 Extension Demo:
 https://gl.githack.com/lepe/m2d2/raw/master/extend.html
@@ -14,7 +18,7 @@ https://gl.githack.com/lepe/m2d2/raw/master/form.html
 
 ## Install
 
-* Download (6Kb): m2d2.min.js and set it in the HTML head.
+* Download (7Kb): m2d2.min.js and set it in the HTML head.
 
 **NOTE** As it has no dependencies, It can be used together with any other library or framework (e.g. JQuery)
 
@@ -66,8 +70,8 @@ What if you have more than one `h1`? You can use a class name or an ID to search
 var title = m2d2({ 
     data: {
       "#title"      : "Hello World",  //Example using an ID
-      ".titleClass" : "Hello World",  //Example using a class name
-      titleClass    : "Hello World"   //Same as above
+      ".title_class" : "Hello World",  //Example using a class name  
+      title_class    : "Hello World"   //Will look for a "title_class" tagname, or the class name 'title_class'
     }  
 });
 // To modify it:
@@ -75,11 +79,11 @@ title["#title"] = "New text";
 title[".titleClass"] = "New text";
 title.titleClass = "New text";
 ```
-Class names may or may not contain `.` at the begining.
+Note: Class names may or may not contain `.` at the begining. However if the class is the same as a tagname (for example, `button`), you may want to specify it as `.button` to clarify.
 
 ## Setting attributes
 
-You can set attributes very easy in this way:
+You can set attributes easily in this way:
 ```html
 <a class="special"></a>
 ```
@@ -109,6 +113,32 @@ You can add non-existant attributes simply like this:
 ```js
 a.special.hreflang = "en";
 a.special['class'] = "active";
+a.special['data-id'] = 100;
+```
+
+## Datasets
+
+You can attach data to your elements in two ways:
+
+Setting each attribute:
+```js
+    data : {
+        a : {
+            'data-code' : "HM2001",
+            'data-qty'  : 20
+        }
+    }
+```
+Setting all at once (using `dataset` property):
+```js
+    data : {
+        a : {
+            dataset: : {
+                code : "HM2001",
+                qty  : 20
+            }
+        }
+    }
 ```
 
 ## Replacing data
@@ -203,9 +233,23 @@ var a = m2d2({
 ...
 ```
 
+You can attach events to root elements by adding an `events` property:
+
+```js
+var a = m2d2({
+    root : ".special",
+    data : "My Special Link",
+    events : {
+        onclick : function(event) {
+            alert("You just clicked this link!");
+        }    
+    }
+ });
+```
+
 ## Using Templates
 
-Sometimes may be useful to keep a template together with your data structure to be sure that it won't be 'accidentally' changed by the designers. In those cases, you can specify the `template` property:
+Sometimes may be useful to keep a template together with your data structure to be sure that it won't be 'accidentally' changed by the designers. In those cases, you can specify the `template` property as a `string`,`html` or an `object`:
 
 ```html
 <div id="clock"></div>
@@ -234,6 +278,8 @@ The `template` property also accepts an object:
 		}
 	}
 ```
+NOTE: The two examples above explained how to set your templates as `html` or `objects`, but not as `string`. Please read the next topic (Creating lists) to know about the `string` type.
+
 Templates are not always required as this library will try to build the HTML based in your data, so the following will do exactly the same as the above examples:
 
 ```js
@@ -267,7 +313,23 @@ There are 3 ways to specify a template:
 
 The code will search for it in that order. 
 
-In the following example, you don't need to specify any template. The default option will be used, duplicated and replaced by those specified inside `data`.
+The shortest way to use a template is specifying it as `string`, which will be translated into an HTML tag. This is useful for very simple data structures:
+
+```html
+<div id="buttons"></div>
+```
+```js
+var buttons = m2d2({
+    root : "#buttons",
+    template : "button",    //It will become: <button></button>
+    data : [
+        { text : "Click Me", onclick : function(ev) { alert("First button"); } },
+        { text : "Submit", onclick : function(ev) { alert("Second button"); } }
+    ]
+});
+```
+
+You don't always need to specify a template. When not specified, the HTML inside our `root` will be used as template and will be duplicated with our `data`.
 ```html
 <select>
 	<option>Select one</option>
@@ -288,8 +350,9 @@ var options = m2d2({
 	]
 });
 ```
+The `select` element, will have as options: `["Select one", "First option", "Second option"]`.
 
-As the `<template>` child element, it is not displayed by the browsers, you can use it to specify only the part of the HTML you want to replicate:
+The `<template>` element is not displayed by the browsers, so you can use it to specify only the part of the HTML you want to replicate:
 
 ```html
 <ul id="list">
@@ -414,7 +477,23 @@ var location = m2d2({
   }
 });
 ```
-In this example, we use a service to get our `json` data and convert it into our data object. If you are planning to call such function in an interval, you can either specify it with the option `interval` or as second argument of the callback:
+In this example, we use a service to get our `json` data and convert it into our data object. 
+
+NOTE: M2D2 will try to guess which kind of data will receive in the callback during its creation. 
+In case your m2d2 object is empty after calling `callback`, it can be fixed by returing an empty `object` or `array`:
+
+```js
+    var why_empty = m2d2({
+        data : function(callback) {
+            window.setTimeout  (function(){
+                callback([1,2,3,4,5])
+            }, 5000);
+            // In case 'why_empty' has no elements after calling the above 'callback', we specify the type here:
+            return []; //This will tell M2D2 that you are expecting an array. Use 'return {}' for an object.
+        } 
+    });
+```
+If you are planning to call such function in an interval, you can either specify it with the option `interval` or as second argument of the callback:
 ```js
 var location = m2d2({
   root: "#location",
@@ -422,6 +501,7 @@ var location = m2d2({
   interval: 10000 //Every 10 seconds
 });
 ```
+
 ```js
 ...
     callback({
@@ -436,7 +516,6 @@ To update the data, is the same as before:
 ```js
 location.place = "Great Britain";
 ```
-
 If you are using intervals and you want to stop it, you can use the property `interval` of your `M2D2` object:
 ```js
 var location = m2d2({
