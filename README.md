@@ -59,16 +59,17 @@ var title = m2d2({
     h1 : "Hello World"
 });
 ```
+It will search inside `<body>` for a tagname `<h1>` and set the text in it.
+
 or:
 ```js
-var title = m2d2("h1","Hello World");
+var title = m2d2("h1","Hello World");   <--- recommended
 ```
-This last way, defines a CSS selector as first argument, that we will call: 'root element'.
+It query the CSS selector "h1" and place set the text in it. We will call this element: `root element`.
 ```js
 //To modify it:
 title.h1 = "Great!";
 ```
-It will search inside `<body>` for a tagname `<h1>` and place the text in it.
 
 You can also use HTML:
 ```js
