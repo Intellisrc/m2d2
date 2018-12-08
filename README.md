@@ -211,6 +211,16 @@ The main advantage of using an object (vs HTML) is that you can update its prope
 a.special.img.src = "http://ur.special/logo_alt.png";
 ```
 
+**NOTE** : To specify a CSS class, the following are equivalent:
+
+```js
+    img : {
+        'class' : "thumbnail",   //Using the HTML attribute (must be between quotes as its a JS reserved keyword)
+        className : "thumbnail", //Using the DOM attribute
+        css : "thumbnail"        //Using `style` plugin (Explained later)
+    }
+```
+
 ## Adding Events
 
 To add an event to an element, its as simple as specifying it inside your data:
@@ -774,3 +784,46 @@ var link = m2d2("a.special", {
 	}
 });
 ```
+
+## Plugins
+
+M2D2 comes with 2 plugins:
+
+* `style` (m2d2.style.src.js) : Simplifies the way to set style or classes into elements:
+
+```js 
+{
+    css : "Short version for: 'class' or className",
+    color : "Set CSS color rule",
+    bgcolor : "Set CSS background-color rule",
+    "-css" : "Remove a class from the element",
+    "+css" : "Add a class to the element"
+}
+```
+
+* `show` (m2d2.show.src.js) : Show or hide elements:
+
+```js
+{
+    show : "If false, will hide the element. If true will display it".
+}
+```
+The main advantage of this plugin, is that it will preserve the previous CSS 'display:' rule. For example, if you have an element with `display:grid` and you hide it and show it again, it will correctly preserve the `grid` display.
+
+## Creating your own plugins:
+
+Extending M2D2 is as easy as:
+
+```js
+m2d2.ext({
+    myext : function(value, node) {
+        // value is in this example: "something"
+        // node is in this example: `<a class='special'></a>` (as DOM element)
+    }
+});
+//----- Usage ----
+var link = m2d2("a.special",{
+    myext : "something"
+});
+```
+
