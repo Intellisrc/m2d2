@@ -34,56 +34,53 @@
 <script type="text/javascript">
 var nav;
 jQuery(function($) {
-	nav = m2d2({
-		root : "nav",
-		data : {
-			profile :{ 
-				href: "/user/profile",
-				text: "Profile",
-				onclick : function(){ return false; }
-			},
-			settings : { 
-				href: "/user/settings",
-				text: "Settings",
-				onclick : function(){ return false; }
-			},
-			users :{ 
-				href: "/admin/users",
-				text: "Manage Users",
-				show: false,
-				onclick : function(){ return false; }
-			},
-			groups :{ 
-				href: "/admin/groups",
-				text: "Manage Groups",
-				show: false,
-				onclick : function(){ return false; }
-			},
-			logout : { 
-				css : "logout",
-				href: "/logout",
-				text: "Logout",
-				show: false,
-				onclick: function() { 
-					nav.users.show = false;
-					nav.groups.show = false;
-					nav.logout.show = false;
-					nav.login.show = true;
-					return false; 
-				}
-			},
-			login : { 
-				href: "/login",
-				text: "Admin Login",
-				show: true,
-				onclick: function() { 
-					nav.users.show = true;
-					nav.groups.show = true;
-					nav.logout.show = true;
-					nav.login.show = false;
-					return false; 
-				}
-			},
+	nav = m2d2("nav", {
+		profile :{ 
+			href: "/user/profile",
+			text: "Profile",
+			onclick : function(){ return false; }
+		},
+		settings : { 
+			href: "/user/settings",
+			text: "Settings",
+			onclick : function(){ return false; }
+		},
+		users :{ 
+			href: "/admin/users",
+			text: "Manage Users",
+			show: false,
+			onclick : function(){ return false; }
+		},
+		groups :{ 
+			href: "/admin/groups",
+			text: "Manage Groups",
+			show: false,
+			onclick : function(){ return false; }
+		},
+		logout : { 
+			css : "logout",
+			href: "/logout",
+			text: "Logout",
+			show: false,
+			onclick: function() { 
+				nav.users.show = false;
+				nav.groups.show = false;
+				nav.logout.show = false;
+				nav.login.show = true;
+				return false; 
+			}
+		},
+		login : { 
+			href: "/login",
+			text: "Admin Login",
+			show: true,
+			onclick: function() { 
+				nav.users.show = true;
+				nav.groups.show = true;
+				nav.logout.show = true;
+				nav.login.show = false;
+				return false; 
+			}
 		}
 	});
 });

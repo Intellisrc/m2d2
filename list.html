@@ -31,34 +31,28 @@ var items = [
 //On ready...
 document.addEventListener("DOMContentLoaded", function() {
     // This example is to show how to generate lists
-    var list = m2d2({
-        root : "#items",
-        data : items
-    });
-    var actions = m2d2({
-		root : "#actions",
-        data : {
-            ".price" : {
-                onkeyup : function(event) {
-                    list[1].price = this.value * 1;
-                }
-            },
-            ".add" : {
-                onclick : function(event) {
-                    list.push({
-                      id    : Math.round((Math.random() * 1000 / 100)),
-                      price : Math.round((Math.random() * 100000 / 100)),
-                      name  : "Extra Item",
-                      style : "color: #B17E28"
-                    });
-                }
-            },
-            ".remove" : { 
-                onclick : function(event) {
-                    list.splice(0, 1);
-                }
-            }
-        }
+    var list = m2d2("#items", items);
+    var actions = m2d2("#actions", {
+		".price" : {
+			onkeyup : function(event) {
+				list[1].price = this.value * 1;
+			}
+		},
+		".add" : {
+			onclick : function(event) {
+				list.push({
+				  id    : Math.round((Math.random() * 1000 / 100)),
+				  price : Math.round((Math.random() * 100000 / 100)),
+				  name  : "Extra Item",
+				  style : "color: #B17E28"
+				});
+			}
+		},
+		".remove" : { 
+			onclick : function(event) {
+				list.splice(0, 1);
+			}
+		}
     });
 });
 </script>

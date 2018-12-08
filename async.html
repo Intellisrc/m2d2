@@ -13,53 +13,47 @@
 	document.addEventListener("DOMContentLoaded", function() {
 		// This is similar to "timer" example, but using a remote server and
 		// it will use a parameter when updating
-		var user = m2d2({
-			root: "#user",
-			data : function(callback, param) {
-				if(param == undefined) {
-					param = 1;
-				}
-				getXHR("https://jsonplaceholder.typicode.com/users?id="+param,function(json) {
-					json = json[0]; //get the first item
-					callback({
-						user : json.username,
-						name : json.name,
-						email: json.email,
-						zip  : json.address.zipcode,
-						url  : {
-							a:  {
-								href : "http://" + json.website,
-								text : json.website,
-								target : "_blank"
-							}
+		var user = m2d2("#user", function(callback, param) {
+			if(param === undefined) param = 1;
+			getXHR("https://jsonplaceholder.typicode.com/users?id="+param,function(json) {
+				json = json[0]; //get the first item
+				callback({
+					user : json.username,
+					name : json.name,
+					email: json.email,
+					zip  : json.address.zipcode,
+					url  : {
+						a:  {
+							href : "http://" + json.website,
+							text : json.website,
+							target : "_blank"
 						}
-					});
+					}
 				});
-			}
+			});
 		});
 
 		// This example uses the content inside <select> as template, which is an <option> tag.
-		var users = m2d2({
-			root: "#users",
-			data : function(callback) {
-				getXHR("https://jsonplaceholder.typicode.com/users",function(json) {
-					var usersList = [];
-					for(var u in json) {
-						var usr = json[u];
-						usersList.push({
-							id		: usr.id,
-							text	: usr.username,
-							value	: usr.id
-						});
-					}
-					callback(usersList);
-				});
-			},
-			events : {
-				onchange : function(event) {
-					user.m2d2.update(this.value);
+		var users = m2d2("#users", function(callback) {
+			getXHR("https://jsonplaceholder.typicode.com/users",function(json) {
+				var usersList = [];
+				for(var u in json) {
+					var usr = json[u];
+					usersList.push({
+						id		: usr.id,
+						text	: usr.username,
+						value	: usr.id
+					});
 				}
-			}
+				callback(usersList);
+			});
+		}, {
+			onchange : function(event) {
+				user.m2d2.update(this.value);
+			},
+			// Special events:
+			oninit  : function() { console.log("initializing..."); },
+			onrender: function() { console.log("done."); },
 		});
 	});
 </script>

@@ -21,3 +21,6 @@ button {
     color: #333;
     cursor: pointer;
 }
+button[disabled] {
+	opacity: 0.3;
+}

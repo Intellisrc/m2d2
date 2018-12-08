@@ -12,22 +12,20 @@
 	document.addEventListener("DOMContentLoaded", function() {
 		// Simple example using an object
 		var page = m2d2({
-			data : {
-				h1 : "M2D2 : Objects example",
-				info : {
-					dt : "Simple is best",
-					dd : "Isn't great to be able to have such freedom, flexibility and simplicity?",
-					a  : {
-						href : "http://example.com",
-						target: "_blank",
-						text : "example.com"
-					}
-				},
-				controls : {
-					"#link" : {
-						onkeyup : function(event){
-							page.info.a = this.value;
-						}
+			h1 : "M2D2 : Objects example",
+			info : {
+				dt : "Simple is best",
+				dd : "Isn't great to be able to have such freedom, flexibility and simplicity?",
+				a  : {
+					href : "http://example.com",
+					target: "_blank",
+					text : "example.com"
+				}
+			},
+			controls : {
+				"#link" : {
+					onkeyup : function(event){
+						page.info.a = this.value;
 					}
 				}
 			}

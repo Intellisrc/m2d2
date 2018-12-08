@@ -10,15 +10,14 @@
 <script type="text/javascript">
 	//On page ready...
 	document.addEventListener("DOMContentLoaded", function() {
-		// Most simple example using a String as data
-		var title = m2d2({
-			h1 : "M2D2 Demo",
-			"#new_title" : {
-				onkeyup : function(event) {
-					title.h1 = this.value;
-				}
+		//--------- Another way to write it -----------
+		var title = m2d2("h1","M2D2 Demo");
+		m2d2("#new_title", {
+			onkeyup : function(event) {
+				title.text = this.value;
 			}
 		});
+		//---------------------------------------------
 	});
 </script>
 </head>
@@ -27,8 +26,7 @@
 <div class="controls">
     <div>New Title: <input id="new_title" type="text" /></div>
 </div>
-Alternative: <a href="index2.html">Same example, different way to code it.</a><br>
-Advanced: <a href="index-adv.html">Same example using callback and return value.</a><br>
+Back: <a href="index.html">Simple example</a><br>
 Next: <a href="object.html">Object example</a>
 </body>
 </html>

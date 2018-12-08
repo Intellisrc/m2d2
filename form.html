@@ -64,113 +64,110 @@ cite {
 <script type="text/javascript">
 var form;
 jQuery(function($) {
-	form = m2d2({
-		root : "form",
-		data : {
-			name : {
-				type : "text",
-				name : "customer_name",
-				required : true,
-				autocomplete : true,
-				size : 10
-			},
-			phone : {
-				type : "tel",
-				name : "phone_number",
-				autocomplete : true,
-				placeholder : "123-4567-8901",
-				pattern : "[0-9]{3}-[0-9]{3}-[0-9]{4}",
-				minlength : 9,
-				maxlength : 14,
-				size : 20
-			},
-			email : {
-				type : "email",
-				name : "email_address",
-				autocomplete : true,
-				placeholder : "you@example.com",
-				size : 30
-			},
-			taxi : {
-				template : {
-					p : {
-						label : {
-							input : {
-								type: "radio",
-								name: "taxi",
-							}
+	form = m2d2("form", {
+		name : {
+			type : "text",
+			name : "customer_name",
+			required : true,
+			autocomplete : true,
+			size : 10
+		},
+		phone : {
+			type : "tel",
+			name : "phone_number",
+			autocomplete : true,
+			placeholder : "123-4567-8901",
+			pattern : "[0-9]{3}-[0-9]{3}-[0-9]{4}",
+			minlength : 9,
+			maxlength : 14,
+			size : 20
+		},
+		email : {
+			type : "email",
+			name : "email_address",
+			autocomplete : true,
+			placeholder : "you@example.com",
+			size : 30
+		},
+		taxi : {
+			template : {
+				p : {
+					label : {
+						input : {
+							type: "radio",
+							name: "taxi",
 						}
 					}
-				},
-				data : [
-					{ input : { value : "car", checked : true }, label : "Car" },
-					{ input : "van", label : "Van" },
-					{ input : "tuktuk", label: "Tuk Tuk" },
-				]
+				}
 			},
-			extras : {
-				template : {
-					p : {
-						label : {
-							input : {
-								type : "checkbox",
-								name : "extras",
-							}
+			data : [
+				{ input : { value : "car", checked : true }, label : "Car" },
+				{ input : "van", label : "Van" },
+				{ input : "tuktuk", label: "Tuk Tuk" },
+			]
+		},
+		extras : {
+			template : {
+				p : {
+					label : {
+						input : {
+							type : "checkbox",
+							name : "extras",
 						}
 					}
-				},
-				data : [
-					{ input : { value : "bb", disabled: true }, label : "Baby Seat (Unavailable)" },
-					{ input : "wa", label : "Wheelchair Access" },
-					{ input : "st", label : "Stock Tip" },
-				]
+				}
 			},
-			date : {
-				type : "date",
-				name : "pickup_date",
-				required : true,
-				value : new Date()
-			},
-			time : {
-				type : "time",
-				name : "pickup_time",
-				required : true,
-				value : new Date()
-			},
-			pickup : {
-				name : "pickup_place",
-				template : '<option>',
-				data : [
-					{ value : "", selected: true, text: "Select One" },
-					{ value : "office", text: "Taxi Office" },
-					{ value : "town_hall", text: "Town Hall" },
-					{ value : "telepathy", text: "We'll Guess!" },
-				]
-			},
-			dropoff : {
-				type : "text",
-				name : "dropoff_place",
-				required : true,
-				list : "destinations"
-			},
-			"#destinations" : {
-				template : '<option>',
-				data : [
-					{ value : "Airport" },
-					{ value : "Beach" },
-					{ value : "Fred Flinstone's House" }
-				]
-			},
-			comment : {
-				name : "comments",
-				maxlength : 500,
-				cols : 50,
-				rows : 5
-			},
-			button : {
-				disabled : true
-			}		
-		}
+			data : [
+				{ input : { value : "bb", disabled: true }, label : "Baby Seat (Unavailable)" },
+				{ input : "wa", label : "Wheelchair Access" },
+				{ input : "st", label : "Stock Tip" },
+			]
+		},
+		date : {
+			type : "date",
+			name : "pickup_date",
+			required : true,
+			value : new Date()
+		},
+		time : {
+			type : "time",
+			name : "pickup_time",
+			required : true,
+			value : new Date()
+		},
+		pickup : {
+			name : "pickup_place",
+			template : '<option>',
+			data : [
+				{ value : "", selected: true, text: "Select One" },
+				{ value : "office", text: "Taxi Office" },
+				{ value : "town_hall", text: "Town Hall" },
+				{ value : "telepathy", text: "We'll Guess!" },
+			]
+		},
+		dropoff : {
+			type : "text",
+			name : "dropoff_place",
+			required : true,
+			list : "destinations"
+		},
+		"#destinations" : {
+			template : '<option>',
+			data : [
+				{ value : "Airport" },
+				{ value : "Beach" },
+				{ value : "Fred Flinstone's House" }
+			]
+		},
+		comment : {
+			name : "comments",
+			maxlength : 500,
+			cols : 50,
+			rows : 5
+		},
+		button : {
+			disabled : true
+		}		
 	});
 });
 </script>

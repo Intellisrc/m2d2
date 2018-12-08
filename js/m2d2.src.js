@@ -2,15 +2,50 @@
  * @author: A. Lepe
  * @url : https://gitlab.com/lepe/m2d2/
  * @since: May, 2018
- * @version: 1.0.2 : 2018-11-19
+ * @version: 1.1 : 2018-12-08
+ *
+ * Examples:
+ // -- Without "root":
+ * var myobj = m2d2("text in body");
+ * var myobj = m2d2({ div : { text : "hello" } });
+ * var myobj = m2d2(function(callback) { ... });
+ // -- With "root":
+ * var myobj = m2d2("#root", "text in #root");
+ * var myobj = m2d2("#input", { value : 199 }); //Using properties
+ * var myobj = m2d2("#clock", function(callback) { ... }); //Using a function (e.g. getting data from another server)
+ // -- With template:
+ * var myobj = m2d2("#ul", [ 1, 2, 3 ], "li"); //Defining template as 3rd parameter
+ * var myobj = m2d2("#ul", [ 1, 2, 3 ], { li : { 'class' : 'blue' } }); //Defining template as object
+ * var myobj = m2d2("#clock", function(callback) { ... }, "time"); //Using a function and a template
+ * var myobj = m2d2("#clock", function(callback) { ... }, { onclick : ... }); //Using object as template
  */
 "use strict";
 var m2d2 = (function() {
 	// main function
-	var m2d2 = function(options, callback) {
-		if(callback != undefined) {
-			options.onRenderDone = callback;
-		}
+	var m2d2 = function(first, second, third) {
+	    var options = {};
+	    var first_type = typeof first;
+	    switch(first_type) {
+	        case "string" :
+	            if(second != undefined) {
+	                options.root = first;
+	                options.data = second;
+	                options.template = third;
+	            } else { //This is the simple use case : md2d("Content"); in which "Content" will be set in "body";
+	                options.data = first;
+	                return null;
+	            }
+	            break;
+	        // In case the first argument is not a string, root will become the default value.
+	        case "object" :
+	        case "function" :
+                options.data = first;
+                options.template = third; //it might be undefined
+	            break;
+	        default :
+	            console.log("First argument passed to m2d2, with value: ("+first+") is of unknown type: "+first_type);
+	            return null;
+	    }
 		return new M2D2(options).get();
 	};
 	// Extensions:
@@ -26,64 +61,26 @@ var m2d2 = (function() {
 		} else {
 			// CUSTOM OPTIONS
 			model = extend(model, options || {});
-			if(model.auto_init) {
-				model.init();
-			}
+			model._init();
 		}
 	}
 	M2D2.prototype = {
 		//------- options ---------------
 		root            : "body",   // DOM baseline to perform searches and replacements. The outer element.
-		auto_init       : true,     // If true, it will render automatically on initialization, otherwise, call render()
-		html            : true,     // Auto detect and insert HTML instead of text
 		data            : {},       // object to render. This object will be monitored for changes,
 	//	template		: undefined,// root template. It can be a string (tagName, ID selector (#) or HTML) or an object. When not specified, it will be generated from array.
 	//  events          : undefined,// if set, it will attach events to root. Example: { onclick : function(ev) {} , onkeyup : function(ev) {} }
-		interval        : 0,        // how often to update data if data is a function.
+	//	interval        : 0,        // how often to update data if data is a function.
 									// ... Also can be set as second parameter when calling: callback(data, interval). 
 									// ... After render, it will become the timer, so it can be stopped if required.
-		//------- events ------------------
-		preRender  : function(instance) {},       // This is executed before we start rendering
-		beforeDataRender   : function(instance, $elem, row) {},  // This is executed just before rendering a row. "row" can be changed before it is rendered. (return false to skip)
-		afterDataRender    : function(instance, $elem, row) {},  // This is executed just after rendering a row. "row" is not longer after this, so modifying it won't take any effect.
-		postRender   : function(instance) {},       // This is executed after all has been rendered
-		onRenderDone : function(data) {},
+		//------- custom events ------------------
+		//oninit              : function() {},       // This is executed before we start rendering
+		//onrender            : function() {},       // This is executed after all has been rendered
 		//------- read only -----
 		rendered        : false,    // true if the data has been rendered
 		//----- accessible during rendering:
 		$root           : null,     // root DOM element e.g. "<body>...</body>"
 		//----- Public functions ----------------
-		/**
-		 * Initialize data. If its a function, call it.
-		 * If "auto_init" is true, render.
-		 */
-		init : function() {
-			var _this = this;
-            if(isFunction(_this._data)) {
-                _this._func = _this._data;
-                _this.data = _this._doFunc(_this._func, _this.param, function(newData, refreshRate){
-                    _this._onReady();
-                    if(refreshRate === undefined) {
-                        if(_this.interval*1 > 0) {
-                            refreshRate = _this.interval;
-                        }
-                    }
-                    if(refreshRate*1 > 0) {
-                        _this.interval = setInterval(function(){
-                            _this._func(function(updData) {
-                                _this._doRender(_this.$root, updData);
-                            });
-                        }, refreshRate);
-                    }
-                });
-            } else {
-                // In case its a Number of String, wrap it.
-                if(!isObject(this._data)) {
-                    this._data = { text : this._data };
-                }
-                _this._onReady();
-            }
-		},
 		/**
 		 * Update model data
 		 */
@@ -102,33 +99,13 @@ var m2d2 = (function() {
 					}
 				}
 				if(property === undefined && isFunction(_this._func)) {
-					_this._doFunc(_this._func, data, function(newData){
+					_this._doFunc(_this._func, data, function(newData, /*unused*/refreshRate){
 						doUpdate(newData);
 					});
 				} else {
 					doUpdate(data);
 				}
 			}
-		},
-		/**
-		 * Render data
-		 */
-		render : function() {
-			var _this = this;
-			if(_this._data == undefined) {
-			    console.log("data is missing in m2d2 object. Be sure the key 'data' is set.")
-			    return false;
-			}
-            // Initial trigger
-            _this.preRender(_this);
-            // Render data
-            _this._doRender(_this.$root, _this._data);
-            // Trigger on finish
-            _this.postRender(_this);
-            // Set trigger on modifications 
-            _this.rendered = true;
-            // When we are done
-            _this.onRenderDone(_this.get());
 		},
 		/**
 		 * Returns data object
@@ -149,6 +126,53 @@ var m2d2 = (function() {
 			}
 		},
 		//---- Private --
+		/**
+		 * Initialize data. If its a function, call it.
+		 */
+		_init : function() {
+			var _this = this;
+            if(isFunction(_this._data)) {
+                _this._func = _this._data;
+                _this.data = _this._doFunc(_this._func, _this.param, function(/*unused*/newData, refreshRate){
+                    _this._onReady();
+                    if(refreshRate === undefined) {
+                        if(_this.interval*1 > 0) {
+                            refreshRate = _this.interval;
+                        }
+                    }
+                    if(refreshRate*1 > 0) {
+                        _this.interval = setInterval(function(){
+                            _this._func(function(updData) {
+                                _this._doRender(_this.$root, updData);
+                            });
+                        }, refreshRate);
+                    }
+                });
+                if(_this.data) {
+                    _this._onReady();
+                }
+            } else {
+                // In case its a Number of String, wrap it.
+                if(!isObject(this._data)) {
+                    this._data = { text : this._data };
+                }
+                _this._onReady();
+            }
+		},
+		/**
+		 * Render data
+		 */
+		_render : function() {
+			var _this = this;
+			if(_this._data == undefined) {
+			    console.log("data is missing in m2d2 object with root: "+_this.root)
+			    return false;
+			}
+            // Render data
+            _this._doRender(_this.$root, _this._data);
+            // Set trigger on modifications
+            _this.rendered = true;
+		},
 		_cache : null,
 		_data  : null,
 		_func  : null,
@@ -159,15 +183,28 @@ var m2d2 = (function() {
 			var _this = this;
             _this.$root = node(_this.root);
             _this.cache = _this.$root.innerHTML;
-            _this.render();
+            _this._render();
         },
 		_doFunc : function(origFunc, param, callback) {
 			var _this = this;
-			var type = origFunc(function(newData, refreshRate){
+			var ret_data = origFunc(function(newData, second, third){
+			    var refreshRate;
+			    if(third !== undefined && isNumeric(third) ) {
+			        refreshRate = third;
+			    } else if(second !== undefined && isNumeric(second)) {
+			        refreshRate = second;
+			    }
+			    if(second !== undefined && !isNumeric(second)) {
+			        _this._data.template = second;
+			    }
 				if(isObject(newData)) {
 					// The first time, _this._data may be object. Fix it.
 					if(isArray(newData) && isPlainObject(_this._data)) {
-						_this._data = newData;
+					    if(_this._data.data !== undefined) {
+                            _this._data.data = newData;
+						} else {
+						    _this._data = newData;
+						}
 					} else {
 						for(var n in newData) {
 							_this._data[n] = newData[n];
@@ -177,13 +214,16 @@ var m2d2 = (function() {
 				if(callback != undefined) {
 					callback(newData, refreshRate);
 				}
-			}, param) || (_this._getTemplate(node(_this.root), _this)) ? [] : {};
-			if(!isPlainObject(type) &&! isArray(type)) {
+			}, param);
+			if(ret_data == undefined) {
+			    ret_data = (_this._getTemplate(node(_this.root), _this)) == "" ? [] : {};
+			}
+			if(!isPlainObject(ret_data) &&! isArray(ret_data)) {
 			    console.log("Undefined type of 'data'. For automatic detection do not set any 'return' in the data's function. Or explicitly return '[]' for arrays or '{}' for objects.")
 			}
-			return type;
+			return ret_data;
 		},
-        _setProxy : function(force) {
+        _setProxy : function() {
 			var _this = this;
 			if(_this._data._proxy === undefined && (isPlainObject(_this._data) || isArray(_this._data))) {
 				_this._data = _this._proxy(_this._data, function(obj, variable, value) {
@@ -196,18 +236,19 @@ var m2d2 = (function() {
 		// Render an element with its values
 		_doRender : function($elem, value) {
 			var _this = this;
-			//Add events to root
-			if(_this.events !== undefined) {
-			    for(var e in _this.events) {
-			        $elem[e] = _this.events[e];
-			    }
-			}
+            // Initial trigger
+            if(value.oninit != undefined) {
+                value.oninit();
+            }
             _this._setProxy();
 			if(isArray(value)) {
 				_this._doArray($elem, _this, value);
 			} else { //Number, String or Objects
 				_this._setValues($elem, value);
 			}
+            if(value.onrender != undefined) {
+                value.onrender();
+            }
 		},
 		// Process an array
 		_doArray : function($elem, obj, values) {
@@ -253,13 +294,14 @@ var m2d2 = (function() {
 		// Returns a copy of the model to duplicate
 		// $elem is to search in DOM for <template>
 		// obj is to search for property "template"
+		//TODO: template is getting lost from obj.template, and it is getting it from obj._template (which is a cache) but it has no events.
 		_getTemplate : function($elem, obj) {
 			var _this = this;
-			if(obj._template != undefined) {
+			if(obj._template != undefined) {        //TODO <---here
 				return obj._template;
 			} else {
 				var $template;
-				if(obj.template != undefined) {
+				if(obj.template != undefined) {  //TODO <--- and here
 					if(isPlainObject(obj.template)) {
 						$template = newNode("div");
 						_this._setValues($template, obj.template);
@@ -322,7 +364,11 @@ var m2d2 = (function() {
 							_this._setValue($elem, key, item);
 						// Attributes: --Do not set ID with a numeric value
 						} else if(_this._hasAttr($elem, key) && !(key == "id" && isNumeric(item))) {
-							$elem.setAttribute(key, item);
+						    if(typeof $elem[key] == "boolean") {
+						            $elem[key] = item;
+						    } else {
+    							    $elem.setAttribute(key, item);
+    						}
 						// Search child elements:
 						} else {
 						    // Search by tag name first
@@ -501,6 +547,9 @@ var m2d2 = (function() {
     }
     var isArray = function(a) {
         return Array.isArray(a);
+    }
+    var isEmpty = function(obj) {
+        return obj === undefined || (isObject(obj) && Object.keys(obj).length === 0) || obj == "";
     }
     var isObject = function(oa) {
         return typeof oa === 'object';
