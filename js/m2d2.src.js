@@ -8,10 +8,12 @@
  // -- Without "root":
  * var myobj = m2d2("text in body");
  * var myobj = m2d2({ div : { text : "hello" } });
+ * var myobj = m2d2([ {},{},{} ]); //Setting list without template and root
  * var myobj = m2d2(function(callback) { ... });
  // -- With "root":
  * var myobj = m2d2("#root", "text in #root");
  * var myobj = m2d2("#input", { value : 199 }); //Using properties
+ * var myobj = m2d2("#input", [ 0, 1, 2 ]); //Setting list without template
  * var myobj = m2d2("#clock", function(callback) { ... }); //Using a function (e.g. getting data from another server)
  // -- With template:
  * var myobj = m2d2("#ul", [ 1, 2, 3 ], "li"); //Defining template as 3rd parameter
@@ -29,6 +31,9 @@ var m2d2 = (function() {
 	        case "string" :
 	            if(second != undefined) {
 	                options.root = first;
+	                if(isArray(second)) {
+	                    second = { items : second };
+	                }
 	                options.data = second;
 	                options.template = third;
 	            } else { //This is the simple use case : md2d("Content"); in which "Content" will be set in "body";
@@ -39,6 +44,9 @@ var m2d2 = (function() {
 	        // In case the first argument is not a string, root will become the default value.
 	        case "object" :
 	        case "function" :
+                if(isArray(first)) {
+                    second = { items : first };
+                }
                 options.data = first;
                 options.template = third; //it might be undefined
 	            break;
@@ -67,31 +75,27 @@ var m2d2 = (function() {
 	M2D2.prototype = {
 		//------- options ---------------
 		root            : "body",   // DOM baseline to perform searches and replacements. The outer element.
-		data            : {},       // object to render. This object will be monitored for changes,
 	//	template		: undefined,// root template. It can be a string (tagName, ID selector (#) or HTML) or an object. When not specified, it will be generated from array.
-	//  events          : undefined,// if set, it will attach events to root. Example: { onclick : function(ev) {} , onkeyup : function(ev) {} }
 	//	interval        : 0,        // how often to update data if data is a function.
 									// ... Also can be set as second parameter when calling: callback(data, interval). 
 									// ... After render, it will become the timer, so it can be stopped if required.
 		//------- custom events ------------------
 		//oninit              : function() {},       // This is executed before we start rendering
 		//onrender            : function() {},       // This is executed after all has been rendered
-		//------- read only -----
-		rendered        : false,    // true if the data has been rendered
 		//----- accessible during rendering:
-		$root           : null,     // root DOM element e.g. "<body>...</body>"
+		$root           : null,     // root DOM element e.g. "<body>...</body>" //TODO: required?
 		//----- Public functions ----------------
 		/**
 		 * Update model data
 		 */
 		update : function(data, property, valObj) {
 			var _this = this;
-			if(_this.rendered) {
+			if(_this._rendered) {
 				var doUpdate = function(data) {
 					if(data._node != undefined) {
 						var change = {}
 						change[property] = valObj.value;
-						_this._doRender(data._node, extend(data,change));
+						_this._doRender(data._node, extend(data, change));
 					} else {
 						// Clear root element
 						_this.clear();
@@ -117,15 +121,16 @@ var m2d2 = (function() {
 			return this._data;
 		},
 		/**
-		 * Removes added model items
+		 * Removes added model items //TODO: move to items? maybe not needed.
 		 */
 		clear : function() {
 			var _this = this;
-			if(_this.rendered) {
+			if(_this._rendered) {
 				_this.$root.innerHTML = _this.cache;
 			}
 		},
 		//---- Private --
+		_rendered        : false,    // true if the data has been rendered
 		/**
 		 * Initialize data. If its a function, call it.
 		 */
@@ -133,8 +138,7 @@ var m2d2 = (function() {
 			var _this = this;
             if(isFunction(_this._data)) {
                 _this._func = _this._data;
-                _this.data = _this._doFunc(_this._func, _this.param, function(/*unused*/newData, refreshRate){
-                    _this._onReady();
+                var syncRet = _this._doFunc(_this._func, _this.param, function(/*unused*/newData, refreshRate){
                     if(refreshRate === undefined) {
                         if(_this.interval*1 > 0) {
                             refreshRate = _this.interval;
@@ -148,7 +152,13 @@ var m2d2 = (function() {
                         }, refreshRate);
                     }
                 });
-                if(_this.data) {
+                //If the function returns a value, render it
+                if(syncRet) {
+                    //Wrap it if its an array
+                    if(isArray(syncRet)) {
+                        syncRet = { items: syncRet };
+                    }
+                    _this._data = syncRet;
                     _this._onReady();
                 }
             } else {
@@ -171,7 +181,7 @@ var m2d2 = (function() {
             // Render data
             _this._doRender(_this.$root, _this._data);
             // Set trigger on modifications
-            _this.rendered = true;
+            _this._rendered = true;
 		},
 		_cache : null,
 		_data  : null,
@@ -182,7 +192,7 @@ var m2d2 = (function() {
         _onReady : function(_this) {
 			var _this = this;
             _this.$root = node(_this.root);
-            _this.cache = _this.$root.innerHTML;
+            _this.cache = _this.$root.innerHTML; //In order to be able to rollback root.
             _this._render();
         },
 		_doFunc : function(origFunc, param, callback) {
@@ -195,30 +205,26 @@ var m2d2 = (function() {
 			        refreshRate = second;
 			    }
 			    if(second !== undefined && !isNumeric(second)) {
-			        _this._data.template = second;
+    			    _this.template = second;
 			    }
-				if(isObject(newData)) {
-					// The first time, _this._data may be object. Fix it.
-					if(isArray(newData) && isPlainObject(_this._data)) {
-					    if(_this._data.data !== undefined) {
-                            _this._data.data = newData;
-						} else {
-						    _this._data = newData;
-						}
-					} else {
-						for(var n in newData) {
-							_this._data[n] = newData[n];
-						}
-					}
-				}
+                if(isArray(newData)) {
+                    for(var n in newData) {
+                        _this._data.items[n] = newData[n];
+                    }
+                } else if(isPlainObject(newData)) {
+                    for(var n in newData) {
+                        _this._data[n] = newData[n];
+                    }
+                }
 				if(callback != undefined) {
 					callback(newData, refreshRate);
 				}
-			}, param);
-			if(ret_data == undefined) {
-			    ret_data = (_this._getTemplate(node(_this.root), _this)) == "" ? [] : {};
+			}, param) || { items: [] };
+			//Wrap it if its an array:
+			if(isArray(ret_data)) {
+			    ret_data = { items : ret_data }
 			}
-			if(!isPlainObject(ret_data) &&! isArray(ret_data)) {
+			if(!isObject(ret_data)) {
 			    console.log("Undefined type of 'data'. For automatic detection do not set any 'return' in the data's function. Or explicitly return '[]' for arrays or '{}' for objects.")
 			}
 			return ret_data;
@@ -244,6 +250,9 @@ var m2d2 = (function() {
 			if(isArray(value)) {
 				_this._doArray($elem, _this, value);
 			} else { //Number, String or Objects
+			    if(isObject(value) && value.items === undefined) {
+			        value.items = [];
+			    }
 				_this._setValues($elem, value);
 			}
             if(value.onrender != undefined) {
@@ -328,12 +337,22 @@ var m2d2 = (function() {
 		// Set values in elements
 		_setValues : function($elem, value) {
 			var _this = this;
+            // Arrays : automatic conversion from [] to { items : [] }
+            if(isArray(value)) {
+                value = { items : value };
+            }
 			if(isPlainObject(value)) {
 				_this._setNode($elem, value);
 				for(var key in value) {
 				    var item = value[key];
-                    // Arrays
-                    if(key == "data") {
+                    // Process Array:
+                    if(key == "items") {
+                        if(!isArray(item)) {
+                            console.log("Warning: 'items' specified but value is not and array in element: ");
+                            console.log($elem);
+                            console.log("Passed values are: ");
+                            console.log(item);
+                        }
                         _this._doArray($elem, value, item);
                     } else if(key == "template") {
                         // If it contains a template property, add it as HTML
@@ -489,6 +508,11 @@ var m2d2 = (function() {
 					if(property == "m2d2" || property[0] == '_') {
 						return target[property];
 					} else {
+					    var realValue = Reflect.get(target, property, receiver);
+					    var ownDesc = Object.getOwnPropertyDescriptor(target, property);
+					    if(ownDesc && !ownDesc.writable && !ownDesc.configurable) {
+					        return realValue;
+					    }
 						try {
 							if(isArray(obj) && !isNumeric(property)) {
 								return target[property];
@@ -496,7 +520,7 @@ var m2d2 = (function() {
 								return new Proxy(target[property], handler);
 							}
 						} catch (err) {
-							return Reflect.get(target, property, receiver);
+							return realValue;
 						}
 					}
 				},

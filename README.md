@@ -142,7 +142,7 @@ Setting each attribute:
 Setting all at once (using `dataset` property):
 ```js
     var link = m2d2("a.two", {
-		dataset: : {
+		dataset : {
 			code : "HM2001",
 			qty  : 20
 		}
@@ -433,7 +433,7 @@ var dictionary = m2d2("#dictionary", function(callback) {
 
 ### 2. as 'template' property (explained later)
 
-Sometimes we might only want to duplicate some element and change few properties. We can use 'template' and 'data' pairs in any element, for example:
+Sometimes we might only want to duplicate some element and change few properties. We can use 'template' and 'items' pairs in any element, for example:
 
 Initial HTML:
 ```html
@@ -448,7 +448,7 @@ var table = m2d2("table", {
 				'class' : "cell"
 			}
 		},
-		data : [
+		items : [
 			{ text : "ID",		title : "Product ID", onclick: function(event){ ... } },
 			{ text : "Product", title : "Product Name" },
 			{ text : "Price",	title : "Product Price" },
@@ -540,20 +540,36 @@ The HTML inside `<template>` is used to generate the list:
 </ul>
 ```
 
-To modify it:
+Arrays are stored in the `items` property. The following is equivalent to the previous example:
+
 ```js
-list[2].text = "2nd item";
+var list = m2d2("#list", {
+	items : [
+		{
+			id : 1,
+			style: "color: red",
+			text: "First item"
+		},
+		... (and so on)
+	]
+});
+
+```
+So, to modify it:
+```js
+list.items[2].text = "2nd item";
 ```
 You can even add or remove elements:
 ```js
-list.push({
+list.items.push({
   id : 4,
   style: "color: yellow",
   text: "Fourth item"
 });
-list.splice(1,1);
+list.items.splice(1,1);
 ```
 And the HTML will be updated accordingly.
+
 
 ### 3. as HTML inside your 'root element'
 
@@ -579,7 +595,7 @@ The `select` element, will have as options: `["Select one", "First option", "Sec
 
 ## List inside object
 
-If you want to specify a list inside an object, you need to specify the `template` and the `data` properties:
+If you want to specify a list inside an object, you need to specify the `template` and the `items` properties:
 
 ```html
 <form>
@@ -606,7 +622,7 @@ var form = m2d2("form", {
 				}
 			}
 		},
-		data : [
+		items : [
 			{ label : "First  ", input : { value : "one", checked : true } },
 			{ label : "Second ", input : { value : "two", disabled: true } },
 			{ label : "Third  ", input : { value : "three", required: false } },
@@ -630,16 +646,15 @@ Another example:
 
 ```js
 var table = m2d2("table", {
-	users : {	//Using class name specified in tbody
-		data : [
-			{ id: 10, name: "John Muller" },
-			{ id: 20, name: "Peter Wilson" }
-		]
-	}
+	//Note: The following line is equivalent to: "users : { items : [ ... ] }"
+	users : [	//Using class name specified in tbody
+		{ id: 10, name: "John Muller" },
+		{ id: 20, name: "Peter Wilson" }
+	]
 }, {
     colgroup : {
         template : "col",
-        data : [
+        items : [
             { width : "10%" },
             { width : "90%" }
         ]
@@ -647,7 +662,7 @@ var table = m2d2("table", {
     thead : {
         tr : {
             template : "th",
-            data : [
+            items : [
                 {
                     text : "ID",
                     title : "User Number"
@@ -669,13 +684,13 @@ var table = m2d2("table", {
 });
 ```
 
-You can alternatively define the data in a separate m2d2 object (which may be easier to manage):
+You can alternatively define the items in a separate m2d2 object (which may be easier to manage):
 
 ```js
 var table = m2d2("table", {
     colgroup : {
         template : "col",
-        data : [
+        items : [
             { width : "10%" },
             { width : "90%" }
         ]
@@ -689,8 +704,7 @@ var users = m2d2("table tbody.users", [
 
 ```
 
-
-## Templates
+## Templates //TODO: already explained before?
 
 Templates are useful to keep DOM elements separated from data, specially if your HTML definition is larger than the data itself. For example:
 

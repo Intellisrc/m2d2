@@ -70,3 +70,9 @@ button {
     color: #333;
     cursor: pointer;
 }
+#loading {
+	border : 1px solid #DDD;
+	padding: 10px;
+	text-align: center;
+	margin: auto;
+}

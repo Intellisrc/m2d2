@@ -32,7 +32,6 @@
 				});
 			});
 		});
-
 		// This example uses the content inside <select> as template, which is an <option> tag.
 		var users = m2d2("#users", function(callback) {
 			getXHR("https://jsonplaceholder.typicode.com/users",function(json) {
@@ -47,13 +46,14 @@
 				}
 				callback(usersList);
 			});
-		}, {
-			onchange : function(event) {
-				user.m2d2.update(this.value);
-			},
-			// Special events:
-			oninit  : function() { console.log("initializing..."); },
-			onrender: function() { console.log("done."); },
+			return {
+				onchange : function(event) {
+					user.m2d2.update(this.value);
+				},
+				// Special events:
+				oninit  : function() { console.log("initializing..."); },
+				onrender: function() { console.log("done."); },
+			}
 		});
 	});
 </script>

@@ -8,9 +8,10 @@
 <link rel="stylesheet" href="css/index.css" type="text/css" />
 <script src="js/m2d2.src.js" type="text/javascript"></script>
 <script src="js/m2d2.style.src.js" type="text/javascript"></script>
+<script src="js/m2d2.show.src.js" type="text/javascript"></script>
 <script type="text/javascript">
 //On ready...
-var list;
+var list, actions, loading; //For debugging purposes
 document.addEventListener("DOMContentLoaded", function() {
     // This example is to show how to generate lists using a function
     list = m2d2("#items", function(callback) {
@@ -20,6 +21,7 @@ document.addEventListener("DOMContentLoaded", function() {
 			actions.price.disabled = false;
 			actions.add.disabled = false;
 			actions.del.disabled = false;
+			loading.show = false;
 			// Using 'color' from 'style' plugin (m2d2.style.src.js)
 			callback([
 				{
@@ -42,14 +44,14 @@ document.addEventListener("DOMContentLoaded", function() {
 				// Using 'css' from 'style' plugin:
 				tr : {
 					template : {
-						td : {	//TODO: onclick is getting lost somewhere
+						td : {	//TODO: onclick is getting lost somewhere (Issue #8)
 							onclick : function(event) {
 								alert("You clicked:" + event.target.text);
 							},
 							style : "font-weight: bold"
 						} 
 					},
-					data : [
+					items : [
 						{ css : "id" },
 						{ css : "name" },
 						{ 
@@ -60,31 +62,26 @@ document.addEventListener("DOMContentLoaded", function() {
 						}
 					]
 				}
-			});
+			}); //, 10000); //TODO: setting the timer increments data (instead of replacing) due to calling _doRender (:146). (issue #7)
 		}, 2000);
-
-		//TODO: first issue: without "return" we can't update the list (data is in: list.m2d2._data) , and can be modified with splice.
 		// Returing initial layout:
-		// As we are also defining events and other properties besides data,
-		// We need to specify the data as empty array so it can be correctly assigned.
-		/*return {	//TODO: when enabling "return" data is not displayed after 2 secs. However, when we click "add", it will show it. Splice doesn't work in this case.
-			data : [], // Must include in this case
+		return {	
 			title : "Click me"
-		}*/
+		}
 	});
 
 	// Note how we are using list.data instead of just "list"
-    var actions = m2d2("#actions", {
+    actions = m2d2("#actions", {
 		price : {
 			disabled : true,
 			onkeyup : function(event) {
-				list.data[1].price = this.value * 1;
+				list.items[1].price = this.value * 1;
 			}
 		},
 		add : {
 			disabled : true,
 			onclick : function(event) {
-				list.data.push({
+				list.items.push({
 				  id    : Math.round((Math.random() * 1000 / 100)),
 				  price : Math.round((Math.random() * 100000 / 100)),
 				  name  : "Extra Item",
@@ -95,10 +92,13 @@ document.addEventListener("DOMContentLoaded", function() {
 		del : { 
 			disabled : true,
 			onclick : function(event) {
-				list.data.splice(0, 1);
+				list.items.splice(0, 1);
 			}
 		}
     });
+	loading = m2d2("#loading", {
+		show : true
+	});
 });
 </script>
 </head>
@@ -106,8 +106,9 @@ document.addEventListener("DOMContentLoaded", function() {
 <h1>M2D2 List example</h1>
 <table id="checkout">
   <caption>My whish list:</caption>
-  <tbody id="items"><tr><td class="loading">Loading...</td></tr></tbody>
+  <tbody id="items"></tbody>
 </table>
+<div id="loading">Loading...</div>
 <div id="actions" class="controls">
     <div>
 		<button class="add">Add Row</button>
