@@ -451,6 +451,8 @@ Initial HTML:
 <table></table>
 ```
 
+**NOTE** : "template" property must be specified before "items" or it won't be displayed (current limitation).
+
 ```js
 var table = m2d2("table", {
 	tr : {

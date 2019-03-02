@@ -208,6 +208,9 @@ var m2d2 = (function() {
     			    _this.template = second;
 			    }
                 if(isArray(newData)) {
+                    if(_this._data.items === undefined) {
+                        _this._data.items = [];
+                    } 
                     for(var n in newData) {
                         _this._data.items[n] = newData[n];
                     }
