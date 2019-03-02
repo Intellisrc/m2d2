@@ -2,7 +2,7 @@
  * @author: A. Lepe
  * @url : https://gitlab.com/lepe/m2d2/
  * @since: May, 2018
- * @version: 1.1 : 2018-12-08
+ * @version: 2019-03-02
  *
  * Examples:
  // -- Without "root":
@@ -93,9 +93,32 @@ var m2d2 = (function() {
 			if(_this._rendered) {
 				var doUpdate = function(data) {
 					if(data._node != undefined) {
-						var change = {}
-						change[property] = valObj.value;
-						_this._doRender(data._node, extend(data, change));
+					    if(isArray(data)) {
+					        //Item was removed
+					        if(valObj == undefined) {
+                                if(data[property]._node != undefined) {
+                                    // Remove element
+                                    data[property]._node.remove();
+                                }
+					        } else {
+                                var toRemove = [];
+                                for(var n in data._node.childNodes) {
+                                    var node = data._node.childNodes[n];
+                                    if(node.tagName != undefined && node.tagName != "TEMPLATE") {
+                                        toRemove.push(node);
+                                    }
+                                }
+                                for(var n in toRemove) {
+                                    var node = toRemove[n];
+                                    node.remove();
+                                }
+                                _this._doRender(data._node, data);
+						    }
+						} else {
+                            var change = {}
+                            change[property] = valObj.value;
+                            _this._doRender(data._node, extend(data, change));
+						}
 					} else {
 						// Clear root element
 						_this.clear();
@@ -126,7 +149,7 @@ var m2d2 = (function() {
 		clear : function() {
 			var _this = this;
 			if(_this._rendered) {
-				_this.$root.innerHTML = _this.cache;
+    			_this.$root.innerHTML = _this.cache;
 			}
 		},
 		//---- Private --
@@ -205,12 +228,9 @@ var m2d2 = (function() {
 			        refreshRate = second;
 			    }
 			    if(second !== undefined && !isNumeric(second)) {
-    			    _this.template = second;
+    			    _this._data.template = second;
 			    }
                 if(isArray(newData)) {
-                    if(_this._data.items === undefined) {
-                        _this._data.items = [];
-                    } 
                     for(var n in newData) {
                         _this._data.items[n] = newData[n];
                     }
@@ -250,14 +270,18 @@ var m2d2 = (function() {
                 value.oninit();
             }
             _this._setProxy();
+            // Arrays : automatic conversion from [] to { items : [] }
 			if(isArray(value)) {
-				_this._doArray($elem, _this, value);
-			} else { //Number, String or Objects
-			    if(isObject(value) && value.items === undefined) {
-			        value.items = [];
-			    }
-				_this._setValues($elem, value);
+                value = { items : value };
 			}
+			/*if(isArray(value)) {
+                _this._doArray($elem, _this, value);
+            }*/
+			//Number, String or Objects
+            if(isObject(value) && value.items === undefined) {
+                value.items = [];
+            }
+            _this._setValues($elem, value);
             if(value.onrender != undefined) {
                 value.onrender();
             }
@@ -265,6 +289,7 @@ var m2d2 = (function() {
 		// Process an array
 		_doArray : function($elem, obj, values) {
 			var _this = this;
+			_this._setNode($elem, values);
 			var template = _this._getTemplate($elem, obj);
             for(var i = 0; i < values.length; i++) {
                 var val = values[i];
@@ -309,7 +334,7 @@ var m2d2 = (function() {
 		//TODO: template is getting lost from obj.template, and it is getting it from obj._template (which is a cache) but it has no events.
 		_getTemplate : function($elem, obj) {
 			var _this = this;
-			if(obj._template != undefined) {        //TODO <---here
+			if(obj._template != undefined && obj._template != "") { //TODO <---here
 				return obj._template;
 			} else {
 				var $template;
@@ -320,9 +345,9 @@ var m2d2 = (function() {
 					} else if(isSelectorID(obj.template)) {
 					    $template = document.querySelector(obj.template);
 					} else if(isHtml(obj.template)) {
-						$template = htmlNode("<div>"+obj.template+"</div>");
+						$template = htmlNode("<template>"+obj.template+"</template>");
 					} else {
-					    $template = htmlNode("<div>"+newNode(obj.template).outerHTML+"</div>");
+					    $template = htmlNode("<template>"+newNode(obj.template).outerHTML+"</template>");
 					}
 				} else {
 					$template = node("template", $elem);
@@ -349,18 +374,20 @@ var m2d2 = (function() {
 				for(var key in value) {
 				    var item = value[key];
                     // Process Array:
-                    if(key == "items") {
-                        if(!isArray(item)) {
-                            console.log("Warning: 'items' specified but value is not and array in element: ");
-                            console.log($elem);
-                            console.log("Passed values are: ");
-                            console.log(item);
-                        }
+                    if(key == "items" && isArray(item)) {
+                        //TODO: if by this point there is no template detected, warn
+                        //TODO: alternatively, automatic create template: e.g: ul -> li, select -> option, etc
                         _this._doArray($elem, value, item);
                     } else if(key == "template") {
                         // If it contains a template property, add it as HTML
                         $elem.innerHTML = "<template>" + _this._getTemplate($elem, value) + "</template>";
                     } else {
+                        if(key == "items" &&! isArray(item)) {
+                            console.log("Warning: 'items' specified but value is not and array in element: ");
+                            console.log($elem);
+                            console.log("Passed values are: ");
+                            console.log(item);
+                        }
 						// Apply extensions:
 						if(_this._ext[key] != undefined && isFunction(_this._ext[key])) {
 							var ret = _this._ext[key](item, $elem);
