@@ -274,9 +274,6 @@ var m2d2 = (function() {
 			if(isArray(value)) {
                 value = { items : value };
 			}
-			/*if(isArray(value)) {
-                _this._doArray($elem, _this, value);
-            }*/
 			//Number, String or Objects
             if(isObject(value) && value.items === undefined) {
                 value.items = [];
@@ -302,14 +299,14 @@ var m2d2 = (function() {
                             if(isSelectorID(val)) {
                                 var idNode = document.querySelector(val);
                                 if(idNode) {
-                                    template = idNode.outerHTML;
+                                    template = idNode;
                                 } else {
                                     console.log("Warning: ID selector for template not found: "+val+" . Object:");
                                     console.log(obj);
                                     return
                                 }
                             } else {
-                                template = newNode(Object.keys(val)[0]).outerHTML;
+                                template = newNode(Object.keys(val)[0]);
                             }
                         } else {
                             console.log("Warning: Multiple keys in data without template is not supported yet. Object:");
@@ -322,45 +319,82 @@ var m2d2 = (function() {
                         return
                     }
                 }
-                var $item = htmlNode(template);
-                $item.setAttribute("data-id", i);
-                $elem.append($item);
-                _this._setValues($item, val);
+                if(template) {
+                    var $item = template.cloneNode(true);
+                    $item.setAttribute("data-id", i);
+                    $elem.append($item);
+                    _this._setValues($item, val);
+                }
             }
 		},
-		// Returns a copy of the model to duplicate
+		// Returns a copy of the DOM to duplicate
 		// $elem is to search in DOM for <template>
 		// obj is to search for property "template"
-		//TODO: template is getting lost from obj.template, and it is getting it from obj._template (which is a cache) but it has no events.
 		_getTemplate : function($elem, obj) {
 			var _this = this;
+			var $template;
+            if($elem._template != undefined) {
+                $template = $elem._template;
+            } else if(obj.template != undefined) {
+                if(isPlainObject(obj.template)) {
+                    $template = newNode("div");
+                    _this._setValues($template, obj.template);
+                    $template = $template.childNode;
+                } else if(isSelectorID(obj.template)) {
+                    $template = document.querySelector(obj.template);
+                } else if(isHtml(obj.template)) {
+                    $template = htmlNode("<template>" + obj.template + "</template>");
+                    $template = $template.childNode;
+                } else { //String:
+                    $template = newNode(obj.template);
+                }
+            } else {
+			    $template = node("template", $elem);
+            }
+            if(!$template) {
+                if($elem.innerHTML) {
+                    $template = htmlNode("<template>" + $elem.innerHTML + "</template>");
+                    $template = $template.childNode;
+                }
+            }
+            return $template;
+            /*
 			if(obj._template != undefined && obj._template != "") { //TODO <---here
-				return obj._template;
+				$template = obj._template;
 			} else {
-				var $template;
 				if(obj.template != undefined) {  //TODO <--- and here
 					if(isPlainObject(obj.template)) {
-						$template = newNode("div");
+						$template = newNode("template");
 						_this._setValues($template, obj.template);
 					} else if(isSelectorID(obj.template)) {
 					    $template = document.querySelector(obj.template);
 					} else if(isHtml(obj.template)) {
-						$template = htmlNode("<template>"+obj.template+"</template>");
+						$template = htmlNode(obj.template);
 					} else {
-					    $template = htmlNode("<template>"+newNode(obj.template).outerHTML+"</template>");
+					    $template = newNode(obj.template);
 					}
+                } else if($elem._template != undefined) {
+                    $template = newNode("template");
+                    _this._setValues($template, $elem._template);
 				} else {
 					$template = node("template", $elem);
 				}
 				// If not template is found, use html as of element
 				if($template) {
+                    /*
 					var html = $template.innerHTML.trim();
 					_this._defineProp(obj, "_template", html);
 					return html;
+                    *
+                    if($template.tagName == "TEMPLATE") {
+                        $template = $template.childNode;
+                    }
 				} else {
-					return $elem.innerHTML.trim();
+					$template = $elem.childNode || newNode("span");
 				}
 			}
+            return $template ? $template.cloneNode(true) : newNode("span");
+            */
 		},
 		// Set values in elements
 		_setValues : function($elem, value) {
@@ -380,7 +414,16 @@ var m2d2 = (function() {
                         _this._doArray($elem, value, item);
                     } else if(key == "template") {
                         // If it contains a template property, add it as HTML
-                        $elem.innerHTML = "<template>" + _this._getTemplate($elem, value) + "</template>";
+                        var template = _this._getTemplate($elem, value);
+                        if(template) {
+                            $elem._template = template; //TODO: polluting a DOM element is not a nice way to solve it
+                            $elem.innerHTML = "<template>" + template.outerHTML + "</template>";
+                        } else {
+                            console.log("Warning: 'template' was declared but nothing was returned in element:");
+                            console.log($elem);
+                            console.log("Passed values are: ");
+                            console.log(item);
+                        }
                     } else {
                         if(key == "items" &&! isArray(item)) {
                             console.log("Warning: 'items' specified but value is not and array in element: ");
@@ -544,7 +587,7 @@ var m2d2 = (function() {
 					        return realValue;
 					    }
 						try {
-							if(isArray(obj) && !isNumeric(property)) {
+							if(property == "template" || (isArray(obj) && !isNumeric(property))) {
 								return target[property];
 							} else {
 								return new Proxy(target[property], handler);
