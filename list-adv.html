@@ -113,11 +113,15 @@ document.addEventListener("DOMContentLoaded", function() {
 		add : {
 			disabled : true,
 			onclick : function(event) {
+                var colors = [];
+                for(var c=0; c<3; c++) {
+                    colors.push(Math.round(Math.random() * 255));
+                }
 				list.items.push({
 				  id    : list.items.length + 1,
 				  price : Math.round((Math.random() * 100000 / 100)),
 				  name  : "Extra Item " + (++count),
-				  color : "#B17E28"
+				  color : "rgb("+colors[0]+","+colors[1]+","+colors[2]+")"
 				});
 			}
 		}
