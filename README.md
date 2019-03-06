@@ -525,22 +525,45 @@ The `<template>` element is not displayed by the browsers, so you can use it to 
 var list = m2d2("#list", [
 	{ 
 		id : 1,
-		style: "color: red",
+		style: {
+            color: "red"
+        },
 		text: "First item"
 	},
 	{ 
 		id : 2,
-		style: "color: green",
+		style: {
+            color: "green"
+        },
 		text: "Second item"
 	},        
 	{ 
 		id : 3,
-		style: "color: blue",
+		style: {
+            color: "blue"
+        },
 		text: "Third item"
 	}           
 ]);
 ```
 **NOTE**: Any `id` field is converted automatically to `data-id`.
+
+Styles can be declared as string:
+```js
+    style : "position: absolute; color: black"
+```
+or as object: (as in the previous example)
+```js
+    style : {
+        position: "absolute",
+        color   : "black"
+    }
+```
+All styles supported by the browser can be specified.
+The main difference is that as String, it will replace all current styles
+(specified inline), while as Object, it will only replace/add such styles, 
+and will keep the rest.
+
 The HTML inside `<template>` is used to generate the list:
 
 ```html
