@@ -23,6 +23,7 @@
  */
 "use strict";
 var m2d2 = (function() {
+    var updater = true;
 	// main function
 	var m2d2 = function(first, second, third) {
 	    var options = {};
@@ -235,7 +236,12 @@ var m2d2 = (function() {
                         _this._data.items[n] = newData[n];
                     }
                 } else if(isPlainObject(newData)) {
+                    updater = false;
+                    var idx = 1;
                     for(var n in newData) {
+                        if(idx++ == Object.keys(newData).length) {
+                            updater = true;
+                        }
                         _this._data[n] = newData[n];
                     }
                 }
@@ -256,7 +262,7 @@ var m2d2 = (function() {
 			var _this = this;
 			if(_this._data._proxy === undefined && (isPlainObject(_this._data) || isArray(_this._data))) {
 				_this._data = _this._proxy(_this._data, function(obj, variable, value) {
-					if(variable != "m2d2" && variable[0] != '_') { //Do not update if it starts with '_'
+					if(variable != "m2d2" && variable[0] != '_' && updater) { //Do not update if it starts with '_'
 						_this.update(obj, variable, value);
 					}
 				});
