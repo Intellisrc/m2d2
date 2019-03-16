@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", function() {
     var menuLinks = {
         "Update from input" : "index.html",
         "Update from input (alternative way)" : "index2.html",
-        "Update from input using callback" : "index-adv.html",
+        "Update using callback" : "index-adv.html",
         "Using object" : "object.html",
         "Menu (show and style extensions)" : "menu.html",
         "Timer" : "timer.html",

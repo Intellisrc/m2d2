@@ -19,30 +19,38 @@
 			// Waiting to show async condition:
 			setTimeout(function() {
 				callback({
-					h1 : "Loaded",
-					bgcolor: "#4c866d"
+					h3 : {
+                        text: "Loading ... (1s)",
+    					color: "orange"
+                    }
+				});
+			}, 1000);
+			// Waiting to show async condition:
+			setTimeout(function() {
+				callback({
+                    h3 : {
+                        text : "Done.",
+    					color: "green"
+                    }
 				});
 			}, 2000);
 
 			// The following will be used to create the basic HTML structure.
 			// 'bgcolor' is from the plugin 'style' (m2d2.style.src.js)
 			return {
-				h1 : "Loading M2D2 Demo... (wait 2s)",
-				bgcolor: "#4c6d86",
-				"#new_title" : {
-					onkeyup : function(event) {
-						title.h1 = this.value;
-					}
-				}
+				h1 : "M2D2 Callback Demo",
+                h3 : {
+                    text : "Loading ... (2s)",
+                    color : "red"
+                }
 			}
 		});
 	});
 </script>
 </head>
 <body>
-<h1>Title</h1>
-<div class="controls">
-    <div>New Title: <input id="new_title" type="text" /></div>
-</div>
+    <h1>Title</h1>
+    <h3>???</h3>
+    <p>In this example, we use a callback function to return the object we want to render. It can be called multiple times.</p>
 </body>
 </html>

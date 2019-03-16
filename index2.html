@@ -14,10 +14,12 @@
 	//On page ready...
 	document.addEventListener("DOMContentLoaded", function() {
 		//--------- Another way to write it -----------
-		var title = m2d2("h1","M2D2 Demo - alternative");
+        var default_text = "M2D2 Demo - alternative";
+		var title = m2d2("h1",default_text);
 		m2d2("#new_title", {
+            autofocus : true,
 			onkeyup : function(event) {
-				title.text = this.value;
+    			title.text = this.value || default_text;
 			}
 		});
 		//---------------------------------------------
@@ -26,6 +28,7 @@
 </head>
 <body>
 <h1>Title</h1>
+<p>To update the title, input some text:</p>
 <div class="controls">
     <div>New Title: <input id="new_title" type="text" /></div>
 </div>

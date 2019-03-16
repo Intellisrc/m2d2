@@ -13,15 +13,19 @@
 <script type="text/javascript">
 	//On ready...
 	document.addEventListener("DOMContentLoaded", function() {
-		// This example, is to demonstrate how to use the interval
-		var clock = m2d2("#datetime", function(callback) {
-			//We could retrieve the date from a remote server...
+        function getTime() {
 			var date = new Date();
-			callback({
+            return {
 				text : "Now: " + date,
 				datetime : date,
 				title: "Attribute datetime is also changing!"
-			}, 1000); // call function each 1sec.
+			}
+        }
+		// This example, is to demonstrate how to use the interval
+		var clock = m2d2("#datetime", function(callback) {
+			//We could retrieve the date from a remote server...
+			callback(getTime(), 1000); // call function each 1sec.
+            return getTime(); //We return the first second to render immediately.
 		}, "time"); //This will use <time> as template
 	});
 </script>

@@ -14,11 +14,13 @@
 	//On page ready...
 	document.addEventListener("DOMContentLoaded", function() {
 		// Most simple example using a String as data
+        var default_text = "M2D2 Demo";
 		var title = m2d2({
-			h1 : "M2D2 Demo",
+			h1 : default_text,
 			"#new_title" : {
+                autofocus : true,
 				onkeyup : function(event) {
-					title.h1 = this.value;
+    			    title.h1 = this.value || default_text;
 				}
 			}
 		});
@@ -27,6 +29,7 @@
 </head>
 <body>
 <h1>Title</h1>
+<p>To update the title, input some text:</p>
 <div class="controls">
     <div>New Title: <input id="new_title" type="text" /></div>
 </div>
