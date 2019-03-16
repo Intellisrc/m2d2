@@ -6,24 +6,9 @@ This is my second version of "Model", that is why I named it M2D2. Also, for tho
 Live Demo:
 https://gl.githack.com/lepe/m2d2/raw/master/index.html
 
-https://gl.githack.com/lepe/m2d2/raw/master/object.html
-
-https://gl.githack.com/lepe/m2d2/raw/master/timer.html
-
-https://gl.githack.com/lepe/m2d2/raw/master/list.html
-
-https://gl.githack.com/lepe/m2d2/raw/master/async.html
-
-
-Extension Demo:
-https://gl.githack.com/lepe/m2d2/raw/master/extend.html
-
-Form Demo:
-https://gl.githack.com/lepe/m2d2/raw/master/form.html
-
 ## Install
 
-* Download (7Kb): [m2d2.min.js](https://gl.githack.com/lepe/m2d2/raw/master/js/m2d2.min.js) and set it in the HTML head.
+* Download (8.6Kb): [m2d2.min.js](https://gl.githack.com/lepe/m2d2/raw/master/js/m2d2.min.js) and set it in the HTML head.
 
 **NOTE** As it has no dependencies, It can be used together with any other library or framework (e.g. JQuery)
 
@@ -31,7 +16,9 @@ https://gl.githack.com/lepe/m2d2/raw/master/form.html
 
 * Style (< 1Kb) [m2d2.style.js](https://gl.githack.com/lepe/m2d2/raw/master/js/m2d2.style.src.js) : enable use of 'css', '-css', '+css', 'color', 'bgcolor' shortcuts
 
-* Show (< 1Kb) [m2d2.show.js](https://gl.githack.com/lepe/m2d2/raw/master/js/m2d2.show.src.js) : enable use of 'show' to hide or show elements easily.
+* Show (1.5Kb) [m2d2.show.js](https://gl.githack.com/lepe/m2d2/raw/master/js/m2d2.show.src.js) : enable use of 'show' to hide or show elements easily.
+
+# Tutorial
 
 ## Hello World
 
