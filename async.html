@@ -18,22 +18,24 @@
 		// it will use a parameter when updating
 		var user = m2d2("#user", function(callback, param) {
 			if(param === undefined) param = 1;
-			getXHR("https://jsonplaceholder.typicode.com/users?id="+param,function(json) {
-				json = json[0]; //get the first item
-				callback({
-					user : json.username,
-					name : json.name,
-					email: json.email,
-					zip  : json.address.zipcode,
-					url  : {
-						a:  {
-							href : "http://" + json.website,
-							text : json.website,
-							target : "_blank"
-						}
-					}
-				});
-			});
+            if((param * 1) != 0) {
+                getXHR("https://jsonplaceholder.typicode.com/users?id="+param,function(json) {
+                    json = json[0]; //get the first item
+                    callback({
+                        user : json.username,
+                        name : json.name,
+                        email: json.email,
+                        zip  : json.address.zipcode,
+                        url  : {
+                            a:  {
+                                href : "http://" + json.website,
+                                text : json.website,
+                                target : "_blank"
+                            }
+                        }
+                    });
+                });
+            }
 		});
 		// This example uses the content inside <select> as template, which is an <option> tag.
 		var users = m2d2("#users", function(callback) {
@@ -74,7 +76,7 @@
 <div class="controls">
 	<div>User: 
 		<select id="users">
-			<option>Choose one:</option>
+			<option value="0">Choose one:</option>
 		</select>
 	</div>
 </div>

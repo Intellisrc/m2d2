@@ -174,8 +174,8 @@ var m2d2 = (function() {
                 }
             } else {
                 // In case its a Number of String, wrap it.
-                if(!isObject(this._data)) {
-                    this._data = { text : this._data };
+                if(!isObject(_this._data)) {
+                    _this._data = { text : _this._data };
                 }
                 _this._onReady();
             }
@@ -272,8 +272,9 @@ var m2d2 = (function() {
 		_doRender : function($elem, value) {
 			var _this = this;
             // Initial trigger
-            if(value.oninit != undefined) {
+            if(value.oninit != undefined && isFunction(value.oninit)) {
                 value.oninit();
+                delete(value.oninit);
             }
             _this._setProxy();
             // Arrays : automatic conversion from [] to { items : [] }
