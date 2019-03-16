@@ -127,7 +127,7 @@ var m2d2 = (function() {
 					}
 				}
 				if(property === undefined && isFunction(_this._func)) {
-					_this._doFunc(_this._func, data, function(newData, /*unused*/refreshRate){
+					_this._doFunc(_this._func, data, function(newData){
 						doUpdate(newData);
 					});
 				} else {
@@ -162,20 +162,7 @@ var m2d2 = (function() {
 			var _this = this;
             if(isFunction(_this._data)) {
                 _this._func = _this._data;
-                var syncRet = _this._doFunc(_this._func, _this.param, function(/*unused*/newData, refreshRate){
-                    if(refreshRate === undefined) {
-                        if(_this.interval*1 > 0) {
-                            refreshRate = _this.interval;
-                        }
-                    }
-                    if(refreshRate*1 > 0) {
-                        _this.interval = setInterval(function(){
-                            _this._func(function(updData) {
-                                _this._doRender(_this.$root, updData);
-                            });
-                        }, refreshRate);
-                    }
-                });
+                var syncRet = _this._doFunc(_this._func, _this.param);
                 //If the function returns a value, render it
                 if(syncRet) {
                     //Wrap it if its an array
@@ -228,14 +215,15 @@ var m2d2 = (function() {
 			    } else if(second !== undefined && isNumeric(second)) {
 			        refreshRate = second;
 			    }
-			    if(second !== undefined && !isNumeric(second)) {
-    			    _this._data.template = second;
-			    }
                 if(isArray(newData)) {
-                    for(var n in newData) {
-                        _this._data.items[n] = newData[n];
+                    newData = { items : newData }
+                    if(second !== undefined && !isNumeric(second)) {
+                        newData["template"] = second;
+                    } else if(_this.template != undefined) {
+                        newData["template"] = _this.template;
                     }
-                } else if(isPlainObject(newData)) {
+                }
+                if(isPlainObject(newData)) {
                     updater = false;
                     var idx = 1;
                     for(var n in newData) {
@@ -245,9 +233,21 @@ var m2d2 = (function() {
                         _this._data[n] = newData[n];
                     }
                 }
-				if(callback != undefined) {
-					callback(newData, refreshRate);
-				}
+                if(refreshRate === undefined) {
+                    if(_this.interval*1 > 0) {
+                        refreshRate = _this.interval;
+                    }
+                }
+                if(refreshRate*1 > 0) {
+                    _this.interval = setInterval(function(){
+                        _this._func(function(updData) {
+                            _this._doRender(_this.$root, updData);
+                        });
+                    }, refreshRate);
+                }
+                if(callback !== undefined) {
+                    callback(newData);
+                }
 			}, param) || { items: [] };
 			//Wrap it if its an array:
 			if(isArray(ret_data)) {

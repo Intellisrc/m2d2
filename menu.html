@@ -5,8 +5,11 @@
 <meta name="viewport" content="width=device-width, maximum-scale=1.0">
 <meta name="theme-color" content="#333333">
 <link rel="stylesheet" href="css/common.css" type="text/css" />
+<!-- Import Demo menu: -->
+<script src="js/demo-links.js" type="text/javascript"></script>
+<!--                   -->
 <style type="text/css">
-	a {
+	#menu a {
 		display: block;
 		border: 1px solid #CCC;
 		padding: 5px 10px;
@@ -17,13 +20,13 @@
 		text-transform: uppercase;
 		text-decoration: none;
 	}
-	a:hover {
+	#menu a:hover {
 		background-color: #EEE;
 	}
-	a.login {
+	#menu a.login {
 		background-color: #bfffa8;
 	}
-	a.logout {
+	#menu a.logout {
 		background-color: #ffbfa8;
 	}
 </style>
@@ -34,7 +37,7 @@
 <script type="text/javascript">
 var nav;
 jQuery(function($) {
-	nav = m2d2("nav", {
+	nav = m2d2("#menu", {
 		profile :{ 
 			href: "/user/profile",
 			text: "Profile",
@@ -88,7 +91,8 @@ jQuery(function($) {
 </head>
 <body>
 	<h1>Menu Example</h1>
-	<nav>
+    <p>M2D2 has no dependencies, so it doesn't require JQuery. Still, you can use it together without any issue. Other frameworks may be used, however, I assume Angular, ReactJS, etc, may not work all the time as they are based in the same principles in which M2D2 works.</p>
+	<nav id="menu">
 		<a class="profile"></a>
 		<a class="settings"></a>
 		<a class="users"></a>

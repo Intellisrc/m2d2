@@ -10,7 +10,7 @@
  */
 m2d2.ext({
 	show : function(show, node) {
-	    var cssDisplay = getComputedStyle(node, null).display;
+	    var cssDisplay = function() { return getComputedStyle(node, null).display; }
 	    var defaultDisplay = function() {
 	        var b = document.getElementsByTagName("body")[0];
 	        var t = document.createElement("template");
@@ -21,17 +21,19 @@ m2d2.ext({
 	        t.remove();
 	        return display;
 	    }
-		if(show &&! cssDisplay != "none") {
-		    if(node.dataset._m2d2_display) {
-    			node.style.display = node.dataset._m2d2_display;
-    	    } else {
-    	        node.style.removeProperty("display");
-    	        if(cssDisplay == "none") {
-    	            node.style.display = node.dataset.display || defaultDisplay();
-    	        }
-    	    }
+		if(show) {
+            if(cssDisplay() == "none") {
+                if(node.dataset._m2d2_display) {
+                    node.style.display = node.dataset._m2d2_display;
+                } else {
+                    node.style.removeProperty("display");
+                    if(cssDisplay() == "none") {
+                        node.style.display = node.dataset.display || cssDisplay() || defaultDisplay();
+                    }
+                }
+            }
 		} else {
-		    node.dataset._m2d2_display = node.style.display != "none" ? node.style.display : cssDisplay;
+		    node.dataset._m2d2_display = node.style.display != "none" ? node.style.display : cssDisplay();
 			node.style.display = "none"
 		}
 	}
