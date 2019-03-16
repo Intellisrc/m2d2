@@ -10,7 +10,6 @@
 		text-decoration: underline;
 	}
 </style>
-<script src="js/jquery.js"></script>
 <script src="js/m2d2.src.js" type="text/javascript"></script>
 <script src="js/m2d2.style.src.js" type="text/javascript"></script>
 <script src="js/m2d2.show.src.js" type="text/javascript"></script>
@@ -19,7 +18,8 @@
 <!--                   -->
 <script type="text/javascript">
 var body;
-jQuery(function($) {
+//On page ready...
+document.addEventListener("DOMContentLoaded", function() {
 	body = m2d2({
 		original : {
 			color : "red",
