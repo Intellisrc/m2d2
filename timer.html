@@ -6,34 +6,33 @@
 <meta name="theme-color" content="#333333">
 <link rel="stylesheet" href="css/common.css" type="text/css" />
 <link rel="stylesheet" href="css/index.css" type="text/css" />
-<script src="js/m2d2.min.js" type="text/javascript"></script>
+<script src="js/m2d2.src.js" type="text/javascript"></script>
+<!-- Import Demo menu: -->
+<script src="js/demo-links.js" type="text/javascript"></script>
+<!--                   -->
 <script type="text/javascript">
 	//On ready...
 	document.addEventListener("DOMContentLoaded", function() {
-		// This example, is to demonstrate how to use the interval
-		var clock = m2d2({
-			root : "#datetime",
-			data : function(callback) {
-				//We could retrieve the date from a remote server...
-				var date = new Date();
-				callback({
-					time : { 
-						text : "Now: " + date,
-						datetime : date,
-						title: "Attribute datetime is also changing!"
-					}
-				}, 1000); // call function each 1sec.
+        function getTime() {
+			var date = new Date();
+            return {
+				text : "Now: " + date,
+				datetime : date,
+				title: "Attribute datetime is also changing!"
 			}
-		});
+        }
+		// This example, is to demonstrate how to use the interval
+		var clock = m2d2("#datetime", function(callback) {
+			//We could retrieve the date from a remote server...
+			callback(getTime(), 1000); // call function each 1sec.
+            return getTime(); //We return the first second to render immediately.
+		}, "time"); //This will use <time> as template
 	});
 </script>
 </head>
 <body>
 <h1>M2D2 : Timer example</h1>
-<div id="datetime">
-    <time>Time Now</time>
-</div>
+<div id="datetime"></div>
 <br>
-Next: <a href="list.html">List example</a>
 </body>
 </html>

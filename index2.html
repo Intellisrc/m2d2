@@ -1,6 +1,6 @@
 <html>
 <head>
-<title>Demo using M2D2 : Simple</title>
+<title>Demo using M2D2 : Simple (alternative way)</title>
 <meta name="HandheldFriendly" content="1">
 <meta name="viewport" content="width=device-width, maximum-scale=1.0">
 <meta name="theme-color" content="#333333">
@@ -13,17 +13,16 @@
 <script type="text/javascript">
 	//On page ready...
 	document.addEventListener("DOMContentLoaded", function() {
-		// Most simple example using a String as data
-        var default_text = "M2D2 Demo";
-		var title = m2d2({
-			h1 : default_text,
-			"#new_title" : {
-                autofocus : true,
-				onkeyup : function(event) {
-    			    title.h1 = this.value || default_text;
-				}
+		//--------- Another way to write it -----------
+        var default_text = "M2D2 Demo - alternative";
+		var title = m2d2("h1",default_text);
+		m2d2("#new_title", {
+            autofocus : true,
+			onkeyup : function(event) {
+    			title.text = this.value || default_text;
 			}
 		});
+		//---------------------------------------------
 	});
 </script>
 </head>

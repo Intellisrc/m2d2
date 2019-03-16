@@ -1,0 +1,37 @@
+<html>
+<head>
+<title>Demo using M2D2 : Lists</title>
+<meta name="HandheldFriendly" content="1">
+<meta name="viewport" content="width=device-width, maximum-scale=1.0">
+<meta name="theme-color" content="#333333">
+<link rel="stylesheet" href="css/common.css" type="text/css" />
+<link rel="stylesheet" href="css/index.css" type="text/css" />
+<script src="js/m2d2.src.js" type="text/javascript"></script>
+<!-- Import Demo menu: -->
+<script src="js/demo-links.js" type="text/javascript"></script>
+<!--                   -->
+<script type="text/javascript">
+//On ready...
+var list;
+document.addEventListener("DOMContentLoaded", function() {
+    // This example is to show how to generate lists
+    list = m2d2("#items", function(callback) {
+        setTimeout(function() {
+            callback([
+                "Blue panter",
+                "Slow and Furious",
+                "Ugly and the Beast",
+                "Iron Woman",
+                "American Cake"
+            ]);
+        }, 100);
+    }, "li");
+});
+</script>
+</head>
+<body>
+<h1>M2D2 List example with callback</h1>
+<p>Movie List:</p>
+<ol id="items"></ol>
+</body>
+</html>

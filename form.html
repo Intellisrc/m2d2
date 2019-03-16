@@ -10,6 +10,7 @@
 	font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
 	font-size: 0.8em;
 	width: 30em;
+    margin: auto;
 	padding: 1em;
 }
 
@@ -17,18 +18,23 @@
 	box-sizing: border-box;
 }
 
+.myForm [required] {
+    border: 2px solid blue;
+}
+
 .myForm label {
 	padding: 0;
 	font-weight: bold;
-	text-align: right;
 	display: block;
 }
 
-.myForm input,
-.myForm select,
-.myForm textarea {
+.myForm label select,
+.myForm label input {
+    float: right;
+}
+
+.myForm select {
 	margin-left: 2em;
-	float: right;
 	width: 20em;
 	border: 1px solid #ccc;
 	font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
@@ -38,6 +44,7 @@
 
 .myForm textarea {
 	height: 100px;
+    width: 100%;
 }
 
 .myForm button {
@@ -59,118 +66,144 @@ cite {
 	font-size: 80%;
 }
 </style>
-<script src="js/jquery.js"></script>
 <script src="js/m2d2.src.js" type="text/javascript"></script>
+<!-- Import Demo menu: -->
+<script src="js/demo-links.js" type="text/javascript"></script>
+<!--                   -->
 <script type="text/javascript">
 var form;
-jQuery(function($) {
-	form = m2d2({
-		root : "form",
-		data : {
-			name : {
-				type : "text",
-				name : "customer_name",
-				required : true,
-				autocomplete : true,
-				size : 10
-			},
-			phone : {
-				type : "tel",
-				name : "phone_number",
-				autocomplete : true,
-				placeholder : "123-4567-8901",
-				pattern : "[0-9]{3}-[0-9]{3}-[0-9]{4}",
-				minlength : 9,
-				maxlength : 14,
-				size : 20
-			},
-			email : {
-				type : "email",
-				name : "email_address",
-				autocomplete : true,
-				placeholder : "you@example.com",
-				size : 30
-			},
-			taxi : {
-				template : {
-					p : {
-						label : {
-							input : {
-								type: "radio",
-								name: "taxi",
-							}
+//On page ready...
+document.addEventListener("DOMContentLoaded", function() {
+    function isReady(event) {
+        var ready = true;
+        for(var f in form) {
+            if(form[f].required) {
+                if(form[f].value == "") {
+                    ready = false;
+                }
+            }
+        }
+        if(ready) {
+            form.button.disabled = false;
+        }
+    }
+	form = m2d2("form", {
+        action : "http://example.com/post_here",
+        method : "POST",
+		".name" : { //We don't use 'name' as form has a 'name' property
+			type : "text",
+			name : "customer_name",
+			required : true,
+            onchange : isReady,
+			autocomplete : true,
+            autofocus : true,
+            placeholder : "Your Name",
+			size : 30
+		},
+		phone : {
+			type : "tel",
+			name : "phone_number",
+			autocomplete : true,
+			placeholder : "123-4567-8901",
+			pattern : "[0-9]{3,5}-[0-9]{3,5}-[0-9]{3,5}",
+			minlength : 9,
+			maxlength : 14,
+			size : 20
+		},
+		email : {
+			type : "email",
+			name : "email_address",
+			autocomplete : true,
+			placeholder : "you@example.com",
+			required : true,
+            onchange : isReady,
+			size : 30
+		},
+		taxi : {
+			template : {
+				p : {
+					label : {
+						input : {
+							type: "radio",
+							name: "taxi",
 						}
 					}
-				},
-				data : [
-					{ input : { value : "car", checked : true }, label : "Car" },
-					{ input : "van", label : "Van" },
-					{ input : "tuktuk", label: "Tuk Tuk" },
-				]
+				}
 			},
-			extras : {
-				template : {
-					p : {
-						label : {
-							input : {
-								type : "checkbox",
-								name : "extras",
-							}
+			items : [
+				{ input : { value : "car", checked : true }, label : "Car" },
+				{ input : "van", label : "Van" },
+				{ input : "tuktuk", label: "Tuk Tuk" },
+			]
+		},
+		extras : {
+			template : {
+				p : {
+					label : {
+						input : {
+							type : "checkbox",
+							name : "extras",
 						}
 					}
-				},
-				data : [
-					{ input : { value : "bb", disabled: true }, label : "Baby Seat (Unavailable)" },
-					{ input : "wa", label : "Wheelchair Access" },
-					{ input : "st", label : "Stock Tip" },
-				]
+				}
 			},
-			date : {
-				type : "date",
-				name : "pickup_date",
-				required : true,
-				value : new Date()
-			},
-			time : {
-				type : "time",
-				name : "pickup_time",
-				required : true,
-				value : new Date()
-			},
-			pickup : {
-				name : "pickup_place",
-				template : '<option>',
-				data : [
-					{ value : "", selected: true, text: "Select One" },
-					{ value : "office", text: "Taxi Office" },
-					{ value : "town_hall", text: "Town Hall" },
-					{ value : "telepathy", text: "We'll Guess!" },
-				]
-			},
-			dropoff : {
-				type : "text",
-				name : "dropoff_place",
-				required : true,
-				list : "destinations"
-			},
-			"#destinations" : {
-				template : '<option>',
-				data : [
-					{ value : "Airport" },
-					{ value : "Beach" },
-					{ value : "Fred Flinstone's House" }
-				]
-			},
-			comment : {
-				name : "comments",
-				maxlength : 500,
-				cols : 50,
-				rows : 5
-			},
-			button : {
-				disabled : true
-			}		
-		}
+			items : [
+				{ input : { value : "bb", disabled: true }, label : "Baby Seat (Unavailable)" },
+				{ input : "wa", label : "Wheelchair Access" },
+				{ input : "st", label : "Stock Tip" },
+			]
+		},
+		date : {
+			type : "date",
+			name : "pickup_date",
+			value : new Date()
+		},
+		time : {
+			type : "time",
+			name : "pickup_time",
+            min  : "10:00",
+            max  : "20:00",
+			value : "10:00"
+		},
+		pickup : {
+			name : "pickup_place",
+			template : 'option',
+			items : [
+				{ value : "", selected: true, text: "Select One" },
+				{ value : "office", text: "Taxi Office" },
+				{ value : "town_hall", text: "Town Hall" },
+				{ value : "telepathy", text: "We'll Guess!" },
+			]
+		},
+		dropoff : {
+			type : "text",
+			name : "dropoff_place",
+			list : "destinations"
+		},
+		"#destinations" : {
+			template : 'option',
+			items : [
+				{ value : "Airport" },
+				{ value : "Beach" },
+				{ value : "Fred Flinstone's House" }
+			]
+		},
+		comment : {
+			name : "comments",
+			maxlength : 500,
+			cols : 50,
+			rows : 5
+		},
+		button : {
+			disabled : true
+		},
+        onsubmit : function(event) {
+            if(this.checkValidity()) {
+                alert("Thank you");
+                this.reset();
+            }
+            return false;
+        }
 	});
 });
 </script>
@@ -178,29 +211,29 @@ jQuery(function($) {
 <body>
 	<h1>Form M2D2 Demo</h1>
 	<p>
-		This example, shows how M2D2 can be used easily with forms:
+		This example, shows how M2D2 can be used easily with forms:<br>
+        Fields with blue border are required (do not enter real information).<br>
+        The submit button will be enabled when all required fields has been completed.
 	</p>
 	<cite>Example adapted from : <a href="https://www.quackit.com/html/codes/html_form_code.cfm">QuackKit.com</a> (Sorry I was too lazy).</cite>
-	<form>
-		<form method="get">
-			<p><label>Name	<input class="name"></label></p>
-			<p><label>Phone <input class="phone"></label></p>
-			<p><label>Email <input class="email"></label></p>
+	<form class="myForm">
+        <p><label>Name	<input class="name"></label></p>
+        <p><label>Phone <input class="phone"></label></p>
+        <p><label>Email <input class="email"></label></p>
 
-			<fieldset class="taxi"><legend>Which taxi do you require?</legend></fieldset>
-			<fieldset class="extras"><legend>Extras</legend></fieldset>
+        <fieldset class="taxi"><legend>Which taxi do you require?</legend></fieldset>
+        <fieldset class="extras"><legend>Extras</legend></fieldset>
 
-			<p><label>Pickup Date <input class="date"></label></p>
-			<p><label>Pickup Time <input class="time"></label></p>
-			<p><label>Pickup Place <select class="pickup"></select></label></p>
-			<p><label>Dropoff Place 
-				<input class="dropoff"></label>
-				<datalist id="destinations"></datalist>
-			</p>
+        <p><label>Pickup Date <input class="date"></label></p>
+        <p><label>Pickup Time <input class="time"></label></p>
+        <p><label>Pickup Place <select class="pickup"></select></label></p>
+        <p><label>Dropoff Place 
+            <input class="dropoff"></label>
+            <datalist id="destinations"></datalist>
+        </p>
 
-			<p><label>Special Instructions <br><textarea class="comment"></textarea></label></p>
-			<p><button>Submit Booking</button></p>
-		</form>
+        <p><label>Special Instructions <br><textarea class="comment"></textarea></label></p>
+        <p><button>Submit Booking</button></p>
 	</form>
 </body>
 </html>
