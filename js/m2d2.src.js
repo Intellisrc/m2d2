@@ -215,13 +215,15 @@ var m2d2 = (function() {
 			    } else if(second !== undefined && isNumeric(second)) {
 			        refreshRate = second;
 			    }
-                if(isArray(newData)) {
-                    newData = { items : newData }
+                if(isArray(newData)) {                    
+                	var wrapper = {};
                     if(second !== undefined && !isNumeric(second)) {
-                        newData["template"] = second;
-                    } else if(_this.template != undefined) {
-                        newData["template"] = _this.template;
+                        wrapper.template = second;
+                    } else if(_this.template !== undefined) {
+                    	wrapper.template = _this.template
                     }
+                    wrapper.items = newData;
+                    newData = wrapper;
                 }
                 if(isPlainObject(newData)) {
                     updater = false;
@@ -261,7 +263,7 @@ var m2d2 = (function() {
         _setProxy : function() {
 			var _this = this;
 			if(_this._data._proxy === undefined && (isPlainObject(_this._data) || isArray(_this._data))) {
-				_this._data = _this._proxy(_this._data, function(obj, variable, value) {
+				_this._data = _this._proxy(_this._data, function(obj, variable, value) { //onChange...
 					if(variable != "m2d2" && variable[0] != '_' && updater) { //Do not update if it starts with '_'
 						_this.update(obj, variable, value);
 					}
@@ -388,7 +390,7 @@ var m2d2 = (function() {
                         _this._doArray($elem, value, item);
                     } else if(key == "template") {
                         // If it contains a template property, add it as HTML
-                        $elem.innerHTML = "<template>" + _this._getTemplate($elem, value) + "</template>";
+                        $elem.append(htmlNode("<template>" + _this._getTemplate($elem, value) + "</template>"));
                     } else {
                         if(key == "items" &&! isArray(item)) {
                             console.log("Warning: 'items' specified but value is not and array in element: ");

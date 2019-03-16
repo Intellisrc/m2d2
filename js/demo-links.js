@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", function() {
         "Using object" : "object.html",
         "Menu (show and style extensions)" : "menu.html",
         "Timer" : "timer.html",
+        "Movie list - Async" : "list-async.html",
         "Item list" : "list.html",
         "Item list (advanced)" : "list-adv.html",
         "Phone book - Async" : "async.html",
