@@ -33,7 +33,10 @@ m2d2.ext({
                 }
             }
 		} else {
-		    node.dataset._m2d2_display = node.style.display != "none" ? node.style.display : cssDisplay();
+		    var stored = node.style.display != "none" ? node.style.display : cssDisplay();
+		    if(stored != "none") {
+		        node.dataset._m2d2_display = stored;
+		    }
 			node.style.display = "none"
 		}
 	}
