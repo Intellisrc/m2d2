@@ -26,7 +26,7 @@ https://gl.githack.com/lepe/m2d2/raw/master/index.html
 <body></body>
 ```
 ```js
-var body = m2d2("Hello World");
+const body = m2d2("Hello World");
 ```
 That line will render "Hello World" into `<body>`.
 
@@ -42,7 +42,7 @@ Cool! But not very useful, so let's set it inside some element:
 ```
 You can set H1 text in two ways:
 ```js
-var title = m2d2({ 
+const title = m2d2({ 
     h1 : "Hello World"
 });
 ```
@@ -50,7 +50,7 @@ It will search inside `<body>` for a tagname `<h1>` and set the text in it.
 
 or:
 ```js
-var title = m2d2("h1","Hello World");   <--- recommended
+const title = m2d2("h1","Hello World");   <--- recommended
 ```
 It query the CSS selector "h1" and place set the text in it. We will call this element: `root element`.
 ```js
@@ -60,7 +60,7 @@ title.h1 = "Great!";
 
 You can also use HTML:
 ```js
-var title = m2d2("h1","<i>This</i> is interesting...");
+const title = m2d2("h1","<i>This</i> is interesting...");
 title.html = "<b>Great!</b>";
 ```
 If HTML is detected, it will be treated as HTML.
@@ -69,7 +69,7 @@ If HTML is detected, it will be treated as HTML.
 
 What if you have more than one `h1`? You can use a class name or an ID to search for it:
 ```js
-var title = m2d2({
+const title = m2d2({
   "#title"       : "Hello World",  //Example using an ID
   ".title_class" : "Hello World",  //Example using a class name  
   title_class    : "Hello World"   //Will look for a "title_class" tagname, or the class name 'title_class'
@@ -90,7 +90,7 @@ You can set attributes easily in this way:
 </section>	
 ```
 ```js
-var link = m2d2("section",{
+const link = m2d2("section",{
   special : {						//It will search for '.special' inside '<section>'
 	text  : "You are special",
 	title : "I told you so...",
@@ -122,14 +122,14 @@ You can attach data to your elements in two ways:
 
 Setting each attribute:
 ```js
-    var link = m2d2("a.one", {
+    const link = m2d2("a.one", {
 		'data-code' : "HM2001",
 		'data-qty'  : 20
     });
 ```
 Setting all at once (using `dataset` property):
 ```js
-    var link = m2d2("a.two", {
+    const link = m2d2("a.two", {
 		dataset : {
 			code : "HM2001",
 			qty  : 20
@@ -163,7 +163,7 @@ link.m2d2.update("a.special", {			//Using the CSS selector directly
 If we want to add HTML into an element, we can either pass the string to the `html` property: 
 
 ```js
-var link = m2d2("a.special",{ 
+const link = m2d2("a.special",{ 
 	title : "I told you so...",
 	href  : "http://ur.special",
 	target: "_blank",
@@ -174,7 +174,7 @@ var link = m2d2("a.special",{
 ... or generating it using an object: (recommended)
 
 ```js
-var link = m2d2("a.special",{ 
+const link = m2d2("a.special",{ 
 	title : "I told you so...",
 	href  : "http://ur.special",
 	target: "_blank",
@@ -213,7 +213,7 @@ a.special.img.src = "http://ur.special/logo_alt.png";
 To add an event to an element, its as simple as specifying it inside your data:
 
 ```js
-var link = m2d2("a.special",{
+const link = m2d2("a.special",{
 	onclick : function(event) {
 		alert("You just clicked this link!");
 	}
@@ -241,7 +241,7 @@ If you are using jQuery, you can use it as usual:
 You can attach events to child elements as well:
 
 ```js
-var link = m2d2("a.special", {
+const link = m2d2("a.special", {
     text : "My Special Link",
     img : {
         onclick : function(event) {
@@ -256,7 +256,7 @@ var link = m2d2("a.special", {
 For advanced usages, you can hook some function before or after each element is rendered. For example:
 
 ```js
-var link = m2d2("a.special", {
+const link = m2d2("a.special", {
     text : "My Special Link",
     img : {
 		oninit : function() {
@@ -289,7 +289,7 @@ Original JSON:
 </table>
 ```
 ```js
-var location = m2d2("#location", function(callback) {
+const location = m2d2("#location", function(callback) {
   $.get("https://www.metaweather.com/api/location/search/?query=london", function(json) {
 	callback({
 		place : json.title,
@@ -306,7 +306,7 @@ NOTE: M2D2 will try to guess which kind of data will receive in the callback dur
 In case your m2d2 object is empty after calling `callback`, it can be fixed by returing an empty `object` or `array`:
 
 ```js
-var why_empty = m2d2(function(callback) {
+const why_empty = m2d2(function(callback) {
 	setTimeout(function(){
 		callback([1,2,3,4,5])
 	}, 5000);
@@ -316,7 +316,7 @@ var why_empty = m2d2(function(callback) {
 ```
 If you want to update your DOM in an interval, you can specify the amount of milliseconds as second argument of the callback:
 ```js
-var location = m2d2("#location", function(callback) {
+const location = m2d2("#location", function(callback) {
 ...
     callback({
         place : json.title,
@@ -348,7 +348,7 @@ location.m2d2.update();
 If you want to update it with a parameter, you need to set a second argument:
 
 ```js
-var location = m2d2("#location", function(callback, param) {
+const location = m2d2("#location", function(callback, param) {
   if(param == undefined) {
 	param = "tokyo";
   }
@@ -395,12 +395,12 @@ The code will search for it in that order.
 ```
 
 ```js
-var dictionary = m2d2("#dictionary", function(callback) {
+const dictionary = m2d2("#dictionary", function(callback) {
 	//Example using JQuery XHR:
 	$.get("/words.json").done(function(words){
-		var list = [];
-		for(var w in words) {
-			var word = words[w];
+		const list = [];
+		for(let w in words) {
+			const word = words[w];
 			list.push({
 				dt : word.title,
 				dd : word.definition
@@ -441,7 +441,7 @@ Initial HTML:
 **NOTE** : "template" property must be specified before "items" or it won't be displayed (current limitation).
 
 ```js
-var table = m2d2("table", {
+const table = m2d2("table", {
 	tr : {
 		template : {
 			td : {
@@ -492,7 +492,7 @@ The shortest way to use a template is specifying it as `string`, which will be t
 <div id="buttons"></div>
 ```
 ```js
-var buttons = m2d2("#buttons", [
+const buttons = m2d2("#buttons", [
 	{ text : "Click Me", onclick : function(ev) { alert("First button"); } },
 	{ text : "Submit", onclick : function(ev) { alert("Second button"); } }
 ], "button"); // Template: It will become: <button></button>, it can also be HTML
@@ -509,7 +509,7 @@ The `<template>` element is not displayed by the browsers, so you can use it to 
 ```
 
 ```js
-var list = m2d2("#list", [
+const list = m2d2("#list", [
 	{ 
 		id : 1,
 		style: {
@@ -566,7 +566,7 @@ The HTML inside `<template>` is used to generate the list:
 Arrays are stored in the `items` property. The following is equivalent to the previous example:
 
 ```js
-var list = m2d2("#list", {
+const list = m2d2("#list", {
 	items : [
 		{
 			id : 1,
@@ -603,7 +603,7 @@ When a template is not specified, the HTML inside our `root element` will be use
 </select>
 ```
 ```js
-var options = m2d2("select", [
+const options = m2d2("select", [
 	{
 		text : "First option",
 		value : 1
@@ -628,7 +628,7 @@ If you want to specify a list inside an object, you need to specify the `templat
 ```
 
 ```js
-var form = m2d2("form", {
+const form = m2d2("form", {
 	action : "/post.php", //'form' property
 	method : "POST",
 	options : {
@@ -668,7 +668,7 @@ Generated HTML:
 Another example: 
 
 ```js
-var table = m2d2("table", {
+const table = m2d2("table", {
 	//Note: The following line is equivalent to: "users : { items : [ ... ] }"
 	users : [	//Using class name specified in tbody
 		{ id: 10, name: "John Muller" },
@@ -710,7 +710,7 @@ var table = m2d2("table", {
 You can alternatively define the items in a separate m2d2 object (which may be easier to manage):
 
 ```js
-var table = m2d2("table", {
+const table = m2d2("table", {
     colgroup : {
         template : "col",
         items : [
@@ -720,7 +720,7 @@ var table = m2d2("table", {
     },
 	... same as before ...
 });
-var users = m2d2("table tbody.users", [
+const users = m2d2("table tbody.users", [
 	{ id: 10, name: "John Muller" },
 	{ id: 20, name: "Peter Wilson" }
 ]);
@@ -732,7 +732,7 @@ var users = m2d2("table tbody.users", [
 Templates are useful to keep DOM elements separated from data, specially if your HTML definition is larger than the data itself. For example:
 
 ```js
-var profile = m2d2("#profile", {
+const profile = m2d2("#profile", {
 	section : {
 		div : {
 			h2 : {
@@ -751,7 +751,7 @@ var profile = m2d2("#profile", {
 You can organize it by separating what is fixed from what is not: (which is easier to read)
 
 ```js
-var profile = m2d2("#profile", {	
+const profile = m2d2("#profile", {	
 		user : "Peter Wilson"
 }, { //Third argument is used as template:
 	section : {
@@ -774,7 +774,7 @@ When using a function to retrieve the data, you can see its advantages:
 **NOTE** : Please read the later section "Using a function as data" for more about "functions".
 
 ```js
-var profile = m2d2("#profile", function(callback) {
+const profile = m2d2("#profile", function(callback) {
 	// XHR call using JQuery:
 	$.get("/user.php?id=100").done(function(response) {
 		callback({  user : response.name }); //assuming response is a JSON object
@@ -800,7 +800,7 @@ var profile = m2d2("#profile", function(callback) {
 M2D2 defines custom events that you can use hook into:
 
 ```js
-var link = m2d2("a.special", {
+const link = m2d2("a.special", {
 	oninit : function(my_m2d2) {
 		//This is executed before we start rendering
 	},
@@ -848,7 +848,7 @@ m2d2.ext({
     }
 });
 //----- Usage ----
-var link = m2d2("a.special",{
+const link = m2d2("a.special",{
     myext : "something"
 });
 ```
