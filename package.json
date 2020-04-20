@@ -1,0 +1,30 @@
+{
+  "name": "m2d2",
+  "version": "20.4.20",
+  "description": "A class to easily place data in DOM and update them immediately upon change. ",
+  "main": "js/m2d2.src.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://gitlab.com/lepe/m2d2/"
+  },
+  "keywords": [
+    "reactive",
+    "proxy",
+    "javascript",
+    "dom"
+  ],
+  "author": "Alberto Lepe",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://gitlab.com/lepe/m2d2/-/issues"
+  },
+  "homepage": "https://gitlab.com/lepe/m2d2/",
+  "devDependencies": {
+    "gulp": "^3.8.11",
+    "gulp-concat": "^2.5.2",
+    "gulp-terser": "^1.2.0"
+  }
+}
