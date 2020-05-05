@@ -1,22 +1,35 @@
 # M2D2 JS (Model to DOM 2)
-A class to easily place data in DOM and update them immediately upon change.
+A class to easily place data in DOM and update them immediately upon change. It is similar to Angular, Vue, ReactJS and alike frameworks.
 
-This is my second version of "Model", that is why I named it M2D2. Also, for those Start Wars fans, it also kind of a joke.
+The main goal of this framework is to keep the HTML and JS pure and clean, without having to either setup rules in 
+the HTML (like in Angular), use HTML templates inside Javascript like in React, or use mixed templates like Vue. 
+
+If you know Javascript and HTML you pretty much know 98% of M2D2 already. 
+Because of that, it has a small learning curve, so you don't need to spend hours trying to understand
+how the framework works or how you can apply it to your work.
+
+This framework can work together with any other as it is just pure Javascript. Although, once you use it, you will like
+how clean your code can be.
+
+Repositories (synchronized):
+
+* https://gitlab.com/lepe/m2d2/
+* https://github.com/lepe/m2d2/
 
 Live Demo:
 https://gl.githack.com/lepe/m2d2/raw/master/index.html
 
 ## Install
 
-* Download (8.6Kb): [m2d2.min.js](https://gl.githack.com/lepe/m2d2/raw/master/js/m2d2.min.js) and set it in the HTML head.
+* Using npm:
+
+`npm i m2d2`
+
+or:
+
+* Download (~10Kb): [m2d2.min.js](https://gl.githack.com/lepe/m2d2/raw/master/js/m2d2.min.js) and set it in the HTML head.
 
 **NOTE** As it has no dependencies, It can be used together with any other library or framework (e.g. JQuery)
-
-## Extensions / Plugins:
-
-* Style (< 1Kb) [m2d2.style.js](https://gl.githack.com/lepe/m2d2/raw/master/js/m2d2.style.src.js) : enable use of 'css', '-css', '+css', 'color', 'bgcolor' shortcuts
-
-* Show (1.5Kb) [m2d2.show.js](https://gl.githack.com/lepe/m2d2/raw/master/js/m2d2.show.src.js) : enable use of 'show' to hide or show elements easily.
 
 # Tutorial
 
@@ -50,7 +63,7 @@ It will search inside `<body>` for a tagname `<h1>` and set the text in it.
 
 or:
 ```js
-const title = m2d2("h1","Hello World");   <--- recommended
+const title = m2d2("h1","Hello World");   //<--- recommended
 ```
 It query the CSS selector "h1" and place set the text in it. We will call this element: `root element`.
 ```js
@@ -112,7 +125,7 @@ link.special.html = "<img src='/img.jpg' />";
 You can add non-existant attributes simply like this:
 ```js
 link.special.hreflang = "en";
-link.special['class'] = "active";
+link.special.className = "active"; 
 link.special['data-id'] = 100;
 ```
 
@@ -137,26 +150,18 @@ Setting all at once (using `dataset` property):
 	});
 ```
 
-## Replacing data
-
-If you need to replace the whole data object, there is a special function for that: `update()`.
-You will need to access the `M2D2` object through its property: `.m2d2`:
+## Style
 ```js
-console.log(link.m2d2)
+    const link = m2d2("user", {
+        name : {
+             style : {
+                 color : "red"
+             }
+        }
+    });
+    // Change color:
+    link.name.style.color = "blue";
 ```
-So, using the `M2D2` object, you can update like this:
-(following the previous example...)
-
-```js
-link.m2d2.update("a.special", {			//Using the CSS selector directly
-	text  : "I'm special too!",
-	title : "You told me so...",
-	href  : "http://iam.special",
-	target: "_blank"
-});
-```
-
-**NOTE**: By replacing the whole data, it will clear the contents inside the element automatically.
 
 ## Generating DOM
 
@@ -179,7 +184,7 @@ const link = m2d2("a.special",{
 	href  : "http://ur.special",
 	target: "_blank",
 	img   : {
-		'class' : "thumbnail",
+		className : "thumbnail", //You may use 'class' (with quotes) instead of `className`
 		src : "http://ur.special/logo.png",
 		alt : "UR Special logo",
 		width: 32,
@@ -203,10 +208,38 @@ a.special.img.src = "http://ur.special/logo_alt.png";
 ```js
     img : {
         'class' : "thumbnail",   //Using the HTML attribute (must be between quotes as its a JS reserved keyword)
-        className : "thumbnail", //Using the DOM attribute
+        className : "thumbnail", //Using the DOM property
         css : "thumbnail"        //Using `style` plugin (Explained later)
     }
 ```
+
+For multiple classes:
+
+```js
+    img : {
+        'class' : "small thumb",
+        className : "small thumb", 
+        classList : "small thumb", 
+        css : ["small", "thumb"] 
+    }
+```
+
+## Updating more than one element at once:
+
+```js
+const user = m2d2(".user", {
+	name: "Default Name"
+});
+const title = m2d2("h1", {
+	text : [ user, "name" ], //<-- first part of the array is the object and the second part the property you want to link
+    ...
+});
+// Update:   
+```
+By updating the value of: `user.name` it will automatically update `h1.text`. 
+See [Update from input - multiple targets](https://gl.githack.com/lepe/m2d2/raw/master/)` example.
+
+**Note**: If you set: `text : user.name` it will set the value only, and it won't be updated if it changes.
 
 ## Adding Events
 
@@ -408,18 +441,18 @@ const dictionary = m2d2("#dictionary", function(callback) {
 		}
 		callback(list);
 	}, { //This is the template:
+        html : "", // Clear the contents each time, otherwise it will append data each cycle. 
 		dt : {
-			'class' : "title",
+			className : "title",
 			onclick : function(event){
 				alert("This word is:" , event.target.text);
 			}
 		},
 		dd : {
-			'class' : "definition"
+			className : "definition"
 		}
-	}, 60000); //You can se the interval as last argument.
+	}, 60000); //You can set the interval as last argument.
 
-	//TODO: idea:
 	return {
 		onmouseover : function(event) {
 			event.target.className = "over";
@@ -445,7 +478,7 @@ const table = m2d2("table", {
 	tr : {
 		template : {
 			td : {
-				'class' : "cell"
+				className : "cell"
 			}
 		},
 		items : [
@@ -637,11 +670,11 @@ const form = m2d2("form", {
 			label : {
 				text  : "",
 				input : {
-					name	: "option",
-					type	: "radio",
-					'class' : "pickone",
-					required: true,
-					disabled: false
+					name	  : "option",
+					type	  : "radio",
+					className : "pickone",
+					required  : true,
+					disabled  : false
 				}
 			}
 		},
@@ -698,9 +731,9 @@ const table = m2d2("table", {
         }
     },
     tbody : {
-		'class' : 'users',
-        onclick : function(event) { ... },
-        template : {
+		className : 'users',
+        onclick   : function(event) { ... },
+        template  : {
 			tr : "<td class='id'></td><td class='name'></td>"
 		}
     }
@@ -737,13 +770,13 @@ const profile = m2d2("#profile", {
 		div : {
 			h2 : {
 				text : "Users",
-				'class' : "subtitle"
+				className : "subtitle"
 			}
-		}
+		},
 		"user" : {
 			onclick : function(event) { ... },
 			text : "Peter Wilson",
-			'class' : "enabled"
+			className : "enabled"
 		}
 	}
 });
@@ -758,12 +791,12 @@ const profile = m2d2("#profile", {
 		div : {
 			h2 : {
 				text : "Users",
-				'class' : "subtitle"
+				className : "subtitle"
 			}
-		}
+		},
 		"user" : {
 			onclick : function(event) { ... },
-			'class' : "enabled"
+			className : "enabled"
 		}
 	}
 });
@@ -784,12 +817,12 @@ const profile = m2d2("#profile", function(callback) {
 		div : {
 			h2 : {
 				text : "Users",
-				'class' : "subtitle"
+				className : "subtitle"
 			}
-		}
+		},
 		"user" : {
 			onclick : function(event) { ... },
-			'class' : "enabled"
+			className : "enabled"
 		}
 	}
 });
@@ -841,7 +874,7 @@ The main advantage of this plugin, is that it will preserve the previous CSS 'di
 Extending M2D2 is as easy as:
 
 ```js
-m2d2.ext({
+M2D2.extend({
     myext : function(value, node) {
         // value is in this example: "something"
         // node is in this example: `<a class='special'></a>` (as DOM element)
@@ -853,3 +886,6 @@ const link = m2d2("a.special",{
 });
 ```
 
+### About the name
+
+This is my second version of "Model", that is why I named it M2D2. Also, for those Start Wars fans, it also kind of joke.
