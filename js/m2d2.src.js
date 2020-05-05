@@ -2,8 +2,8 @@
  * @author: A. Lepe
  * @url : https://gitlab.com/lepe/m2d2/
  * @since: May, 2018
- * @version: 1.3.0
- * @updated: 2020-04-30
+ * @version: 1.3.1
+ * @updated: 2020-05-05
  *
  * Examples:
  // -- Without "root":

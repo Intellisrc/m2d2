@@ -49,8 +49,8 @@ class Utils {
  * @author: A. Lepe
  * @url : https://gitlab.com/lepe/m2d2/
  * @since: May, 2018
- * @version: 1.3.0
- * @updated: 2020-04-30
+ * @version: 1.3.1
+ * @updated: 2020-05-05
  *
  * Examples:
  // -- Without "root":
@@ -267,17 +267,14 @@ class M2D2 {
 				newData = wrapper;
 			}
 			if (Utils.isPlainObject(newData)) {
-				let idx = 1;
+				_this._updater = false;
 				if(! isProxy) {
 					_this._data = {};
 				}
 				for (let n in newData) {
-					if (idx++ === Object.keys(newData).length) {
-						_this._updater = true;
-					}
 					_this._data[n] = newData[n];
 				}
-				updated = isProxy;
+				_this._updater = true;
 			}
 			if (refreshRate === undefined) {
 				if (_this.interval > 0) {

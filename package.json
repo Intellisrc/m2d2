@@ -1,6 +1,6 @@
 {
   "name": "m2d2",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "description": "A class to easily place data in DOM and update them immediately upon change. ",
   "main": "js/m2d2.src.js",
   "scripts": {
