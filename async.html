@@ -7,19 +7,19 @@
 <link rel="stylesheet" href="css/common.css" type="text/css" />
 <link rel="stylesheet" href="css/index.css" type="text/css" />
 <script src="js/xhr.js" type="text/javascript"></script>
-<script src="js/m2d2.dev.js" type="text/javascript"></script>
+<script src="js/m2d2.min.js" type="text/javascript"></script>
 <!-- Import Demo menu: -->
-<!--script src="js/demo-links.js" type="text/javascript"></script-->
+<script src="js/demo-links.js" type="text/javascript"></script>
 <!--                   -->
 <script type="text/javascript">
 	//On ready..
 	document.addEventListener("DOMContentLoaded", function() {
         // Showing when it is loading
-        /*const loading = m2d2("#loading", {
+        const loading = m2d2("#loading", {
             show : false
-        });*/
+        });
         // This example uses the content inside <select> as template, which is an <option> tag.
-        /*const users = m2d2("#users", function(callback) {
+        const users = m2d2("#users", function(callback) {
             loading.show = true;
             getXHR("https://jsonplaceholder.typicode.com/users",function(json) {
                 const usersList = [];
@@ -50,7 +50,7 @@
                     console.log("done.");
                 }
             }
-        });*/
+        });
 		// This is similar to "timer" example, but using a remote server and
 		// it will use a parameter when updating
 		const user = m2d2("#user", function(callback, param) {
@@ -60,8 +60,8 @@
                 //users.disabled = true;
                 getXHR("https://jsonplaceholder.typicode.com/users?id="+param,function(json) {
                     json = json[0]; //get the first item
-                    //loading.show = false;
-                    //users.disabled = false;
+                    loading.show = false;
+                    users.disabled = false;
                     callback({
                         user : json.username,
                         name : json.name,
