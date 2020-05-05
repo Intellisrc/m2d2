@@ -1,7 +1,8 @@
 document.addEventListener("DOMContentLoaded", function() {
-    var menuLinks = {
+    const menuLinks = {
         "Update from input" : "index.html",
         "Update from input (alternative way)" : "index2.html",
+        "Update from input (multiple targets)" : "multiple.html",
         "Update using callback" : "index-adv.html",
         "Using object" : "object.html",
         "Menu (show and style extensions)" : "menu.html",
@@ -14,8 +15,8 @@ document.addEventListener("DOMContentLoaded", function() {
         "Custom extensions" : "extend.html",
     }
     m2d2(function(callback) {
-        var links = [];
-        for(var title in menuLinks) {
+        const links = [];
+        for(let title in menuLinks) {
             links.push({
                 a : {
                     text : title,

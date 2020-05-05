@@ -1,3 +1,50 @@
+// ------- Functions -------
+"use strict";
+/**
+ * Some utils to work with DOM
+ * @Author: A.Lepe <dev@alepe.com>
+ */
+class Utils {
+    static htmlNode(html) {
+        const template = Utils.newNode("template");
+        template.innerHTML = html.trim();
+        return template.content.firstChild;
+    };
+    static newNode(tagName) {
+        return document.createElement(tagName);
+    };
+    static node(selector, root) {
+        if (root === undefined) {
+            root = document;
+        }
+        return selector instanceof Node ? selector : root.querySelector(selector);
+    };
+    static isNumeric(n) {
+        return !isNaN(parseFloat(n)) && isFinite(n);
+    };
+    static isSelectorID(s) {
+        return (s + "").trim().indexOf("#") === 0;
+    };
+    static isPlainObject(o) {
+        return Utils.isObject(o) && !Utils.isArray(o);
+    };
+    static isObject(oa) {
+        return typeof oa === 'object';
+    };
+    static isArray(a) {
+        return Array.isArray(a);
+    };
+    static isFunction(f) {
+        return typeof f === 'function';
+    };
+    static isHtml(s) {
+        return (s + "").trim().indexOf("<") !== -1;
+    };
+    static isEmpty(obj) {
+        return obj === undefined || (Utils.isObject(obj) && Object.keys(obj).length === 0) || obj === "";
+    };
+}
+
 /**
  * @author: A. Lepe
  * @url : https://gitlab.com/lepe/m2d2/
@@ -220,14 +267,17 @@ class M2D2 {
 				newData = wrapper;
 			}
 			if (Utils.isPlainObject(newData)) {
-				_this._updater = false;
+				let idx = 1;
 				if(! isProxy) {
 					_this._data = {};
 				}
 				for (let n in newData) {
+					if (idx++ === Object.keys(newData).length) {
+						_this._updater = true;
+					}
 					_this._data[n] = newData[n];
 				}
-				_this._updater = true;
+				updated = isProxy;
 			}
 			if (refreshRate === undefined) {
 				if (_this.interval > 0) {
@@ -846,3 +896,76 @@ const m2d2 = function(first, second, third) {
 	}
 	return new M2D2(options).get();
 };
+
+/**
+ * @author: A. Lepe
+ * @url : https://gitlab.com/lepe/m2d2/
+ * @since: May, 2018
+ *
+ * This is an extension to use the property "show" to hide/show elements
+ * It will keep previous "display" property value and restore it upon "show".
+ * If there is not "previous" display property will search for "data-display"
+ * attribute or will set the default for the specified element tag.
+ */
+M2D2.extend({
+	show : function(show, node) {
+		const cssDisplay = function () {
+			return getComputedStyle(node, null).display;
+		};
+		const defaultDisplay = function () {
+			const b = document.getElementsByTagName("body")[0];
+			const t = document.createElement("template");
+			const n = document.createElement(node.tagName);
+			t.appendChild(n);
+			b.appendChild(t);
+			const display = getComputedStyle(n, null).display;
+			t.remove();
+			return display;
+		};
+		if(show) {
+			if(cssDisplay() === "none") {
+				if(node.dataset._m2d2_display) {
+					node.style.display = node.dataset._m2d2_display;
+				} else {
+					node.style.removeProperty("display");
+					if(cssDisplay() === "none") {
+						const defaultShow = defaultDisplay();
+						node.style.display = node.dataset.display || (defaultShow !== "none" ? defaultShow : "block");
+					}
+				}
+			}
+		} else {
+			const stored = node.style.display !== "none" ? node.style.display : cssDisplay();
+			if(stored !== "none") {
+				node.dataset._m2d2_display = stored;
+			}
+			node.style.display = "none"
+		}
+	}
+});
+
+/**
+ * @author: A. Lepe
+ * @url : https://gitlab.com/lepe/m2d2/
+ * @since: May, 2018
+ *
+ * This is an extension to use propertes to set style in elements
+ */
+M2D2.extend({
+	// Set css "color" for text. It accepts any supported CSS value
+	color   : function(value, elem) { elem.style.color = value; },
+	// Set css "background-color".
+	bgcolor : function(value, elem) { elem.style.backgroundColor = value; },
+	// Set className. It will replace all classes
+	css	    : function(value, elem) { elem.className = value; },
+	// Remove specific class from element
+	"-css"  : function(value, elem) {
+		let styles = Utils.isArray(value) ? value : value.split(" ");
+		for(let s in styles) { elem.classList.remove(styles[s]) };
+	},
+	// Add class to element
+	"+css"  : function(value, elem) {
+		let styles = Utils.isArray(value) ? value : value.split(" ");
+		for(let s in styles) { elem.classList.add(styles[s]) };
+	}
+});

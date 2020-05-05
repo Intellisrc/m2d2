@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#333333">
 <link rel="stylesheet" href="css/common.css" type="text/css" />
 <link rel="stylesheet" href="css/index.css" type="text/css" />
-<script src="js/m2d2.src.js" type="text/javascript"></script>
+<script src="js/m2d2.min.js" type="text/javascript"></script>
 <!-- Import Demo menu: -->
 <script src="js/demo-links.js" type="text/javascript"></script>
 <!--                   -->
@@ -14,7 +14,7 @@
 	//On ready...
 	document.addEventListener("DOMContentLoaded", function() {
         function getTime() {
-			var date = new Date();
+            const date = new Date();
             return {
 				text : "Now: " + date,
 				datetime : date,
@@ -22,11 +22,11 @@
 			}
         }
 		// This example, is to demonstrate how to use the interval
-		var clock = m2d2("#datetime", function(callback) {
-			//We could retrieve the date from a remote server...
-			callback(getTime(), 1000); // call function each 1sec.
+        const clock = m2d2("#datetime", function (callback) {
+            //We could retrieve the date from a remote server...
+            callback(getTime(), 1000); // call function each 1sec.
             return getTime(); //We return the first second to render immediately.
-		}, "time"); //This will use <time> as template
+        }, "time"); //This will use <time> as template
 	});
 </script>
 </head>

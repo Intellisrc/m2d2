@@ -1,6 +1,7 @@
-<html>
+<html lang="en">
 <head>
 <title>Demo using M2D2 : Lists - Advaced example</title>
+<meta charset="UTF-8">
 <meta name="HandheldFriendly" content="1">
 <meta name="viewport" content="width=device-width, maximum-scale=1.0">
 <meta name="theme-color" content="#333333">
@@ -25,12 +26,10 @@
         cursor: pointer;
     }
 </style>
-<script src="js/m2d2.src.js" type="text/javascript"></script>
-<script src="js/m2d2.style.src.js" type="text/javascript"></script>
-<script src="js/m2d2.show.src.js" type="text/javascript"></script>
+<script src="js/m2d2.min.js" type="text/javascript"></script>
 <script type="text/javascript">
 //On ready...
-var list, actions, loading; //For debugging purposes
+let list, actions, loading; //For debugging purposes
 document.addEventListener("DOMContentLoaded", function() {
     // This example is to show how to generate lists using a function
     list = m2d2("#items", function(callback) {
@@ -63,17 +62,23 @@ document.addEventListener("DOMContentLoaded", function() {
                     template : {
                         td : {
                             onclick : function(event) {
+                                const td = event.target;
+                                const id = td.parentNode.dataset.id;
                                 switch(event.target.className) {
                                     case "name":
-                                        var newName = prompt("Please enter new item name: ", event.target.textContent);
-                                        list.items[1].name = newPrice;
+                                        let newName = prompt("Please enter new item name: ", td.textContent);
+                                        if(newName) {
+                                            list.items[id].name = newName;
+                                        }
                                         break;
                                     case "delete" :
-                                        list.items.splice(0, 1);
+                                        list.items.splice(id, 1);
                                         break;
                                     case "price" :
-                                        var newPrice = prompt("Please enter new price: ", event.target.textContent);
-                                        list.items[1].price = newPrice;
+                                        let newPrice = prompt("Please enter new price: ", td.textContent);
+                                        if(newPrice) {
+                                            list.items[id].price = newPrice;
+                                        }
                                         break;
                                 }
                             }
@@ -99,25 +104,25 @@ document.addEventListener("DOMContentLoaded", function() {
                         }
                     ]
                 }
-			}); //, 10000); //TODO: setting the timer increments data (instead of replacing) due to calling _doRender (:146). (issue #7)
+			});
 		}, 2000);
 	});
     // Build Headers
-    var headers = m2d2("#heads", {	
+    const headers = m2d2("#heads", {
         tr : {
             template : "th",
             items : ["ID","Item","Price","Del"]
         }
 	});
     
-    var count = 0;
+    let count = 0;
 	// Note how we are using list.data instead of just "list"
     actions = m2d2("#actions", {
 		add : {
 			disabled : true,
 			onclick : function(event) {
-                var colors = [];
-                for(var c=0; c<3; c++) {
+                const colors = [];
+                for(let c=0; c<3; c++) {
                     colors.push(Math.round(Math.random() * 255));
                 }
 				list.items.push({

@@ -1,0 +1,30 @@
+<html lang="en">
+<head>
+    <title>Issue 16</title>
+    <meta charset="UTF-8">
+    <meta name="HandheldFriendly" content="1">
+    <meta name="viewport" content="width=device-width, maximum-scale=1.0">
+    <meta name="theme-color" content="#333333">
+    <link rel="stylesheet" href="../css/common.css" type="text/css" />
+    <link rel="stylesheet" href="../css/index.css" type="text/css" />
+    <script src="../js/m2d2.dev.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        document.addEventListener("DOMContentLoaded", function() {
+            const objs = m2d2("#objs", {
+                show : false,
+                template : "div",
+                items : ["one"]
+            });
+            objs.show = true;
+            objs.show = false;
+            objs.show = true;
+        });
+    </script>
+</head>
+<body>
+<a href="https://gitlab.com/lepe/m2d2/-/issues/16"></a>
+<p>It should not duplicate content on update</p>
+<div id="objs">
+</div>
+</body>
+</html>
