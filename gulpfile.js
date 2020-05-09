@@ -4,7 +4,7 @@ const gulp = require('gulp'),
 
 const paths = {
 	prefix: 'm2d2',
-	build: 'js/',
+	build: 'dist/',
 	js: [
 		'js/utils.src.js',
 		'js/m2d2.src.js',
@@ -21,7 +21,7 @@ gulp.task('js', function() {
 });
 gulp.task('dev', function() {
 	return gulp.src(paths.js)
-		.pipe(concat(paths.prefix + '.dev.js'))
+		.pipe(concat(paths.prefix + '.src.js'))
 		.pipe(gulp.dest(paths.build));
 });
 

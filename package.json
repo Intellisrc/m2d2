@@ -23,8 +23,8 @@
   },
   "homepage": "https://gitlab.com/lepe/m2d2/",
   "files" : [
-      "js/m2d2.dev.js",
-      "js/m2d2.min.js"
+      "dist/m2d2.src.js",
+      "dist/m2d2.min.js"
   ],
   "devDependencies": {
     "gulp": "^3.8.11",
