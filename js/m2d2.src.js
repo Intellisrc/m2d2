@@ -327,16 +327,16 @@ class M2D2 {
 				val._node = undefined;
 			}
 			if(!template) {
-			if($elem.tagName === "SELECT" || $elem.tagName === "DATALIST") {
-				template = "<option>";
-				if(typeof val === "string") {
-					val = {text: val, value: val}
-				}
-			} else if($elem.tagName === "UL" || $elem.tagName === "OL") {
-				template = "<li>";
-			} else if($elem.tagName === "NAV") {
-				template = "<a>";
-			} else if(Utils.isPlainObject(val)) {
+                if($elem.tagName === "SELECT" || $elem.tagName === "DATALIST") {
+                    template = "<option>";
+                    if(typeof val === "string") {
+                        val = {text: val, value: val}
+                    }
+                } else if($elem.tagName === "UL" || $elem.tagName === "OL") {
+                    template = "<li>";
+                } else if($elem.tagName === "NAV") {
+                    template = "<a>";
+                } else if(Utils.isPlainObject(val)) {
 					if(Object.keys(val).length === 1) {
 						if(Utils.isSelectorID(val)) {
 							const idNode = document.querySelector(val);
@@ -431,8 +431,6 @@ class M2D2 {
 				if(!value.hasOwnProperty("items")) {
 					value.items = [];
 				}
-			} else if(value.hasOwnProperty("items")) {
-				console.log("Warning: 'items' specified but no template found.");
 			}
 			for(let key in value) {
 				const item = value[key];
