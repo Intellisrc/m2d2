@@ -1,6 +1,6 @@
 {
   "name": "m2d2",
-  "version": "1.3.1",
+  "version": "1.3.2",
   "description": "A class to easily place data in DOM and update them immediately upon change. ",
   "main": "js/m2d2.src.js",
   "scripts": {
@@ -22,6 +22,10 @@
     "url": "https://gitlab.com/lepe/m2d2/-/issues"
   },
   "homepage": "https://gitlab.com/lepe/m2d2/",
+  "files" : [
+      "js/m2d2.dev.js",
+      "js/m2d2.min.js"
+  ],
   "devDependencies": {
     "gulp": "^3.8.11",
     "gulp-concat": "^2.5.2",

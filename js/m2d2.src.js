@@ -64,7 +64,7 @@ class M2D2 {
 							const toRemove = [];
 							for (n in data._node.childNodes) {
 								node = data._node.childNodes[n];
-								if (node.tagName !== undefined && node.tagName !== "TEMPLATE") {
+								if (node && node.tagName !== undefined && node.tagName !== "TEMPLATE") {
 									toRemove.push(node);
 								}
 							}
@@ -573,7 +573,7 @@ class M2D2 {
 								if(_this._htmlGenTags.indexOf(key) !== -1) {
 									createElem(key, item, isTemplate)
 									continue;
-								} else if(Utils.isObject(item)) {
+								} else if(item && Utils.isObject(item)) {
 									if(item.tagName !== undefined) {
 										let tag = item.tagName;
 										delete item.tagName;
