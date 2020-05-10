@@ -27,7 +27,7 @@ https://gl.githack.com/lepe/m2d2/raw/master/index.html
 
 or:
 
-* Download (~10Kb): [m2d2.min.js](https://gl.githack.com/lepe/m2d2/raw/master/js/m2d2.min.js) and set it in the HTML head.
+* Download (~12Kb): [m2d2.min.js](https://gl.githack.com/lepe/m2d2/raw/master/dist/m2d2.min.js) and set it in the HTML head.
 
 **NOTE** As it has no dependencies, It can be used together with any other library or framework (e.g. JQuery)
 
