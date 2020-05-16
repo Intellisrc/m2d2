@@ -4,14 +4,14 @@
 <meta name="HandheldFriendly" content="1">
 <meta name="viewport" content="width=device-width, maximum-scale=1.0">
 <meta name="theme-color" content="#333333">
-<link rel="stylesheet" href="css/common.css" type="text/css" />
-<link rel="stylesheet" href="css/index.css" type="text/css" />
+<link rel="stylesheet" href="../css/common.css" type="text/css" />
+<link rel="stylesheet" href="../css/index.css" type="text/css" />
 	<style type="text/css">
 		code { background: #EEE; padding: 10px; display: block; white-space: pre; }
 	</style>
-<script src="js/m2d2.min.js" type="text/javascript"></script>
+<script src="../dist/m2d2.min.js" type="text/javascript"></script>
 <!-- Import Demo menu: -->
-<script src="js/demo-links.js" type="text/javascript"></script>
+<script src="../js/demo-links.js" type="text/javascript"></script>
 <!--- --->
 <script type="text/javascript">
 	//On page ready...
@@ -24,7 +24,7 @@
 				onsubmit : function() { return false; },
 			},
 			name: {
-				value: "Updating multiple elements in a single line of code.",
+				value: "Some title",
 				size: 50
 			}
 		});
@@ -40,13 +40,14 @@
 <body>
 <h1>Title</h1>
 <h2>Title</h2>
-<p>To update the titles, input some text and press ENTER (its triggered on change):</p>
-<p>If you want it to change on keyup or other event, follow <a href="index.html">the simple example</a>.</p>
 <div class="user">
 	<form>
 		<label for="name">Name : </label><input id="name" type="text" value="" />
 	</form>
 </div>
+<hr>
+<p>To update the titles, input some text and press <b>ENTER KEY</b> (its triggered on change):</p>
+<p>If you want it to change on keyup or other event, follow <a href="index.html">the simple example</a>.</p>
 <p>You can open the console and execute:<br>
 	<code>user.name.value = "some text";</code>
 	And you will see the input and the 2 titles change.

@@ -479,6 +479,11 @@ class M2D2 {
 					value.items = [];
 				}
 			}
+			// Clear the contents if we don't have a html property and we have items
+			//TODO: find a way to distinguish between update and set (issue #7 related)
+			/*if(! value.hasOwnProperty("html") && value.hasOwnProperty("items")) {
+				$elem.innerHTML = "";
+			}*/
 			for(let key in value) {
 				const item = value[key];
 				if(key === "html" || key === "template" || key.startsWith("_")) {
@@ -502,13 +507,13 @@ class M2D2 {
 					} else if(key[0] === "#") {
 						// ID defined:
 						_this._doRender(Utils.node(key), item, isTemplate);
-					} else if(Utils.isArray(item) && item.length === 2 && item[0]._node !== undefined) {
+					} else if(Utils.isArray(item) && item.length === 2 && typeof item[0] === 'object' && typeof item[1] === 'string') {
 						// Update by reference
 						let oldfunc = item[0]._update || null;
 						if($elem._orig_update === undefined) {
 							$elem._orig_update = oldfunc;
 							item[0]._update = function () {
-								_this._data[key] = item[0][item[1]];
+								_this._setValue($elem, key, item[0][item[1]]);
 								if ($elem._orig_update !== null) {
 									$elem._orig_update();
 								}

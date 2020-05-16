@@ -1,0 +1,92 @@
+<html>
+<head>
+<title>Demo using M2D2 : Log example</title>
+<meta name="HandheldFriendly" content="1">
+<meta name="viewport" content="width=device-width, maximum-scale=1.0">
+<meta name="theme-color" content="#333333">
+<link rel="stylesheet" href="../css/common.css" type="text/css" />
+<link rel="stylesheet" href="../css/index.css" type="text/css" />
+<style type="text/css">
+    #log {
+        list-style: none;
+        font-family: monospace;
+        font-size: 80%;
+        background: #333;
+        padding: 10px;
+        margin: 0;
+    }
+    #log li {
+        display: flex;
+    }
+    .date {
+        color: #999;
+        width: 30%;
+    }
+    .action {
+        color: #990;
+        width: 10%;
+    }
+    .msg {
+        color: #090;
+    }
+</style>
+<script src="../dist/m2d2.min.js" type="text/javascript"></script>
+<!-- Import Demo menu: -->
+<script src="../js/demo-links.js" type="text/javascript"></script>
+<!--                   -->
+<script type="text/javascript">
+function getRandom(array) {
+    return array[Math.floor(Math.random() * array.length)];
+}
+//On ready...
+document.addEventListener("DOMContentLoaded", function() {
+    const users = ["admin","editor","guest"]
+    const actions = {
+        "read": "The user [USER] viewed an item",
+        "new": "The user [USER] created an item",
+        "write": "The user [USER] updated an item",
+        "delete" : "The user [USER] deleted an item"
+    }
+    function addLog(log) {
+        const action = getRandom(Object.keys(actions));
+        const message = actions[action].replace("USER", getRandom(users));
+        list.items.push({
+            date    : new Date().toISOString().slice(0, 22).replace("T"," "),
+            action  : action.toUpperCase(),
+            msg     : message
+        });
+    }
+    // This example is to show how append to a list
+    const list = m2d2("#log", {
+        template : {
+            li : {
+                date : {
+                    tagName: "span",
+                    className : "date"
+                },
+                action : {
+                    tagName : "span",
+                    className: "action"
+                },
+                msg : {
+                    tagName : "span",
+                    className: "msg"
+                }
+            }
+        },
+        items: [] //Initialize list with empty values
+    });
+    setInterval(function() {
+        addLog("hello")
+    }, 777);
+});
+</script>
+</head>
+<body>
+<h1>M2D2 Logging Example</h1>
+<hr>
+<p>This example appends items into the list, and creates elements "on the fly".</p>
+<hr>
+<ul id="log"></ul>
+</body>
+</html>

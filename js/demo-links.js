@@ -2,11 +2,12 @@ document.addEventListener("DOMContentLoaded", function() {
     const menuLinks = {
         "Update from input" : "index.html",
         "Update from input (alternative way)" : "index2.html",
+        "Update from input using object" : "object.html",
         "Update from input (multiple targets)" : "multiple.html",
         "Update using callback" : "index-adv.html",
-        "Using object" : "object.html",
         "Menu (show and style extensions)" : "menu.html",
         "Timer" : "timer.html",
+        "Logging screen" : "log.html",
         "Movie list - Async" : "list-async.html",
         "Item list" : "list.html",
         "Item list (advanced)" : "list-adv.html",
@@ -20,7 +21,7 @@ document.addEventListener("DOMContentLoaded", function() {
             links.push({
                 a : {
                     text : title,
-                    href : menuLinks[title]
+                    href : "/examples/" + menuLinks[title]
                 }
             });
         }
