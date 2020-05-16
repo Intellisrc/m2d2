@@ -17,11 +17,12 @@ document.addEventListener("DOMContentLoaded", function() {
     }
     m2d2(function(callback) {
         const links = [];
+        const baseURL = window.location.href.indexOf("examples/") >= 0 ? "" : "examples/";
         for(let title in menuLinks) {
             links.push({
                 a : {
                     text : title,
-                    href : "examples/" + menuLinks[title]
+                    href : baseURL + menuLinks[title]
                 }
             });
         }
