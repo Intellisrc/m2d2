@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", function() {
             links.push({
                 a : {
                     text : title,
-                    href : "/examples/" + menuLinks[title]
+                    href : "examples/" + menuLinks[title]
                 }
             });
         }
