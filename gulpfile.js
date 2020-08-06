@@ -1,3 +1,5 @@
+let debug = true;
+
 const gulp = require('gulp'),
 	concat = require('gulp-concat'),
 	terser = require('gulp-terser');
@@ -21,7 +23,7 @@ gulp.task('js', function() {
 });
 gulp.task('dev', function() {
 	return gulp.src(paths.js)
-		.pipe(concat(paths.prefix + '.src.js'))
+		.pipe(concat(paths.prefix + (debug ? '.min.js' : '.src.js')))
 		.pipe(gulp.dest(paths.build));
 });
 
@@ -31,4 +33,4 @@ gulp.task('watch', function() {
 });
 
 // Build
-gulp.task('default', ['js','dev']);
+gulp.task('default', debug ? ['dev'] : ['js','dev']);

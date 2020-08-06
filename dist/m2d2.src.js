@@ -49,25 +49,21 @@ class Utils {
  * @author: A. Lepe
  * @url : https://gitlab.com/lepe/m2d2/
  * @since: May, 2018
- * @version: 1.3.1
- * @updated: 2020-05-05
+ * @version: 1.3.4
+ * @updated: 2020-08-05
  *
  * Examples:
  // -- Without "root":
  * const myobj = m2d2("text in body");
  * const myobj = m2d2({ div : { text : "hello" } });
  * const myobj = m2d2([ {},{},{} ]); //Setting list without template and root
- * const myobj = m2d2(function(callback) { ... });
  // -- With "root":
  * const myobj = m2d2("#root", "text in #root");
  * const myobj = m2d2("#input", { value : 199 }); //Using properties
  * const myobj = m2d2("#input", [ 0, 1, 2 ]); //Setting list without template
- * const myobj = m2d2("#clock", function(callback) { ... }); //Using a function (e.g. getting data from another server)
  // -- With template:
  * const myobj = m2d2("#ul", [ 1, 2, 3 ], "li"); //Defining template as 3rd parameter
  * const myobj = m2d2("#ul", [ 1, 2, 3 ], { li : { 'class' : 'blue' } }); //Defining template as object
- * const myobj = m2d2("#clock", function(callback) { ... }, "time"); //Using a function and a template
- * const myobj = m2d2("#clock", function(callback) { ... }, { onclick : ... }); //Using object as template
  */
 "use strict";
 /**
@@ -133,13 +129,7 @@ class M2D2 {
 					_this._doRender(_this.$root, data);
 				}
 			};
-			if(property === undefined && Utils.isFunction(_this._func)) {
-				_this._doFunc(_this._func, data, function(newData){
-					doUpdate(newData);
-				});
-			} else {
-				doUpdate(data);
-			}
+			doUpdate(data);
 		}
 	}
 	/**
@@ -181,29 +171,11 @@ class M2D2 {
 	 */
 	_init () {
 		const _this = this;
-		if(Utils.isFunction(_this._data)) {
-			_this._func = _this._data;
-			let syncRet = _this._doFunc(_this._func, _this.param);
-			//If the function returns a value, render it
-			if(syncRet) {
-				//TODO: probably repetitive:
-				//Wrap it if its an array
-				if(Utils.isArray(syncRet)) {
-					syncRet = { items: syncRet };
-				}
-				_this._data = syncRet;
-				if(!_this._rendered) {
-					_this._onReady();
-				}
-			}
-		} else {
-			//TODO: probably repetitive:
-			// In case its a Number of String, wrap it.
-			if(!Utils.isObject(_this._data)) {
-				_this._data = { text : _this._data };
-			}
-			_this._onReady();
+		// In case its a Number of String, wrap it.
+		if(!Utils.isObject(_this._data)) {
+			_this._data = { text : _this._data };
 		}
+		_this._onReady();
 	}
 	/**
 	 * Render data
@@ -237,81 +209,6 @@ class M2D2 {
 	}
 
 	/**
-	 * Process function, which is passed as m2d2 argument
-	 * @param origFunc : Function
-	 * @param param : Object
-	 * @param callback : Function
-	 * @returns {*|{}}
-	 * @private
-	 */
-	_doFunc (origFunc, param, callback) {
-		const _this = this;
-		let ret_data = origFunc(function (newData, second, third) {
-			let refreshRate;
-			let isProxy = _this._data._proxy !== undefined;
-			let updated = false;
-			if (third !== undefined && Utils.isNumeric(third)) {
-				refreshRate = third;
-			} else if (second !== undefined && Utils.isNumeric(second)) {
-				refreshRate = second;
-			}
-			//TODO: do we need to convert it here? we are doing it later
-			if (Utils.isArray(newData)) {
-				const wrapper = {};
-				if (second !== undefined && !Utils.isNumeric(second)) {
-					wrapper.template = second;
-				} else if (_this.template !== undefined) {
-					wrapper.template = _this.template
-				}
-				wrapper.items = newData;
-				newData = wrapper;
-			}
-			if (Utils.isPlainObject(newData)) {
-				_this._updater = false;
-				if(! isProxy) {
-					_this._data = {};
-				}
-				for (let n in newData) {
-					_this._data[n] = newData[n];
-				}
-				_this._updater = true;
-			}
-			if (refreshRate === undefined) {
-				if (_this.interval > 0) {
-					refreshRate = _this.interval;
-				}
-			}
-			if (refreshRate > 0) {
-				const action = function () {
-					_this._func(function (updData) {
-						_this._doRender(_this.$root, updData);
-					});
-				}
-				_this.interval = setInterval(action, refreshRate);
-			}
-			if(!updated) {
-				_this._onReady();
-			}
-			if (callback !== undefined) {
-				callback(newData);
-			}
-		}, param) || {};
-		// If we have the new data ready, it means it was synchronous.
-		if(!Utils.isFunction(_this._data)) {
-			ret_data = _this._data;
-		}
-		//TODO: all these conversions should be done in a single place
-		//Wrap it if its an array:
-		if(Utils.isArray(ret_data)) {
-			ret_data = { items : ret_data }
-		}
-		if(!Utils.isObject(ret_data)) {
-			console.log("Undefined type of 'data'. For automatic detection do not set any 'return' in the data's function. Or explicitly return '[]' for arrays or '{}' for objects.")
-		}
-		return ret_data;
-	}
-
-	/**
 	 * Set proxy to m2d2 object
 	 * @private
 	 */
@@ -333,7 +230,7 @@ class M2D2 {
 	 * @param value : Object value to render
 	 * @param isTemplate : Boolean
 	 * @private
- 	 */
+	 */
 	_doRender ($elem, value, isTemplate) {
 		const _this = this;
 		if(isTemplate === undefined) { isTemplate = false; }
@@ -362,7 +259,7 @@ class M2D2 {
 	 * @param values : Array or Object
 	 * @param isTemplate : Boolean
 	 * @private
- 	 */
+	 */
 	_doArray ($elem, obj, values, isTemplate) {
 		const _this = this;
 		if(isTemplate === undefined) { isTemplate = false; }
@@ -374,16 +271,16 @@ class M2D2 {
 				val._node = undefined;
 			}
 			if(!template) {
-                if($elem.tagName === "SELECT" || $elem.tagName === "DATALIST") {
-                    template = "<option>";
-                    if(typeof val === "string") {
-                        val = {text: val, value: val}
-                    }
-                } else if($elem.tagName === "UL" || $elem.tagName === "OL") {
-                    template = "<li>";
-                } else if($elem.tagName === "NAV") {
-                    template = "<a>";
-                } else if(Utils.isPlainObject(val)) {
+				if($elem.tagName === "SELECT" || $elem.tagName === "DATALIST") {
+					template = "<option>";
+					if(typeof val === "string") {
+						val = {text: val, value: val}
+					}
+				} else if($elem.tagName === "UL" || $elem.tagName === "OL") {
+					template = "<li>";
+				} else if($elem.tagName === "NAV") {
+					template = "<a>";
+				} else if(Utils.isPlainObject(val)) {
 					if(Object.keys(val).length === 1) {
 						if(Utils.isSelectorID(val)) {
 							const idNode = document.querySelector(val);
@@ -551,7 +448,11 @@ class M2D2 {
 						}
 					} else if(item instanceof Date) {
 						// Date / Time:
-						_this._setValue($elem, key, item);
+						if(_this._hasAttrOrProp($elem, key)) {
+							$elem.setAttribute(key, item);
+						} else {
+							_this._setValue($elem, key, item);
+						}
 					} else if(_this._hasAttrOrProp($elem, key) &&
 						// Attributes: --Do not set ID with a numeric value
 						!Utils.isObject(item) &&
@@ -854,9 +755,9 @@ class M2D2 {
 
 /**
  * Main function that will initialize M2D2 class object
- * @param first : Object node to use as root, data, template or function
- * @param second : Object data, template or function
- * @param third : Object, template or function
+ * @param first : Object node to use as root, data, template
+ * @param second : Object data, template
+ * @param third : Object, template
  * @returns M2D2 object
  */
 const m2d2 = function(first, second, third) {
@@ -882,8 +783,6 @@ const m2d2 = function(first, second, third) {
 				options.root = first;
 				first = second;
 			}
-		//No break here
-		case "function" :
 			if (Utils.isArray(first)) {
 				second = {items: first};
 			}

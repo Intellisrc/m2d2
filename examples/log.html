@@ -47,7 +47,7 @@ document.addEventListener("DOMContentLoaded", function() {
         "write": "The user [USER] updated an item",
         "delete" : "The user [USER] deleted an item"
     }
-    function addLog(log) {
+    function addLog() {
         const action = getRandom(Object.keys(actions));
         const message = actions[action].replace("USER", getRandom(users));
         list.items.push({

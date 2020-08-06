@@ -14,36 +14,27 @@
 	//On page ready...
 	document.addEventListener("DOMContentLoaded", function() {
 		// Most simple example using a String as data
-        const title = m2d2(function (callback) {
-            // Waiting to show async condition:
-            setTimeout(function () {
-                callback({
-                    h3: {
-                        text: "Loading ... (1s)",
-                        color: "orange"
-                    }
-                });
-            }, 1000);
-            // Waiting to show async condition:
-            setTimeout(function () {
-                callback({
-                    h3: {
-                        text: "Done.",
-                        color: "green"
-                    }
-                });
-            }, 2000);
-
+        const title = m2d2(
             // The following will be used to create the basic HTML structure.
             // 'bgcolor' is from the plugin 'style' (m2d2.style.src.js)
-            return {
+            {
                 h1: "M2D2 Callback Demo",
                 h3: {
                     text: "Loading ... (2s)",
                     color: "red"
                 }
             }
-        });
+        );
+        // Waiting to show async condition:
+        setTimeout(function () {
+            title.h3.text = "Loading ... (1s)";
+            title.h3.color = "orange";
+        }, 1000);
+        // Waiting to show async condition:
+        setTimeout(function () {
+            title.h3.text = "Done.";
+            title.h3.color = "green";
+        }, 2000);
     });
 </script>
 </head>

@@ -6,39 +6,63 @@
 <meta name="theme-color" content="#333333">
 <link rel="stylesheet" href="../css/common.css" type="text/css" />
 <link rel="stylesheet" href="../css/index.css" type="text/css" />
-<script src="../js/xhr.js" type="text/javascript"></script>
 <script src="../dist/m2d2.min.js" type="text/javascript"></script>
 <!-- Import Demo menu: -->
 <script src="../js/demo-links.js" type="text/javascript"></script>
 <!--                   -->
 <script type="text/javascript">
+    function cloneObject(object) {
+        return JSON.parse(JSON.stringify(object));
+    }
 	//On ready..
 	document.addEventListener("DOMContentLoaded", function() {
         // Showing when it is loading
         const loading = m2d2("#loading", {
             show : false
         });
+        const empty_user =  {
+            user : "",
+            name : "",
+            email: "",
+            zip  : "",
+            url  : {
+                a:  {
+                    href : "#",
+                    text : "",
+                    target : "_blank"
+                }
+            }
+        }
+
         // This example uses the content inside <select> as template, which is an <option> tag.
-        const users = m2d2("#users", function(callback) {
-            loading.show = true;
-            getXHR("https://jsonplaceholder.typicode.com/users",function(json) {
-                const usersList = [];
-                for(let u in json) {
-                    const usr = json[u];
-                    usersList.push({
-                        id		: "usr-" + usr.id,
-                        text	: usr.username,
-                        value	: usr.id
+        const users = m2d2("#users", function() {
+            // This part will load the users asynchronously and fill the list:
+            (async() => {
+                loading.show = true;
+                let response = await fetch("https://jsonplaceholder.typicode.com/users");
+                let user = await response.json();
+                users.items.push({
+                    id: 0,
+                    text: "Choose One:",
+                    value: ""
+                })
+                for (let u in user) {
+                    const usr = user[u];
+                    users.items.push({
+                        id: "usr-" + usr.id,
+                        text: usr.username,
+                        value: usr.id
                     });
                 }
                 loading.show = false;
-                callback(usersList);
-            });
+                users.disabled = false;
+            })();
             // Specify initial state and events:
             return {
+                items    : [],
                 disabled : true,
                 onchange : function(event) {
-                    user.m2d2.update(this.value);
+                    selectUser(this.value);
                 },
                 // Special events:
                 oninit  : function() {
@@ -50,39 +74,40 @@
                     console.log("done.");
                 }
             }
-        });
-		// This is similar to "timer" example, but using a remote server and
-		// it will use a parameter when updating
-		const user = m2d2("#user", function(callback, param) {
-			if(param === undefined) param = 1;
-            if(param !== 0) {
-                //loading.show = true;
-                //users.disabled = true;
-                getXHR("https://jsonplaceholder.typicode.com/users?id="+param,function(json) {
-                    json = json[0]; //get the first item
-                    loading.show = false;
-                    users.disabled = false;
-                    callback({
-                        user : json.username,
-                        name : json.name,
-                        email: json.email,
-                        zip  : json.address.zipcode,
-                        url  : {
-                            a:  {
-                                href : "http://" + json.website,
-                                text : json.website,
-                                target : "_blank"
-                            }
+        }());
+
+        async function selectUser(id) {
+            if(id) {
+                loading.show = true;
+                users.disabled = true;
+                let response = await fetch("https://jsonplaceholder.typicode.com/users?id=" + id);
+                let json = await response.json();
+                let info = json[0]; //get the first item
+                loading.show = false;
+                users.disabled = false;
+                m2d2(user, {
+                    user: info.username,
+                    name: info.name,
+                    email: info.email,
+                    zip: info.address.zipcode,
+                    url: {
+                        a: {
+                            href: "http://" + info.website,
+                            text: info.website
                         }
-                    });
+                    }
                 });
+            } else {
+                m2d2(user, cloneObject(empty_user));
             }
-		});
-	});
+        }
+        const user = m2d2("#user", cloneObject(empty_user));
+    });
 </script>
 </head>
 <body>
-<h1>M2D2 Async examples</h1>
+<h1>M2D2 Async List</h1>
+<p>This example shows how to use a remote source to update html fields. It also uses an M2D2 object as first parameter to update it.</p>
 <table id="user">
   <caption>User Info:</caption>
   <tr><th>Username</th><td class="user"></td></tr>
@@ -94,9 +119,7 @@
 <div id="loading">Loading...</div>
 <div class="controls">
     <div><label for="users">User: </label>
-		<select id="users">
-			<option value="0">Choose one:</option>
-		</select>
+		<select id="users"></select>
 	</div>
 </div>
 </body>

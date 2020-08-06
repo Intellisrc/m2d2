@@ -32,7 +32,7 @@
 let list, actions, loading; //For debugging purposes
 document.addEventListener("DOMContentLoaded", function() {
     // This example is to show how to generate lists using a function
-    list = m2d2("#items", function(callback) {
+    list = m2d2("#items", function() {
 		// Simulating loading data from remote server:
         // $.get("/some.service", { data : 'list' }, function(response) { ... }); // Something like that
 		setTimeout(function() {
@@ -142,6 +142,7 @@ document.addEventListener("DOMContentLoaded", function() {
 </head>
 <body>
 <h1>M2D2 List example</h1>
+<p>This example loads the list using an async function. Then allows you to add or remove items as you want.</p>
 <table id="checkout">
   <caption>My whish list:</caption>
   <thead id="heads"></thead>

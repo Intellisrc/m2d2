@@ -27,7 +27,7 @@ https://gl.githack.com/lepe/m2d2/raw/master/index.html
 
 or:
 
-* Download (~12Kb): [m2d2.min.js](https://gl.githack.com/lepe/m2d2/raw/master/dist/m2d2.min.js) and set it in the HTML head.
+* Download (~11Kb): [m2d2.min.js](https://gl.githack.com/lepe/m2d2/raw/master/dist/m2d2.min.js) and set it in the HTML head.
 
 **NOTE** As it has no dependencies, It can be used together with any other library or framework (e.g. JQuery)
 
@@ -304,109 +304,15 @@ const link = m2d2("a.special", {
 	}
 });
 ```
+## Updating object
 
-## Using a function as data
-
-If your data comes from a service, you can convert it using a custom function, for example:
-
-Original JSON:
-```json
-[{"title":"London","location_type":"City","woeid":44418,"latt_long":"51.506321,-0.12714"}]
-```
-```html
-<table id="location">
-  <tr><th>Location: </th><td class="place"></td></tr>
-  <tr><th>Type: </th><td class="type"></td></tr>
-  <tr><th>Latitude: </th><td class="lat"></td></tr>
-  <tr><th>Longitude: </th><td class="lng"></td></tr>
-</table>
-```
-```js
-const location = m2d2("#location", function(callback) {
-  $.get("https://www.metaweather.com/api/location/search/?query=london", function(json) {
-	callback({
-		place : json.title,
-		type  : json.location_type,
-		lat   : json.latt_long.split(',')[0],
-		lng   : json.latt_long.split(',')[1]
-	});
-  });
-});
-```
-In this example, we use a service to get our `json` data and convert it into our data object. 
-
-NOTE: M2D2 will try to guess which kind of data will receive in the callback during its creation. 
-In case your m2d2 object is empty after calling `callback`, it can be fixed by returing an empty `object` or `array`:
+You already know how to update a property, but if you want to update the object as a whole, you can update id like this:
 
 ```js
-const why_empty = m2d2(function(callback) {
-	setTimeout(function(){
-		callback([1,2,3,4,5])
-	}, 5000);
-	// In case 'why_empty' has no elements after calling the above 'callback', we specify the type here:
-	return []; //This will tell M2D2 that you are expecting an array. Use 'return {}' for an object.
-});
-```
-If you want to update your DOM in an interval, you can specify the amount of milliseconds as second argument of the callback:
-```js
-const location = m2d2("#location", function(callback) {
-...
-    callback({
-        place : json.title,
-        type  : json.location_type,
-        lat   : json.latt_long.split(',')[0],
-        lng   : json.latt_long.split(',')[1]
-    }, 10000); // Retrieve the data every 10 seconds
-});
-```
-
-To update the data, is the same as before:
-```js
-location.place = "Great Britain";
-```
-If you want to stop the interval, you can use the property `interval` of your `M2D2` object:
-```js
-//You can stop it with:
-clearInterval(location.m2d2.interval);
-```
-
-## Updating data (function) on command
-
-If you want to call your function on demand, you can use the `update` function inside the `M2D2` object:
-
-```js
-location.m2d2.update();
-```
-
-If you want to update it with a parameter, you need to set a second argument:
-
-```js
-const location = m2d2("#location", function(callback, param) {
-  if(param == undefined) {
-	param = "tokyo";
-  }
-  $.get("https://www.metaweather.com/api/location/search/?query="+param, function(json) {
-	callback({
-		place : json.title,
-		type  : json.location_type,
-		lat   : json.latt_long.split(',')[0],
-		lng   : json.latt_long.split(',')[1]
-	});
-  });
-});
-```
-**NOTE**: During initialization, the parameter is undefined. That is why you need to set your default value by checking if its undefined or not.
-
-We can now call the function on demand with a parameter:
-
-```js
-location.m2d2.update("london");
-```
-
-To reset it to the default value, just call it without parameters:
-
-```js
-location.m2d2.update();
+// Initial state:
+const profile = m2d2("#profile", { ... });
+// Updating it:
+m2d2(profile, { ... });
 ```
 
 ## Creating lists and using Templates

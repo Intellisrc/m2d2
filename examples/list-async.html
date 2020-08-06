@@ -14,27 +14,38 @@
 //On ready...
 let list;
 document.addEventListener("DOMContentLoaded", function() {
-    // This example is to show how to generate lists
-    list = m2d2("#items", function(callback) {
-        setTimeout(function() {
-            callback([
-                "Blue panter",
+    (async() => {
+        // wait until the promise returns us a value
+        let promise = new Promise((resolve, reject) => {
+            setTimeout(() => resolve([
+                "Blue panther",
                 "Slow and Furious",
-                "Ugly and the Beast",
+                "Pirates of the Pacific",
                 "Iron Woman",
                 "American Cake"
-            ], {
-                li : {
-                    title : "This is a Movie"
-                }
-            });
-        }, 500);
-    });
+            ]), 500)
+        });
+        let data = await promise;
+        list.items = data;
+        // This example is to show how to generate lists
+    })();
+    list = m2d2("#items",
+        // Data: (as second parameter)
+        [],
+        // Template: (as third parameter)
+        {
+            li : {
+                title : "This is a Movie"
+            }
+        }
+    );
 });
 </script>
 </head>
 <body>
-<h1>M2D2 List example with callback</h1>
+<h1>M2D2 Async List:</h1>
+<p>This example uses an async function to get the data and then it displays the list using a template as 3rd parameter.</p>
+<hr>
 <p>Movie List:</p>
 <ol id="items"></ol>
 </body>

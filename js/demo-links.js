@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", function() {
         "Form validation" : "form.html",
         "Custom extensions" : "extend.html",
     }
-    m2d2(function(callback) {
+    m2d2(function() {
         const links = [];
         const baseURL = window.location.href.indexOf("examples/") >= 0 ? "" : "examples/";
         for(let title in menuLinks) {
@@ -43,5 +43,5 @@ document.addEventListener("DOMContentLoaded", function() {
                 }
             }
         }
-    });
+    }());
 });
