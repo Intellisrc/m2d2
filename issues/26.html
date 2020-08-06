@@ -1,0 +1,58 @@
+<html lang="en">
+<head>
+    <title>Issue 26 : Improve speed</title>
+    <meta charset="UTF-8">
+    <meta name="HandheldFriendly" content="1">
+    <meta name="viewport" content="width=device-width, maximum-scale=1.0">
+    <meta name="theme-color" content="#333333">
+    <link rel="stylesheet" href="../css/examples.css" type="text/css" />
+    <style type="text/css">
+        li {
+            display: inline-block;
+            padding: 3px;
+            margin: 1px;
+            border: 1px solid green;
+        }
+    </style>
+    <script src="../dist/m2d2.src.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        document.addEventListener("DOMContentLoaded", function() {
+            const start = m2d2("#start", {
+                onclick: function () {
+                    console.time('addElements');
+                    addElements();
+                    console.timeEnd('addElements')
+                }
+            });
+            const elements = m2d2("#elements", {
+                items : [],
+                template : "li"
+            });
+            function addElements() {
+                let elems = [];
+                for(let i=0; i < 10000; i++) {
+                    elems.push({
+                       title : "Item " + i,
+                       text  : i,
+                       onclick : function () {
+                           alert(this.title);
+                       }
+                    });
+                }
+                elements.items = elems;
+            }
+        });
+    </script>
+</head>
+<body>
+<article>
+    <h1>Speed Test</h1>
+    <p>Adds 10,000 elements with onclick event.</p>
+    <p>Note:Prepare all items and set them at once instead of "elements.items.push" to improve performance.</p>
+    <a href="https://gitlab.com/lepe/m2d2/-/issues/26">Issue</a>
+    <p><button id="start">Add 10,000 elements</button></p>
+    <ul id="elements">
+    </ul>
+</article>
+</body>
+</html>

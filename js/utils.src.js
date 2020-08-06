@@ -5,6 +5,9 @@
  * @Author: A.Lepe <dev@alepe.com>
  */
 class Utils {
+    static sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
     static htmlNode(html) {
         const template = Utils.newNode("template");
         template.innerHTML = html.trim();

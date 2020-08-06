@@ -4,8 +4,7 @@
 <meta name="HandheldFriendly" content="1">
 <meta name="viewport" content="width=device-width, maximum-scale=1.0">
 <meta name="theme-color" content="#333333">
-<link rel="stylesheet" href="../css/common.css" type="text/css" />
-<link rel="stylesheet" href="../css/index.css" type="text/css" />
+<link rel="stylesheet" href="../css/examples.css" type="text/css" />
 	<style type="text/css">
 		code { background: #EEE; padding: 10px; display: block; white-space: pre; }
 	</style>
@@ -24,6 +23,7 @@
 				onsubmit : function() { return false; },
 			},
 			name: {
+				autofocus: true,
 				value: "Some title",
 				size: 50
 			}
@@ -38,34 +38,36 @@
 </script>
 </head>
 <body>
-<h1>Title</h1>
-<h2>Title</h2>
-<div class="user">
-	<form>
-		<label for="name">Name : </label><input id="name" type="text" value="" />
-	</form>
-</div>
-<hr>
-<p>To update the titles, input some text and press <b>ENTER KEY</b> (its triggered on change):</p>
-<p>If you want it to change on keyup or other event, follow <a href="index.html">the simple example</a>.</p>
-<p>You can open the console and execute:<br>
-	<code>user.name.value = "some text";</code>
-	And you will see the input and the 2 titles change.
-	Additionally, try changing the "value" attribute in HTML directly, and it will also change the titles.
-</p>
-<h2>Explanation:</h2>
-<code>const user = m2d2(".user", {
-	name: {
-		value: "Hello"
-	}
-});
-const title = m2d2("h1", {
-	text : [ user.name , "value" ]
-});
-</code>
-<p>
-	The important point is that we need to assign an array made of a m2d2 object and the property you want to assign.
-	If you set: <b>text : user.name.value</b> it will set the value only, and it won't be updated if it changes.
-</p>
+<article>
+	<h1>Title</h1>
+	<h2>Title</h2>
+	<div class="user">
+		<form>
+			<label for="name">Name : </label><input id="name" type="text" value="" />
+		</form>
+	</div>
+	<hr>
+	<p>To update the titles, input some text and press <b>ENTER KEY</b> (its triggered on change):</p>
+	<p>If you want it to change on keyup or other event, follow <a href="index.html">the simple example</a>.</p>
+	<p>You can open the console and execute:<br>
+		<code>user.name.value = "some text";</code>
+		And you will see the input and the 2 titles change.
+		Additionally, try changing the "value" attribute in HTML directly, and it will also change the titles.
+	</p>
+	<h2>Explanation:</h2>
+	<code>const user = m2d2(".user", {
+		name: {
+			value: "Hello"
+		}
+	});
+	const title = m2d2("h1", {
+		text : [ user.name , "value" ]
+	});
+	</code>
+	<p>
+		The important point is that we need to assign an array made of a m2d2 object and the property you want to assign.
+		If you set: <b>text : user.name.value</b> it will set the value only, and it won't be updated if it changes.
+	</p>
+</article>
 </body>
 </html>

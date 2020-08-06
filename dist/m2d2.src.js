@@ -5,6 +5,9 @@
  * @Author: A.Lepe <dev@alepe.com>
  */
 class Utils {
+    static sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
     static htmlNode(html) {
         const template = Utils.newNode("template");
         template.innerHTML = html.trim();
@@ -93,7 +96,6 @@ class M2D2 {
 		const _this = this;
 		if(_this._rendered) {
 			const doUpdate = function (data) {
-				let node;
 				if (data._node !== undefined) {
 					if (Utils.isArray(data)) {
 						//Item was removed
@@ -103,30 +105,29 @@ class M2D2 {
 								data[property]._node.remove();
 							}
 						} else {
-							let n;
 							const toRemove = [];
-							for (n in data._node.childNodes) {
-								node = data._node.childNodes[n];
+							data._node.childNodes.forEach(node => {
 								if (node && node.tagName !== undefined && node.tagName !== "TEMPLATE") {
 									toRemove.push(node);
 								}
-							}
-							for (n in toRemove) {
-								node = toRemove[n];
+							});
+							toRemove.forEach(node => {
 								node.remove();
-							}
-							_this._doRender(data._node, data);
+							});
+							_this._doRender(data._node, data, false);
 						}
 					} else {
 						const change = {};
-						change[property] = valObj.value;
-						if(property === "items" && data.template !== undefined &&! Utils.isEmpty(data.template)) {
-							change.template = data.template;
+						if(property) {
+							change[property] = valObj.value;
+							if (property === "items" && data.template !== undefined && !Utils.isEmpty(data.template)) {
+								change.template = data.template;
+							}
+							_this._doRender(data._node, change, false);
 						}
-						_this._doRender(data._node, change);
 					}
 				} else {
-					_this._doRender(_this.$root, data);
+					_this._doRender(_this.$root, data, false);
 				}
 			};
 			doUpdate(data);
@@ -156,7 +157,6 @@ class M2D2 {
 	_updater 	= true;
 	_cache 		= null;
 	_data  		= null;
-	_func  		= null;
 	// HTML5 valid attributes and tags (2018)
 	_htmlGenTags = ["a","abbr","acronym","address","area","article","aside","audio","b","bdi","bdo","big",
 		"blockquote","body","br","button","canvas","caption","cite","code","col","colgroup","datalist","dd",
@@ -188,7 +188,7 @@ class M2D2 {
 			return false;
 		}
 		// Render data
-		_this._doRender(_this.$root, _this._data);
+		_this._doRender(_this.$root, _this._data, false);
 		// Set trigger on modifications
 		_this._rendered = true;
 	}
@@ -265,12 +265,19 @@ class M2D2 {
 		if(isTemplate === undefined) { isTemplate = false; }
 		_this._setNode($elem, values);
 		let template = _this._getTemplate($elem, obj);
+		let $item = null;
+		const $outElem = new DocumentFragment()
 		for(let i = 0; i < (values.length || Object.keys(values).length); i++) {
 			let val = values[i] || Object.values(values)[i];
 			if(val._node !== undefined) {
 				val._node = undefined;
 			}
-			if(!template) {
+			if(template) {
+				let tag = template.match(/^<(\w+)>(<\/\w+>)?$/);
+				if(tag) {
+					$item = Utils.newNode(tag[1]);
+				}
+			} else {
 				if($elem.tagName === "SELECT" || $elem.tagName === "DATALIST") {
 					template = "<option>";
 					if(typeof val === "string") {
@@ -305,12 +312,24 @@ class M2D2 {
 					console.log(obj);
 					return
 				}
+				// If the template was created, add it:
+				if($elem._template === undefined) {
+					$elem._template = template;
+				}
 			}
-			const $item = Utils.htmlNode(template);
-			$item.setAttribute("data-id", i);
-			$elem.append($item);
+			if(!$item) {
+				$item = Utils.htmlNode(template);
+			}
+			const $newItem = $item.cloneNode(true);
+			$newItem.setAttribute("data-id", i);
 			// Set values
-			_this._setValues($item, val, isTemplate);
+			_this._setValues($newItem, val, isTemplate);
+			$outElem.append($newItem);
+		}
+		//Update all at once
+		//$elem.append(...$outElem.childNodes); <-- works but it is slower
+		while ($outElem.firstChild) {
+			$elem.appendChild($outElem.firstChild);
 		}
 	}
 	/** Returns a copy of the model to duplicate
@@ -320,8 +339,8 @@ class M2D2 {
 	 */
 	_getTemplate ($elem, obj) {
 		const _this = this;
-		if(obj._template !== undefined && obj._template !== "") {
-			return obj._template;
+		if($elem._template !== undefined && $elem._template !== "") {
+			return $elem._template;
 		} else {
 			let $template;
 			if(obj.template !== undefined) {
@@ -341,7 +360,7 @@ class M2D2 {
 			// If not template is found, use html as of element
 			if($template) {
 				const html = $template.innerHTML.trim();
-				_this._defineProp(obj, "_template", html);
+				_this._defineProp($elem, "_template", html);
 				return html;
 			} else {
 				return $elem.innerHTML.trim();
@@ -387,14 +406,15 @@ class M2D2 {
 					// Do nothing. Skip as we already processed them and those starting with "_"
 				} else if(key === "items") {
 					// Process Array:
-					_this._doArray($elem, value, item, isTemplate);
-				} else {
-					if(key === "items" &&! Utils.isArray(item)) {
-						console.log("Warning: 'items' specified but value is not and array in element: ");
+					if(Utils.isArray(item)) {
+						_this._doArray($elem, value, item, isTemplate);
+					} else {
+						console.log("Warning: 'items' specified but value is not and array, in element: ");
 						console.log($elem);
 						console.log("Passed values are: ");
 						console.log(item);
 					}
+				} else {
 					if(M2D2._ext[key] !== undefined && Utils.isFunction(M2D2._ext[key])) {
 						// Apply extensions:
 						const ret = M2D2._ext[key](item, $elem);
@@ -422,15 +442,15 @@ class M2D2 {
 						_this._setValue($elem, key, item);
 					} else if(key === "dataset" && Utils.isPlainObject(item)) {
 						// Import dataset: Setting dataset : { id : 'custom' } will override the id set automatically in arrays.
-						for(let d in item) {
-							$elem.setAttribute("data-"+d, item[d]);
-						}
+						Object.keys(item).forEach(key => {
+							$elem.setAttribute("data-"+key, item[key]);
+						});
 					} else if(key === "style") {
 						// Styles
 						if(Utils.isPlainObject(item)) {
-							for(const s in item) {
-								$elem.style[s] = item[s];
-							}
+							Object.keys(item).forEach(key => {
+								$elem.style[key] = item[key];
+							});
 						} else {
 							$elem.style = item;
 						}
@@ -463,8 +483,15 @@ class M2D2 {
 							console.log("Unable to set property ["+key+"] in element: " + $elem.localName + ". Read-only?")
 						}
 						// If its boolean, just update the property, not the attribute
-						if(typeof $elem[key] !== "boolean" && _this._hasAttr($elem, key)) {
-							$elem.setAttribute(key, item);
+						if(typeof $elem[key] === "boolean" && _this._hasAttr($elem, key)) {
+							if(item === true) {
+								$elem.setAttribute(key, item);
+								if(key === "autofocus") {
+									$elem.focus();
+								}
+							} else {
+								$elem.removeAttribute(key);
+							}
 						}
 						if(key === "value") {
 							let oldfunc = $elem.onchange || null;
@@ -482,7 +509,7 @@ class M2D2 {
 							new MutationObserver(function (m) { //On Attribute change...
 								const tgt = m[0].target;
 								if (tgt._m2d2 !== undefined) {
-									m.forEach(function(mr) {
+									m.forEach(mr => {
 										const att = mr.attributeName;
 										let currVal = tgt._m2d2[att];
 										const val = typeof currVal == "boolean" ? tgt[att] : tgt.getAttribute(att);
@@ -592,12 +619,16 @@ class M2D2 {
 			} else {
 				// If the element has children, only change text
 				if($elem.childElementCount > 0) {
-					for(let i in $elem.childNodes) {
-						const inode = $elem.childNodes[i];
-						if(inode.nodeType === 3) {
-							inode.replaceWith(value);
-							return;
-						}
+					const BreakException = {};
+					try {
+						$elem.childNodes.forEach(inode => {
+							if (inode.nodeType === 3) {
+								inode.replaceWith(value);
+								throw BreakException;
+							}
+						});
+					} catch(e) {
+						if (e !== BreakException) throw e;
 					}
 					// If text node not found, append it
 					$elem.innerHTML = $elem.innerHTML + value; //TODO: not the best way IMHO
@@ -782,6 +813,9 @@ const m2d2 = function(first, second, third) {
 			if (first instanceof Node) {
 				options.root = first;
 				first = second;
+			} else if(first.m2d2 !== undefined) {
+				first.m2d2.update(second);
+				return
 			}
 			if (Utils.isArray(first)) {
 				second = {items: first};

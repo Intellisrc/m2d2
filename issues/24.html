@@ -5,8 +5,7 @@
     <meta name="HandheldFriendly" content="1">
     <meta name="viewport" content="width=device-width, maximum-scale=1.0">
     <meta name="theme-color" content="#333333">
-    <link rel="stylesheet" href="../css/common.css" type="text/css" />
-    <link rel="stylesheet" href="../css/index.css" type="text/css" />
+    <link rel="stylesheet" href="../css/examples.css" type="text/css" />
     <script src="../dist/m2d2.src.js" type="text/javascript"></script>
     <script type="text/javascript">
         document.addEventListener("DOMContentLoaded", function() {
@@ -20,17 +19,21 @@
             }, 1000)
             setTimeout(function() {
                 user.show = true;
+                user.color = "green";
             }, 3000)
         });
     </script>
 </head>
 <body>
-<a href="https://gitlab.com/lepe/m2d2/-/issues/24">Issue</a>
-<p>Updating non-existent properties should work. This should disappear and appear again</p>
-<div id="user">
-    <div class="name"></div>
-    <div class="phone"></div>
-    <div class="age"></div>
-</div>
+<article>
+    <h1>Adding properties on the fly</h1>
+    <a href="https://gitlab.com/lepe/m2d2/-/issues/24">Issue</a>
+    <p>Updating non-existent properties should work. This should disappear and appear again</p>
+    <div id="user">
+        <div class="name"></div>
+        <div class="phone"></div>
+        <div class="age"></div>
+    </div>
+</article>
 </body>
 </html>

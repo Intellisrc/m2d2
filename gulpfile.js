@@ -1,4 +1,4 @@
-let debug = true;
+let debug = false;
 
 const gulp = require('gulp'),
 	concat = require('gulp-concat'),

@@ -4,8 +4,7 @@
 <meta name="HandheldFriendly" content="1">
 <meta name="viewport" content="width=device-width, maximum-scale=1.0">
 <meta name="theme-color" content="#333333">
-<link rel="stylesheet" href="../css/common.css" type="text/css" />
-<link rel="stylesheet" href="../css/index.css" type="text/css" />
+<link rel="stylesheet" href="../css/examples.css" type="text/css" />
 <style type="text/css">
     #log {
         list-style: none;
@@ -14,6 +13,8 @@
         background: #333;
         padding: 10px;
         margin: 0;
+        height: 400px;
+        overflow-y: auto;
     }
     #log li {
         display: flex;
@@ -78,15 +79,17 @@ document.addEventListener("DOMContentLoaded", function() {
     });
     setInterval(function() {
         addLog("hello")
-    }, 777);
+    }, 7777);
 });
 </script>
 </head>
 <body>
-<h1>M2D2 Logging Example</h1>
-<hr>
-<p>This example appends items into the list, and creates elements "on the fly".</p>
-<hr>
-<ul id="log"></ul>
+<article>
+    <h1>M2D2 Logging Example</h1>
+    <hr>
+    <p>This example appends items into the list, and creates elements "on the fly".</p>
+    <hr>
+    <ul id="log"></ul>
+</article>
 </body>
 </html>

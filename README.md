@@ -83,16 +83,16 @@ If HTML is detected, it will be treated as HTML.
 What if you have more than one `h1`? You can use a class name or an ID to search for it:
 ```js
 const title = m2d2({
-  "#title"       : "Hello World",  //Example using an ID
-  ".title_class" : "Hello World",  //Example using a class name  
-  title_class    : "Hello World"   //Will look for a "title_class" tagname, or the class name 'title_class'
+  "#type"       : "Hello World",  //Example using an ID
+  ".type"       : "Hello World",  //Example using a class name  
+  type          : "Hello World"   //Will look for a tagname, an ID or a class name: 'title_class'
 });
 // To modify it:
-title["#title"] = "New text";
-title[".titleClass"] = "New text";
-title.titleClass = "New text";
+title["#type"] = "New text";
+title[".type"] = "New text";
+title.type = "New text"; // <--- recommended
 ```
-Note: Class names may or may not contain `.` at the begining. However if the class is the same as a tagname (for example, `button`), you will need to specify it as `.button` to distinguish it.
+Note: If the class is the same as a tagname (for example, `button`), you will need to specify it as `.button` to distinguish it.
 
 ## Setting attributes
 
@@ -327,48 +327,9 @@ There are 3 ways to specify a template:
 
 The code will search for it in that order. 
 
-### 1. as second argument of the callback() function
-
-```html
-<dl id="dictionary"></dl>
 ```
 
-```js
-const dictionary = m2d2("#dictionary", function(callback) {
-	//Example using JQuery XHR:
-	$.get("/words.json").done(function(words){
-		const list = [];
-		for(let w in words) {
-			const word = words[w];
-			list.push({
-				dt : word.title,
-				dd : word.definition
-			});
-		}
-		callback(list);
-	}, { //This is the template:
-        html : "", // Clear the contents each time, otherwise it will append data each cycle. 
-		dt : {
-			className : "title",
-			onclick : function(event){
-				alert("This word is:" , event.target.text);
-			}
-		},
-		dd : {
-			className : "definition"
-		}
-	}, 60000); //You can set the interval as last argument.
-
-	return {
-		onmouseover : function(event) {
-			event.target.className = "over";
-		}
-	}
-});
-
-```
-
-### 2. as 'template' property (explained later)
+### 1. as 'template' property (explained later)
 
 Sometimes we might only want to duplicate some element and change few properties. We can use 'template' and 'items' pairs in any element, for example:
 
@@ -422,8 +383,6 @@ After rendering:
 	</tr>
 </table>
 ```
-
-//TODO: this will be implemented?? (as 3rd argument)
 
 The shortest way to use a template is specifying it as `string`, which will be translated into an HTML tag. This is useful for very simple data structures:
 
@@ -532,6 +491,11 @@ list.items.splice(1,1);
 ```
 And the HTML will be updated accordingly.
 
+NOTE: When inserting many items in a list, using push/splice is not recommended. Update the whole list at once, for example:
+
+```js
+list.items = myNewLongList;
+```
 
 ### 3. as HTML inside your 'root element'
 
@@ -708,32 +672,6 @@ const profile = m2d2("#profile", {
 });
 ```
 
-When using a function to retrieve the data, you can see its advantages:
-
-**NOTE** : Please read the later section "Using a function as data" for more about "functions".
-
-```js
-const profile = m2d2("#profile", function(callback) {
-	// XHR call using JQuery:
-	$.get("/user.php?id=100").done(function(response) {
-		callback({  user : response.name }); //assuming response is a JSON object
-	});
-}, {
-	section : {
-		div : {
-			h2 : {
-				text : "Users",
-				className : "subtitle"
-			}
-		},
-		"user" : {
-			onclick : function(event) { ... },
-			className : "enabled"
-		}
-	}
-});
-```
-
 ## Custom events
 
 M2D2 defines custom events that you can use hook into:
@@ -758,11 +696,11 @@ M2D2 comes with 2 plugins:
 
 ```js 
 {
-    css : "Short version for: 'class' or className",
-    color : "Set CSS color rule",
+    css     : "Short version for: 'class' or className",
+    color   : "Set CSS color rule",
     bgcolor : "Set CSS background-color rule",
-    "-css" : "Remove a class from the element",
-    "+css" : "Add a class to the element"
+    "-css"  : "Remove a class from the element",
+    "+css"  : "Add a class to the element"
 }
 ```
 

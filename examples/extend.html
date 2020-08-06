@@ -4,7 +4,7 @@
 <meta name="HandheldFriendly" content="1">
 <meta name="viewport" content="width=device-width, maximum-scale=1.0">
 <meta name="theme-color" content="#333333">
-<link rel="stylesheet" href="../css/common.css" type="text/css" />
+<link rel="stylesheet" href="../css/examples.css" type="text/css" />
 <style type="text/css">
 	p.myclass {
 		text-decoration: underline;
@@ -38,6 +38,7 @@ document.addEventListener("DOMContentLoaded", function() {
 </script>
 </head>
 <body>
+<article>
 	<h1>Extending M2D2 Demo</h1>
 	<p class="original">This text will be replaced in 3 seconds... wait for it.</p>
 	<p class="replace">This text was shown using an extension property 'show', and added some style.</p>
@@ -60,5 +61,6 @@ setTimeout(function(){
 	body.replace.show = true;
 }, 3000);
 	</pre>
+</article>
 </body>
 </html>

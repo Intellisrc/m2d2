@@ -4,8 +4,7 @@
 <meta name="HandheldFriendly" content="1">
 <meta name="viewport" content="width=device-width, maximum-scale=1.0">
 <meta name="theme-color" content="#333333">
-<link rel="stylesheet" href="../css/common.css" type="text/css" />
-<link rel="stylesheet" href="../css/index.css" type="text/css" />
+<link rel="stylesheet" href="../css/examples.css" type="text/css" />
 <script src="../dist/m2d2.min.js" type="text/javascript"></script>
 <!-- Import Demo menu: -->
 <script src="../js/demo-links.js" type="text/javascript"></script>
@@ -26,7 +25,8 @@
 				}
 			},
 			controls: {
-				"#link": {
+				link : {
+					autofocus : true,
 					onkeyup: function (event) {
 						page.info.a = this.value;
 					}
@@ -37,6 +37,7 @@
 </script>
 </head>
 <body>
+<article>
 	<h1>Title here</h1>
 	<div class="info">
 		<dt></dt>
@@ -46,5 +47,6 @@
 	<div class="controls">
 		<div>New Link: <input id="link" type="text" /></div>
 	</div>
+</article>
 </body>
 </html>
