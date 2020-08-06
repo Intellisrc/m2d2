@@ -2,7 +2,7 @@
  * @author: A. Lepe
  * @url : https://gitlab.com/lepe/m2d2/
  * @since: May, 2018
- * @version: 1.3.4
+ * @version: 1.3.5
  * @updated: 2020-08-05
  *
  * Examples:
