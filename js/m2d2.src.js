@@ -704,7 +704,15 @@ class M2D2 {
 				return Reflect.deleteProperty(target, property);
 			},
 			set: function (target, property, value) {
-				target[property] = value;
+				if(Utils.isPlainObject(value) &&! (value instanceof M2D2)) {
+					const obj = {}
+					Object.keys(value).forEach((k) => {
+						obj[k] = value[k];
+					});
+					target[property] = obj;
+				} else {
+					target[property] = value;
+				}
 				onChange(target, property, {value: value});
 				if(target._update !== undefined) {
 					target._update();

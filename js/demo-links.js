@@ -9,6 +9,7 @@ document.addEventListener("DOMContentLoaded", function() {
         "Logging screen" : "log.html",
         "Movie list - Async" : "list-async.html",
         "Item list" : "list.html",
+        "Item list (sort)" : "list-sort.html",
         "Item list (advanced)" : "list-adv.html",
         "Phone book - Async" : "async.html",
         "Form validation" : "form.html",

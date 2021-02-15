@@ -1,0 +1,78 @@
+<html lang="en">
+<head>
+    <title>Issue 27 : Sorting a list increases Proxy objects</title>
+    <meta charset="UTF-8">
+    <meta name="HandheldFriendly" content="1">
+    <meta name="viewport" content="width=device-width, maximum-scale=1.0">
+    <meta name="theme-color" content="#333333">
+    <link rel="stylesheet" href="../css/examples.css" type="text/css" />
+    <style type="text/css">
+        table { width: 100%;  }
+        th {  cursor: pointer;  }
+        th { background-color: #666; color: white; text-align: center; }
+        td.qty { background-color: #CCC; text-align: center; }
+    </style>
+    <script src="../dist/m2d2.src.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        document.addEventListener("DOMContentLoaded", function() {
+            function sortTable(ev) {
+                const th = ev.target;
+                const label = th.textContent;
+                const prop = th.classList[0];
+                const compare = ( a, b ) => {
+                    return a[prop] < b[prop] ? -1 : (a[prop] > b[prop] ? 1 : 0)
+                }
+                if(list.dataset.sortedBy === label) {
+                    list.data.items.reverse();
+                } else {
+                    list.dataset.sortedBy = label;
+                    list.data.items.sort(compare);
+                }
+                console.log(list.data.items);
+            }
+            const list = m2d2("#list", {
+                dataset: { sortedBy: "" },
+                headers : {
+                    fruit : { onclick : (ev) => { sortTable(ev) } },
+                    qty   : { onclick : (ev) => { sortTable(ev) } }
+                },
+                data : {
+                    items: [
+                        { fruit : "Apple", onclick: () => { console.log("I have an apple") }, qty: 10 },
+                        { fruit : "Orange", qty: 34 },
+                        { fruit : "Banana", qty: 62 },
+                        { fruit : "Peach", qty: 15 },
+                        { fruit : "Mango", qty: 8 },
+                        { fruit : "Watermelon", qty: 3 },
+                        { fruit : "Papaya", qty: 4 },
+                        { fruit : "Pear", qty: 22 },
+                        { fruit : "Strawberry", qty: 45 }
+                    ]
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+    <article>
+        <p>
+            Clicking several times on table headers (to sort), should not slow down over time (due to Proxy object creation).
+        </p>
+        <h3>Fruit Inventory:</h3>
+        <table id="list">
+            <thead class="headers">
+                <th class="fruit">Fruit</th>
+                <th class="qty">Qty</th>
+            </thead>
+            <tbody class="data">
+                <template>
+                    <tr>
+                        <td class="fruit"></td>
+                        <td class="qty"></td>
+                    </tr>
+                </template>
+            </tbody>
+        </table>
+    </article>
+</body>
+</html>

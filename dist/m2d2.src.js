@@ -52,7 +52,7 @@ class Utils {
  * @author: A. Lepe
  * @url : https://gitlab.com/lepe/m2d2/
  * @since: May, 2018
- * @version: 1.3.4
+ * @version: 1.3.5
  * @updated: 2020-08-05
  *
  * Examples:
@@ -754,7 +754,15 @@ class M2D2 {
 				return Reflect.deleteProperty(target, property);
 			},
 			set: function (target, property, value) {
-				target[property] = value;
+				if(Utils.isPlainObject(value) &&! (value instanceof M2D2)) {
+					const obj = {}
+					Object.keys(value).forEach((k) => {
+						obj[k] = value[k];
+					});
+					target[property] = obj;
+				} else {
+					target[property] = value;
+				}
 				onChange(target, property, {value: value});
 				if(target._update !== undefined) {
 					target._update();

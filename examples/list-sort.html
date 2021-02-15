@@ -1,0 +1,57 @@
+<html lang="en">
+<head>
+    <title>List sorting</title>
+    <meta charset="UTF-8">
+    <meta name="HandheldFriendly" content="1">
+    <meta name="viewport" content="width=device-width, maximum-scale=1.0">
+    <meta name="theme-color" content="#333333">
+    <link rel="stylesheet" href="../css/examples.css" type="text/css" />
+    <script src="../dist/m2d2.min.js" type="text/javascript"></script>
+    <!-- Import Demo menu: -->
+    <script src="../js/demo-links.js" type="text/javascript"></script>
+    <!--                   -->
+    <script type="text/javascript">
+        document.addEventListener("DOMContentLoaded", function() {
+            const list = m2d2("#list", {
+                template : "li",
+                dataset : { sorted : false },
+                items : [
+                    "Apple",
+                    "Orange",
+                    "Banana",
+                    "Peach",
+                    "Mango",
+                    "Watermelon",
+                    "Papaya",
+                    "Pear",
+                    "Strawberry"
+                ]
+            });
+            m2d2("button", {
+                onclick : (ev) => {
+                    if(list.dataset.sorted) {
+                        list.items.reverse()
+                    } else {
+                        list.items.sort()
+                        list.dataset.sorted = true
+                    }
+                    console.log(list);
+                }
+            })
+        });
+    </script>
+</head>
+<body>
+    <article>
+        <h1>Sorting a list of elements:</h1>
+        <p>
+            This example shows how to sort a list. You can click the "Sort"
+            button to sort or reverse the sort each time.
+        </p>
+        <h3>Fruits:</h3>
+        <ul id="list">
+        </ul>
+        <button>Sort</button>
+    </article>
+</body>
+</html>
