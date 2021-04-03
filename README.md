@@ -94,6 +94,35 @@ title.type = "New text"; // <--- recommended
 ```
 Note: If the class is the same as a tagname (for example, `button`), you will need to specify it as `.button` to distinguish it.
 
+## Using [name] attribute
+
+When you work with forms, it is usually helpful and cleaner to use the `name` attribute:
+
+```js
+const countryForm = m2d2("#countryForm", {
+        country : "",
+        population : 0,
+        onsubmit : (ev) => {
+            const form = ev.target;
+            // You can validate the form here and send the form data to the server
+            return false
+        }
+});
+```
+```html
+<form id="countryForm">
+    <input type="text" name="country" required />
+    <input type="number" name="population" required />
+    <button type="submit">Submit</button>
+</form>
+```
+
+You can also update the fields from javascript:
+```js
+countryForm.country = "Japan";
+countryForm.population = 120000000;
+```
+
 ## Setting attributes
 
 You can set attributes easily in this way:
@@ -359,7 +388,7 @@ const table = m2d2("table", {
 					name : "qty",
 					min  : 0,
 					max  : 10
-				}
+				},
 				title : "Quantity" 
 			}
 		]
