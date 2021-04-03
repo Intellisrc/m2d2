@@ -492,6 +492,10 @@ class M2D2 {
 								$subelem = Utils.node("."+key, $elem);
 							}
 							if(!$subelem) {
+								// Search by name
+								$subelem = Utils.node("[name="+key+"]", $elem);
+							}
+							if(!$subelem) {
 								const createElem = function(tagName, item, isTemplate) {
 									const $newElem = Utils.newNode(tagName);
 									$elem.append($newElem);
