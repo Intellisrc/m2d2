@@ -349,10 +349,9 @@ m2d2(profile, { ... });
 You can generate elements based in an array. In order to do so, we will need a template that we will use as model for each item.
 There are 3 ways to specify a template:
 
-1. as second argument of the callback() function (recommended)
-2. as `template` property
-3. as HTML inside a `<template>` tag inside your element (recommended)
-4. as HTML inside your `element`
+1. as `template` property
+2. as HTML inside a `<template>` tag inside your element
+3. as HTML inside your `element`
 
 The code will search for it in that order. 
 
