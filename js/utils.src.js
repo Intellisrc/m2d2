@@ -22,6 +22,12 @@ class Utils {
         }
         return selector instanceof Node ? selector : root.querySelector(selector);
     };
+    static isString(v) {
+        return typeof v === 'string';
+    };
+    static isBool(b) {
+        return typeof b === 'boolean';
+    };
     static isNumeric(n) {
         return !isNaN(parseFloat(n)) && isFinite(n);
     };
@@ -40,10 +46,16 @@ class Utils {
     static isFunction(f) {
         return typeof f === 'function';
     };
+    static isNode(n) {
+        return n instanceof HTMLElement;
+    };
     static isHtml(s) {
         return (s + "").trim().indexOf("<") !== -1;
     };
     static isEmpty(obj) {
         return obj === undefined || (Utils.isObject(obj) && Object.keys(obj).length === 0) || obj === "";
+    };
+    static cleanArray(a) {
+        return a.filter(function(e){ return e === 0 || e });
     };
 }

@@ -17,9 +17,7 @@ class Utils {
         return document.createElement(tagName);
     };
     static node(selector, root) {
-        if (root === undefined) {
-            root = document;
-        }
+        if (root === undefined) { root = document; }
         return selector instanceof Node ? selector : root.querySelector(selector);
     };
     static isNumeric(n) {
