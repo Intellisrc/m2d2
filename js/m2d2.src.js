@@ -9,6 +9,7 @@
  * M2D2 Class
  */
 class M2D2 {
+	constructor() {}
 	/**
 	 * M2 Will set all extensions to DOM objects
 	 * @param {string, HTMLElement} selector
@@ -28,6 +29,12 @@ class M2D2 {
 			Object.defineProperty($node, "html", {
 				get() { return this.innerHTML; },
 				set(value) { this.innerHTML = value;  }
+			});
+			["find","findAll"].forEach(f => {
+				if($node.hasOwnProperty(f)) {
+					console.log("Node already had ["+f+"] property. It might cause unexpected behaviour.")
+					console.log("You may need to update the M2D2 version or report it to: github.com/lepe/m2d2/")
+				}
 			});
 			return Object.assign($node, {
 				find: (it) => {
@@ -146,7 +153,8 @@ class M2D2 {
 					if(Utils.isNode(opt)) {
 						if(Utils.isArray(value)) { // Process Array:
 							const template = object["template"];
-							this.doItems($node, value, template);
+							this.doItems(opt, value, template);
+							this.linkNode($node, k, opt);
 						} else {
 							this.renderAndLink($node, opt, k, value);
 						}
@@ -282,6 +290,11 @@ class M2D2 {
 		while ($outElem.firstChild) {
 			$node.appendChild($outElem.firstChild);
 		}
+		//Cleanup
+		$node.removeChild($node.find("template"));
+		//Set "items" link:
+		$node.items = $node.children;
+		this.extendItems($node);
 	}
 	/** Returns a copy of the model to duplicate
 	 * @private
@@ -436,6 +449,74 @@ class M2D2 {
 			}
 		};
 		return new Proxy(obj, handler);
+	}
+
+	/**
+	 * Extends "items"
+	 * @param {NodeList, HTMLCollection} $node
+	 */
+	extendItems($node) {
+		// We try to add most of the array functions into NodeList and HTMLCollection:
+		// NOTE: Not all will work as expected.
+		// NOTE: function() {} is not the same here as () => {} as "this" is not as expected
+		function reattach(items) {
+			items.forEach(itm => {
+				const parent = itm.parentNode;
+				const detatchedItem = parent.removeChild(itm);	//We detach from original parent
+				$node.appendChild(detatchedItem); //Attach to $node (works with non-existing elements)
+			});
+		}
+		const nonStd = ["clear"];
+		const items = $node.items;
+		Object.getOwnPropertyNames(Array.prototype).concat(nonStd).forEach(method => {
+			if(items[method] === undefined) {
+				let func = null;
+				switch (method) {
+					case "clear": // parentNode.replaceChildren() can also be used
+						func = function() {
+							while(this[0]) this[0].remove()
+						}
+						break;
+					case "copyWithin":
+					case "fill":
+					case "pop" :
+					case "shift": //FIXME: not working as expected
+					case "splice":
+					case "reverse":
+					case "unshift":
+						func = function(...args) {
+							const items = Array.from(this);
+							const retObj = items[method](...args);
+							reattach(items);
+							return retObj;
+						}
+						break;
+					case "push":
+						func = function(obj) {
+							if(obj instanceof HTMLElement) {
+								obj.parentNode.appendChild(obj);
+							}
+						}
+						break;
+					case "sort": // You can pass a function to compare items:
+						func = function(compareFunc) {
+							const items = Array.from(this);
+							items.sort(compareFunc || ((a, b) => {
+								return a.text.localeCompare(b.text);
+							}));
+							reattach(items);
+						}
+						break;
+					default:
+						if(typeof Array.prototype[method] == "function") {
+							func = Array.prototype[method];
+						}
+				}
+				if(func) {
+					this.defineProp(items, method, func.bind(items)); //bind: specify the "this" value
+				}
+			}
+		});
 	}
 }
 /**

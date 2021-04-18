@@ -1,0 +1,73 @@
+<html>
+<head>
+    <title>Demo using M2D2 : Objects</title>
+    <meta name="HandheldFriendly" content="1">
+    <meta name="viewport" content="width=device-width, maximum-scale=1.0">
+    <meta name="theme-color" content="#333333">
+    <link rel="stylesheet" href="../css/examples.css" type="text/css" />
+    <script src="../js/utils.src.js" type="text/javascript"></script>
+    <script src="../js/m2d2.src.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        // When ready...
+        let page
+        document.ready(m2d2 => {
+            // Simple example using an object
+            page = m2d2({
+                h1: "M2D2 : Objects example",
+                info: {
+                    style : {
+                        color : "red"
+                    },
+                    dt: "Simple is best",
+                    dd: "Isn't great to be able to have such freedom, flexibility and simplicity?",
+                    a: {
+                        dataset : { id : 100 },
+                        href: "https://example.com",
+                        target: "_blank",
+                        text: "example.com"
+                    },
+                    date : {
+                        tagName : "input",
+                        type : "date",
+                        value : new Date()
+                    },
+                    check : {
+                        tagName : "input",
+                        type : "checkbox",
+                        checked : true
+                    },
+                },
+                controls: {
+                    link : {
+                        autofocus : true,
+                        onkeyup: function (event) {
+                            page.info.a.text = this.value;
+                        }
+                    },
+                    b : "bold",
+                    italic : {
+                        tagName : "i",
+                        text : "Italic",
+                        ul : {
+                            li : "text"
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+<article>
+    <h1>Title here</h1>
+    <div class="info">
+        <dt></dt>
+        <dd></dd>
+        <div>Visit: <a></a></div>
+    </div>
+    <div class="controls">
+        <div>New Link: <input id="link" type="text" /></div>
+    </div>
+</article>
+</body>
+</html>
