@@ -15,6 +15,7 @@
 //On ready...
 let checkout;
 let actions;
+let test;
 document.ready(m2d2 => {
 
     function selectItem(ev) {
@@ -141,8 +142,15 @@ document.ready(m2d2 => {
         },
         price: {
             disabled : true,
+            className : "default",
+            onupdate : function (prop, value) {
+                console.log(prop + " -> " + value);
+            },
             onkeyup: function (ev) {
-                checkout.list.find("[selected]").price.text = this.value * 1;
+                const sel = checkout.list.find("[selected]");
+                if(sel) {
+                    sel.price.text = this.value * 1;
+                }
             }
         }
     });

@@ -155,7 +155,7 @@ class M2D2 {
 							const template = object["template"];
 							this.doItems(opt, value, template);
 							this.linkNode($node, k, opt);
-						} else {
+						} else { // Normal Objects:
 							this.renderAndLink($node, opt, k, value);
 						}
 					} else {
@@ -175,6 +175,22 @@ class M2D2 {
 						this.renderAndLink($node, $newNode, k, value);
 					} else if(k === "items") { //Items creation
 						const template = object["template"];
+						// Allow use of plain object to specify value -> text //TODO: documentation
+						if(Utils.isPlainObject(value)) {
+						    const valTmp = [];
+						    Object.keys(value).forEach(o => {
+						        const obj = {
+                                    text  : value[o]
+						        };
+						        if(this.hasAttrOrProp($node, "value")) {
+                                    obj.value = o;
+                                } else {
+                                    dataset : { id : o };
+                                }
+                                valTmp.push(obj);
+						    });
+						    value = valTmp;
+						}
 						// Process Array:
 						if(Utils.isArray(value)) {
 							this.doItems($node, value, template);
@@ -185,10 +201,13 @@ class M2D2 {
 							console.log(value);
 						}
 					} else if(k !== "template") { //We handle templates inside items
-						console.error("Not sure what you want to do with key: " + k + " under element: ");
-						console.log($node);
-						console.log("And object:");
-						console.log(object);
+					    if(! Utils.isFunction(value)) {
+                            console.error("Not sure what you want to do with key: " + k + " under element: ");
+                            console.log($node);
+                            console.log("And object:");
+                            console.log(object);
+						}
+						$node[k] = value;
 					}
 				}
 			}
@@ -243,7 +262,7 @@ class M2D2 {
 			console.log("Property : " + key + " existed in node: " + $node.tagName +
 			". Using $" + key + " instead for node: " + $child.tagName + ".")
 		} else {
-			$node[key] = $child;
+	        $node[key] = this.proxy($child);
 		}
 	}
 	/**
@@ -486,30 +505,58 @@ class M2D2 {
 	 * @returns {Proxy, Object}
 	 */
 	proxy (obj) {
-		const handler = {
-			get: (target, property, receiver) => {
-				return target[property];
-			},
-			set: (target, property, value) => {
-				if(Utils.isNode(target[property])) {
-					let key = "";
-					if(Utils.isHtml(value)) {
-						key = "html";
-					} else if(Utils.isString(value)) {
-						key = "text";
-					} else if(this.hasProp(target[property], "value")) {
-						key = "value";
-					}
-					if(key) {
-						target[property][key] = value;
-					}
-				} else {
-					target[property] = value;
-				}
-				return true;
-			}
-		};
-		return new Proxy(obj, handler);
+	    if(obj._proxy !== undefined) {
+	        return obj;
+	    } else {
+	        obj._proxy = true;
+            const handler = {
+                get: (target, property, receiver) => {
+                    const t = target[property];
+                    if(typeof t === "function") {
+                        return t.bind(target);
+                    } else {
+                        return t;
+                    }
+                },
+                set: (target, property, value) => {
+                    if(Utils.isNode(target[property])) {
+                        let key = "";
+                        if(Utils.isHtml(value)) {
+                            key = "html";
+                        } else if(Utils.isString(value)) {
+                            key = "text";
+                        } else if(this.hasAttrOrProp(target[property], "value")) {
+                            key = "value";
+                        }
+                        if(key) {
+                            target[property][key] = value;
+                        }
+                    } else {
+                        target[property] = value;
+                    }
+                    return true;
+                }
+            };
+            return new Proxy(obj, handler);
+		}
+	}
+
+	observe($node) {
+		        function callback(mutationsList, observer) {
+                    console.log('Mutations:', mutationsList)
+                    console.log('Observer:', observer)
+                }
+                const mutationObserver = new MutationObserver(callback)
+                mutationObserver.observe(obj, {
+                    attributes: true,
+                    attributeOldValue : true
+                });
+                    // Check for onupdate //TODO: document
+                    if(target.onupdate !== undefined) {
+                        target.onupdate.bind(target)(property, value);
+                    }
+    	        return obj;
+
 	}
 
 	/**
@@ -641,8 +688,8 @@ class M2D2 {
 						}
 					    break;
 					default: //----------------- Link to Array -------------------
-					    // at, every, filter, find, findIndex, forEach, includes, indexOf, join, keys, lastIndexOf,
-					    // map, reduce, reduceRight, slice, some, values
+					    // at, every, filter, find, findIndex, forEach, includes, indexOf, join,
+					    // keys, lastIndexOf, map, reduce, reduceRight, slice, some, values
 						if(typeof Array.prototype[method] == "function") {
 							func = Array.prototype[method];
 						}
