@@ -541,13 +541,13 @@ class M2D2 {
 		Object.getOwnPropertyNames(Array.prototype).concat(nonStd).forEach(method => {
 			if(items[method] === undefined) {
 				let func = null;
+				const _this = this;
 				switch (method) {
 				    //-------------------- Same as in Array --------------------------
 					case "copyWithin": // copy element from index to index FIXME
 					case "fill": // replace N elements in array FIXME
 					case "splice": // add or remove elements
 					case "reverse": // reverse the order
-					case "unshift": // Add an item to the beginning
 						func = function(...args) {
 					        if(this.items.length) {
                                 const items = Array.from(this.items);
@@ -587,10 +587,9 @@ class M2D2 {
 					    }
 					    break;
 					case "push": // Add one item at the end:
-					    const _this = this;
 						func = function(obj) {
 							if(obj instanceof HTMLElement) {
-								obj.parentNode.appendChild(obj);
+								this.appendChild(obj);
 							} else if (Utils.isPlainObject(obj)) {
 							    const index = this.items.length;
 							    const $child = _this.getItem(this, index, obj);
@@ -630,6 +629,17 @@ class M2D2 {
 							}
 						}
 						break;
+					case "unshift": // Add an item to the beginning
+						func = function(obj) {
+							if(obj instanceof HTMLElement) {
+								this.prepend(obj);
+							} else if (Utils.isPlainObject(obj)) {
+							    const index = this.items.length;
+							    const $child = _this.getItem(this, index, obj);
+							    this.prepend($child);
+							}
+						}
+					    break;
 					default: //----------------- Link to Array -------------------
 					    // at, every, filter, find, findIndex, forEach, includes, indexOf, join, keys, lastIndexOf,
 					    // map, reduce, reduceRight, slice, some, values

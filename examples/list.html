@@ -109,7 +109,19 @@ document.ready(m2d2 => {
                 this.classList.toggle("sorted");
             }
         },
-        add: {
+        prepend : {
+            onclick: function (ev) {
+                checkout.list.items.unshift({
+                    id: "it" + (i++),
+                    item_id: "EI" + (i + "").padStart(3, "0"),
+                    price: Math.round((Math.random() * 100000 / 100)),
+                    name: "Extra Item",
+                    style: { color: "#B17E28" },
+                    onclick : selectItem
+                });
+            }
+        },
+        append : {
             onclick: function (ev) {
                 checkout.list.items.push({
                     id: "it" + (i++),
@@ -160,9 +172,10 @@ document.ready(m2d2 => {
     </table>
     <div id="actions" class="controls">
         <div>
+            <button class="prepend">Prepend Item</button>
+            <button class="append">Append Item</button>
             <button class="sort">Sort By Price</button>
-            <button class="add">Add Row</button>
-            <button class="remove">Remove Row</button>
+            <button class="remove">Remove Item</button>
         </div>
         <div>Change Price of selected item: <input class="price" type="number" /></div>
     </div>
