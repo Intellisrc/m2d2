@@ -118,7 +118,7 @@ class M2D2 {
 					default:
 						switch(true) {
 							case Utils.isBool(value): // boolean properties
-								$node.setAttribute(k, value);
+                                this.setPropOrAttr($node, k, value);
 								break;
 							default:
 								$node[k] = value;
@@ -193,7 +193,7 @@ class M2D2 {
 				}
 			}
 		});
-		return this.proxy($node);
+		return $node;
 	}
 
 	/**
@@ -240,7 +240,8 @@ class M2D2 {
 	linkNode($node, key, $child) {
 		if(this.hasAttrOrProp($node, key)) { // Only if its not an attribute or property, we "link" it.
 			$node["$" + key] = $child; //Replace name with "$" + name
-			console.log("Property : " + key + " existed. Using $" + key + " instead.")
+			console.log("Property : " + key + " existed in node: " + $node.tagName +
+			". Using $" + key + " instead for node: " + $child.tagName + ".")
 		} else {
 			$node[key] = $child;
 		}
@@ -267,6 +268,23 @@ class M2D2 {
 		$node.append($newElem);
 		return $newElem;
 	}
+
+    /**
+     * Get an item to be added
+     */
+	getItem($node, index, obj, $template) {
+	    if(!$template) {
+		    $template = this.getTemplate($node);
+		}
+        const $newItem = $template.cloneNode(true);
+        $newItem.dataset.id = index;
+
+        // Add "selected" property
+        this.setUniqueAttrib($newItem, "selected"); //TODO: Document
+        // Set values
+        return this.doDom($newItem, obj);
+	}
+
 	/**
 	 * Process items
 	 * @private
@@ -279,11 +297,8 @@ class M2D2 {
 		const $outElem = new DocumentFragment()
 		let i = 0;
 		values.forEach(val => {
-			const $newItem = $template.cloneNode(true);
-			$newItem.dataset.id = i++;
-			// Set values
+		    const $newItem = this.getItem($node, i++, val, $template);
 			$outElem.appendChild($newItem);
-			this.doDom($newItem, val);
 		});
 		//Update all at once
 		//$elem.append(...$outElem.childNodes); <-- works but it is slower
@@ -291,7 +306,8 @@ class M2D2 {
 			$node.appendChild($outElem.firstChild);
 		}
 		//Cleanup
-		$node.removeChild($node.find("template"));
+		const $temp = $node.find("template");
+		if($temp) { $node.removeChild($temp); }
 		//Set "items" link:
 		$node.items = $node.children;
 		this.extendItems($node);
@@ -398,6 +414,51 @@ class M2D2 {
 		}
 		return hasProp;
 	}
+
+	/**
+	 * Set the value of a property which is true/false
+	 *
+	 */
+	setPropOrAttr ($node, key, value) {
+	    if(this.hasProp($node, key)) {
+            $node[key] = value;
+	    } else {
+	        this.setAttr($node, key, value);
+    	}
+	}
+
+    /**
+     * Set attribute to node. If value is false, will remove it.
+     */
+	setAttr ($node, key, value) {
+        if(value) {
+            $node.setAttribute(key, value);
+        } else {
+            $node.removeAttribute(key);
+        }
+	}
+
+	/**
+	 * It will set a unique attribute among a group of nodes (grouped by parent)
+	 */
+	setUniqueAttrib($node, key) {
+	    const _this = this;
+        if(! $node.hasOwnProperty(key)) {
+            Object.defineProperty($node, key, {
+                get : function()    {
+                    return this.hasAttribute(key);
+                },
+                set : function(val) {
+                    const prevSel = this.parentNode.find("["+key+"]");
+                    if(prevSel) {
+                        prevSel.removeAttribute(key);
+                    }
+                    _this.setAttr(this, key, val);
+                }
+            });
+        }
+	}
+
 	/**
 	 * Define a property to an object
 	 * @private
@@ -452,6 +513,13 @@ class M2D2 {
 	}
 
 	/**
+	 * Get the root node as proxy
+	 */
+	getProxyNode(selector, obj) {
+	    return this.proxy(this.doDom(selector, obj));
+	}
+
+	/**
 	 * Extends "items"
 	 * @param {NodeList, HTMLCollection} $node
 	 */
@@ -466,54 +534,111 @@ class M2D2 {
 				$node.appendChild(detatchedItem); //Attach to $node (works with non-existing elements)
 			});
 		}
-		const nonStd = ["clear"];
 		const items = $node.items;
+		// Non-Standard or non-existent in Array:
+		const nonStd = ["clear", "getId", "removeId"];
+		// Array properties:
 		Object.getOwnPropertyNames(Array.prototype).concat(nonStd).forEach(method => {
 			if(items[method] === undefined) {
 				let func = null;
 				switch (method) {
-					case "clear": // parentNode.replaceChildren() can also be used
-						func = function() {
-							while(this[0]) this[0].remove()
-						}
-						break;
-					case "copyWithin":
-					case "fill":
-					case "pop" :
-					case "shift": //FIXME: not working as expected
-					case "splice":
-					case "reverse":
-					case "unshift":
+				    //-------------------- Same as in Array --------------------------
+					case "copyWithin": // copy element from index to index FIXME
+					case "fill": // replace N elements in array FIXME
+					case "splice": // add or remove elements
+					case "reverse": // reverse the order
+					case "unshift": // Add an item to the beginning
 						func = function(...args) {
-							const items = Array.from(this);
-							const retObj = items[method](...args);
-							reattach(items);
-							return retObj;
-						}
-						break;
-					case "push":
-						func = function(obj) {
-							if(obj instanceof HTMLElement) {
-								obj.parentNode.appendChild(obj);
+					        if(this.items.length) {
+                                const items = Array.from(this.items);
+                                const retObj = items[method](...args);
+                                reattach(items);
+                                return retObj;
 							}
 						}
 						break;
-					case "sort": // You can pass a function to compare items:
-						func = function(compareFunc) {
-							const items = Array.from(this);
-							items.sort(compareFunc || ((a, b) => {
-								return a.text.localeCompare(b.text);
-							}));
-							reattach(items);
+					//--------------------- Special Implementation --------------------
+					case "clear": // parentNode.replaceChildren() can also be used
+						func = function() {
+							while(this.items[0]) this.items[0].remove()
 						}
 						break;
-					default:
+					case "getId": // will return the item with data-id:
+					    func = function(id) {
+					        let found = null;
+					        if(this.items.length) {
+					            this.items.forEach(item => {
+					                if(item.dataset && (item.dataset.id * 1) === id) {
+					                    found = item;
+					                    return;
+					                }
+					            });
+					        }
+					        return found;
+					    }
+					    break;
+					case "pop" : //Remove and return last element:
+					    func = function() {
+					        if(this.items.length) {
+                                const parent = this[0].parentNode;
+                                const last = parent.removeChild(this.items[this.items.length - 1]);
+                                return last;
+					        }
+					    }
+					    break;
+					case "push": // Add one item at the end:
+					    const _this = this;
+						func = function(obj) {
+							if(obj instanceof HTMLElement) {
+								obj.parentNode.appendChild(obj);
+							} else if (Utils.isPlainObject(obj)) {
+							    const index = this.items.length;
+							    const $child = _this.getItem(this, index, obj);
+							    this.appendChild($child);
+							}
+						}
+						break;
+					case "removeId": // will return the item with data-id:
+					    func = function(id) {
+					        if(this.items.length) {
+					            this.items.forEach(item => {
+					                if(item.dataset && (item.dataset.id * 1) === id) {
+					                    item.remove();
+					                    return;
+					                }
+					            });
+					        }
+					    }
+					    break;
+					case "shift": // remove and return first item:
+					    func = function() {
+					        if(this.items.length) {
+                                const parent = this.items[0].parentNode;
+                                const first = parent.removeChild(this.items[0]);
+                                return first;
+					        }
+					    }
+					    break;
+					case "sort": // You can pass a function to compare items:
+						func = function(compareFunc) {
+					        if(this.items.length) {
+                                const items = Array.from(this.items);
+                                items.sort(compareFunc || ((a, b) => {
+                                    return a.text.localeCompare(b.text);
+                                }));
+                                reattach(items);
+							}
+						}
+						break;
+					default: //----------------- Link to Array -------------------
+					    // at, every, filter, find, findIndex, forEach, includes, indexOf, join, keys, lastIndexOf,
+					    // map, reduce, reduceRight, slice, some, values
 						if(typeof Array.prototype[method] == "function") {
 							func = Array.prototype[method];
 						}
 				}
 				if(func) {
-					this.defineProp(items, method, func.bind(items)); //bind: specify the "this" value
+					this.defineProp(items, method, func.bind($node)); //bind: specify the "this" value
 				}
 			}
 		});
@@ -525,6 +650,6 @@ class M2D2 {
 document.ready = (callback) => {
 	const m2d2 = new M2D2();
 	document.addEventListener("DOMContentLoaded", () => {
-		callback((s, o) => { return m2d2.doDom(s, o) }, (s) => { return m2d2.extDom(s) })
+		callback((s, o) => { return m2d2.getProxyNode(s, o) }, (s) => { return m2d2.extDom(s) })
 	});
 }

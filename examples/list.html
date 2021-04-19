@@ -11,55 +11,135 @@
 <!--script src="../js/demo-links.js" type="text/javascript"></script-->
 <!--                   -->
 <script type="text/javascript">
-// These is dummy data:
-const items = [
-    {
-        id: "item1",
-        price: 100,
-        name: "Doggy Bag",
-        style : { color: "#713c3c" }
-    }, {
-        id: "item2",
-        price: 200,
-        name: "Skateboard",
-        style : { color: "#3c7141" }
-    }, {
-        id: "item5",
-        price: 500,
-        name: "Sassy Pants",
-        style : { color: "#3c3f71" }
-    }
-];
 
 //On ready...
 let checkout;
+let actions;
 document.ready(m2d2 => {
+
+    function selectItem(ev) {
+        this.selected = true;
+        actions.$remove.disabled = false;
+        actions.price.disabled = false;
+        actions.price.value = "";
+        actions.price.focus();
+    }
+
     // This example is to show how to generate lists
     checkout = m2d2("#checkout", {
-        list : items
+        list : [
+            {
+                id : "it1",
+                item_id: "DB001",
+                price: 100,
+                name: "Doggy Bag",
+                style : { color: "#713c3c" },
+                onclick : selectItem
+            }, {
+                id : "it2",
+                item_id: "SB002",
+                price: 200,
+                name: "Skateboard",
+                style : { color: "#3c7141" },
+                onclick : selectItem
+            }, {
+                id : "it3",
+                item_id: "DH003",
+                price: 150,
+                name: "Doll House",
+                style : { color: "#3c7141" },
+                onclick : selectItem
+            }, {
+                id : "it4",
+                item_id: "BG004",
+                price: 125,
+                name: "Board Game",
+                style : { color: "#3c4133" },
+                onclick : selectItem
+            }, {
+                id : "it5",
+                item_id: "SP005",
+                price: 500,
+                name: "Sassy Pants",
+                style : { color: "#AA3f71" },
+                onclick : selectItem
+            }, {
+                id : "it6",
+                item_id: "SB006",
+                price: 350,
+                name: "Soccer Ball",
+                style : { color: "#3cAA71" },
+                onclick : selectItem
+            }, {
+                id : "it7",
+                item_id: "RR007",
+                price: 425,
+                name: "Red Rocket",
+                style : { color: "#3c3fAA" },
+                onclick : selectItem
+            }, {
+                id : "it8",
+                item_id: "BG008",
+                price: 50,
+                name: "Bubble Gum",
+                style : { color: "#3c0071" },
+                onclick : selectItem
+            }, {
+                id : "it9",
+                item_id: "GC009",
+                price: 550,
+                name: "Game Console",
+                style : { color: "#3c3f00" },
+                onclick : selectItem
+            }
+        ]
     });
-    /*const actions = m2d2("#actions", {
-        price: {
-            onkeyup: function (event) {
-                list.items[1].price = this.value * 1;
+
+    let i = checkout.list.items.length;
+
+    actions = m2d2("#actions", {
+        // To Sort by Price:
+        sort : {
+            onclick : function (ev) {
+                if(this.classList.contains("sorted")) {
+                    checkout.list.items.reverse();
+                } else {
+                    checkout.list.items.sort((a, b) => { return a.price.text * 1 - b.price.text * 1 });
+                }
+                this.classList.toggle("sorted");
             }
         },
         add: {
-            onclick: function (event) {
-                list.items.push({
-                    id: Math.round((Math.random() * 1000 / 100)),
+            onclick: function (ev) {
+                checkout.list.items.push({
+                    id: "it" + (i++),
+                    item_id: "EI" + (i + "").padStart(3, "0"),
                     price: Math.round((Math.random() * 100000 / 100)),
                     name: "Extra Item",
-                    style: "color: #B17E28"
+                    style: { color: "#B17E28" },
+                    onclick : selectItem
                 });
             }
         },
         remove: {
-            onclick: function (event) {
-                list.items.splice(0, 1);
+            disabled : true,
+            onclick: function (ev) {
+                checkout.list.find("[selected]").remove();
+            }
+        },
+        price: {
+            disabled : true,
+            onkeyup: function (ev) {
+                checkout.list.find("[selected]").price.text = this.value * 1;
             }
         }
-    });*/
+    });
+
+    // NOTE: as remove() function exists in node "div#actions",
+    // this element will be linked as: '$remove' (see console logs).
+    // In other words, to access "remove" button use (e.g.):
+    // actions.$remove.disabled = true;
+
 });
 </script>
 </head>
@@ -71,7 +151,7 @@ document.ready(m2d2 => {
       <tbody id="list">
         <template>
             <tr>
-              <td class="id"></td>
+              <td class="item_id"></td>
               <td><a class="name"></a></td>
               <td>$ <span class="price"></span></td>
             </tr>
@@ -80,11 +160,21 @@ document.ready(m2d2 => {
     </table>
     <div id="actions" class="controls">
         <div>
+            <button class="sort">Sort By Price</button>
             <button class="add">Add Row</button>
             <button class="remove">Remove Row</button>
         </div>
-        <div>Change Price of second item: <input class="price" type="number" /></div>
+        <div>Change Price of selected item: <input class="price" type="number" /></div>
     </div>
+    <p>
+        There are many ways in which you can access the items in the list (the most common are):
+        <ol>
+            <li><b>By index:</b>  <code>checkout.list.items[index];</code></li>
+            <li><b>By data-id:</b>  <code>checkout.list.items.getId(id);</code></li>
+            <li><b>By element id:</b>  <code>checkout.list.items.it4;</code></li>
+            <li><b>By searching in parent:</b>  <code>checkout.list.find("#it4");</code></li>
+        </ol>
+    </p>
 </article>
 </body>
 </html>

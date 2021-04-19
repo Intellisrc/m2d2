@@ -36,9 +36,18 @@ div.info dd {
     padding: 10px;
 }
 #checkout, #user {
-    border-spacing: 5px;
+    border-spacing: 0px;
     border: 1px solid #EEE;
     width: 100%;
+}
+#checkout td {
+    padding: 5px;
+}
+#checkout tr {
+    cursor: pointer;
+}
+#checkout tr[selected] {
+    background-color: yellow;
 }
 #checkout tr td:last-child {
     text-align: right;
@@ -74,9 +83,14 @@ button {
     margin: 0 10px;
     color: #333;
     cursor: pointer;
+    margin: 10px;
 }
 button[disabled] {
     opacity: 0.3;
+}
+input[type=number],
+input[type=text] {
+    padding: 5px;
 }
 #loading {
 	border : 1px solid #DDD;
