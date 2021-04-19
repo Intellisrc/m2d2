@@ -262,6 +262,7 @@ class M2D2 {
 			console.log("Property : " + key + " existed in node: " + $node.tagName +
 			". Using $" + key + " instead for node: " + $child.tagName + ".")
 		} else {
+			this.observe($child);
 	        $node[key] = this.proxy($child);
 		}
 	}
@@ -317,6 +318,7 @@ class M2D2 {
 		let i = 0;
 		values.forEach(val => {
 		    const $newItem = this.getItem($node, i++, val, $template);
+		    this.observe($newItem); //Add onupdate to children
 			$outElem.appendChild($newItem);
 		});
 		//Update all at once
@@ -389,6 +391,20 @@ class M2D2 {
 			return $template;
 		}
 	}
+
+	/**
+	 * Get attribute or property
+	 * @param {HTMLElement} $node
+	 * @param {string} key
+	 * @returns {*}
+	 */
+	getAttrOrProp ($node, key) {
+		let value = "";
+		if(this.hasAttrOrProp($node,  key)) {
+			value = this.hasAttr($node, key) ? $node.getAttribute(key): $node[key];
+		}
+		return value
+	}
 	/**
 	 * If a node contains either a property or an attribute
 	 * @private
@@ -436,7 +452,10 @@ class M2D2 {
 
 	/**
 	 * Set the value of a property which is true/false
-	 *
+	 * @private
+	 * @param {HTMLElement} $node
+	 * @param {string} key
+	 * @param {*} value
 	 */
 	setPropOrAttr ($node, key, value) {
 	    if(this.hasProp($node, key)) {
@@ -448,6 +467,10 @@ class M2D2 {
 
     /**
      * Set attribute to node. If value is false, will remove it.
+	 * @private
+	 * @param {HTMLElement} $node
+	 * @param {string} key
+	 * @param {*} value
      */
 	setAttr ($node, key, value) {
         if(value) {
@@ -459,6 +482,9 @@ class M2D2 {
 
 	/**
 	 * It will set a unique attribute among a group of nodes (grouped by parent)
+	 * @private
+	 * @param {HTMLElement} $node
+	 * @param {string} key
 	 */
 	setUniqueAttrib($node, key) {
 	    const _this = this;
@@ -519,6 +545,7 @@ class M2D2 {
                     }
                 },
                 set: (target, property, value) => {
+                	const oldValue = this.getAttrOrProp(target, property);
                     if(Utils.isNode(target[property])) {
                         let key = "";
                         if(Utils.isHtml(value)) {
@@ -534,6 +561,11 @@ class M2D2 {
                     } else {
                         target[property] = value;
                     }
+					// Check for onupdate //TODO: document
+					// This will observe changes on values
+					if(target.onupdate !== undefined) {
+						target.onupdate.bind(target)(property, value, oldValue);
+					}
                     return true;
                 }
             };
@@ -541,33 +573,59 @@ class M2D2 {
 		}
 	}
 
+	/**
+	 * Function passed to MutationObserver
+	 * @private
+	 * @param {MutationRecord} mutationsList
+	 * @param {MutationObserver} observer
+	 */
+	onObserve(mutationsList, observer) {
+		mutationsList.forEach(m => {
+			const target = m.target;
+			// Check for onupdate //TODO: document
+			if(target.onupdate !== undefined) {
+				if(m.type === "Attribute") {
+					const value = this.getAttrOrProp(target, m.attributeName);
+					target.onupdate.bind(target)(m.attributeName, value, m.oldValue);
+				} else if(m.type === "childList") { //TODO: improve for other types
+					if(m.addedNodes[0].nodeName === "#text") {
+						const value = m.addedNodes[0].textContent;
+						const oldValue = m.removedNodes[0].textContent;
+						target.onupdate.bind(target)("text", value, oldValue);
+					}
+				}
+			}
+		});
+	}
+	/**
+	 * Add MutationObserver to object
+	 * @private
+	 * @param $node
+	 */
 	observe($node) {
-		        function callback(mutationsList, observer) {
-                    console.log('Mutations:', mutationsList)
-                    console.log('Observer:', observer)
-                }
-                const mutationObserver = new MutationObserver(callback)
-                mutationObserver.observe(obj, {
-                    attributes: true,
-                    attributeOldValue : true
-                });
-                    // Check for onupdate //TODO: document
-                    if(target.onupdate !== undefined) {
-                        target.onupdate.bind(target)(property, value);
-                    }
-    	        return obj;
-
+		const mutationObserver = new MutationObserver(this.onObserve.bind(this))
+		mutationObserver.observe($node, {
+			attributeOldValue : true,
+			subtree: true,
+			childList: true
+		});
 	}
 
 	/**
 	 * Get the root node as proxy
+	 * @private
+	 * @param {string|HTMLElement} selector
+	 * @param {Object} obj
 	 */
 	getProxyNode(selector, obj) {
-	    return this.proxy(this.doDom(selector, obj));
+		const $node = this.doDom(selector, obj);
+		this.observe($node);
+		return this.proxy($node);
 	}
 
 	/**
 	 * Extends "items"
+	 * @private
 	 * @param {NodeList, HTMLCollection} $node
 	 */
 	extendItems($node) {

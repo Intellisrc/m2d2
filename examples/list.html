@@ -26,6 +26,10 @@ document.ready(m2d2 => {
         actions.price.focus();
     }
 
+    function onUpdate(prop, value, old) {
+        console.log(prop + " : " + old + " -> " + value);
+    }
+
     // This example is to show how to generate lists
     checkout = m2d2("#checkout", {
         list : [
@@ -35,6 +39,7 @@ document.ready(m2d2 => {
                 price: 100,
                 name: "Doggy Bag",
                 style : { color: "#713c3c" },
+                onupdate : onUpdate,
                 onclick : selectItem
             }, {
                 id : "it2",
@@ -42,6 +47,7 @@ document.ready(m2d2 => {
                 price: 200,
                 name: "Skateboard",
                 style : { color: "#3c7141" },
+                onupdate : onUpdate,
                 onclick : selectItem
             }, {
                 id : "it3",
@@ -49,6 +55,7 @@ document.ready(m2d2 => {
                 price: 150,
                 name: "Doll House",
                 style : { color: "#3c7141" },
+                onupdate : onUpdate,
                 onclick : selectItem
             }, {
                 id : "it4",
@@ -56,6 +63,7 @@ document.ready(m2d2 => {
                 price: 125,
                 name: "Board Game",
                 style : { color: "#3c4133" },
+                onupdate : onUpdate,
                 onclick : selectItem
             }, {
                 id : "it5",
@@ -63,6 +71,7 @@ document.ready(m2d2 => {
                 price: 500,
                 name: "Sassy Pants",
                 style : { color: "#AA3f71" },
+                onupdate : onUpdate,
                 onclick : selectItem
             }, {
                 id : "it6",
@@ -70,6 +79,7 @@ document.ready(m2d2 => {
                 price: 350,
                 name: "Soccer Ball",
                 style : { color: "#3cAA71" },
+                onupdate : onUpdate,
                 onclick : selectItem
             }, {
                 id : "it7",
@@ -77,6 +87,7 @@ document.ready(m2d2 => {
                 price: 425,
                 name: "Red Rocket",
                 style : { color: "#3c3fAA" },
+                onupdate : onUpdate,
                 onclick : selectItem
             }, {
                 id : "it8",
@@ -84,6 +95,7 @@ document.ready(m2d2 => {
                 price: 50,
                 name: "Bubble Gum",
                 style : { color: "#3c0071" },
+                onupdate : onUpdate,
                 onclick : selectItem
             }, {
                 id : "it9",
@@ -91,6 +103,7 @@ document.ready(m2d2 => {
                 price: 550,
                 name: "Game Console",
                 style : { color: "#3c3f00" },
+                onupdate : onUpdate,
                 onclick : selectItem
             }
         ]
@@ -101,6 +114,7 @@ document.ready(m2d2 => {
     actions = m2d2("#actions", {
         // To Sort by Price:
         sort : {
+            onupdate : onUpdate,
             onclick : function (ev) {
                 if(this.classList.contains("sorted")) {
                     checkout.list.items.reverse();
@@ -111,6 +125,7 @@ document.ready(m2d2 => {
             }
         },
         prepend : {
+            onupdate : onUpdate,
             onclick: function (ev) {
                 checkout.list.items.unshift({
                     id: "it" + (i++),
@@ -118,11 +133,13 @@ document.ready(m2d2 => {
                     price: Math.round((Math.random() * 100000 / 100)),
                     name: "Extra Item",
                     style: { color: "#B17E28" },
+                    onupdate : onUpdate,
                     onclick : selectItem
                 });
             }
         },
         append : {
+            onupdate : onUpdate,
             onclick: function (ev) {
                 checkout.list.items.push({
                     id: "it" + (i++),
@@ -130,22 +147,25 @@ document.ready(m2d2 => {
                     price: Math.round((Math.random() * 100000 / 100)),
                     name: "Extra Item",
                     style: { color: "#B17E28" },
+                    onupdate : onUpdate,
                     onclick : selectItem
                 });
             }
         },
         remove: {
             disabled : true,
+            onupdate : onUpdate,
             onclick: function (ev) {
-                checkout.list.find("[selected]").remove();
+                const sel = checkout.list.find("[selected]");
+                if(sel) {
+                    sel.remove();
+                }
             }
         },
         price: {
             disabled : true,
             className : "default",
-            onupdate : function (prop, value) {
-                console.log(prop + " -> " + value);
-            },
+            onupdate : onUpdate,
             onkeyup: function (ev) {
                 const sel = checkout.list.find("[selected]");
                 if(sel) {
