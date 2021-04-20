@@ -41,7 +41,8 @@ class M2D2 {
 			});
 			return Object.assign($node, {
 				find: (it) => {
-					return this.extDom($node.querySelector(it));
+					const node = $node.querySelector(it)
+					return node ? this.extDom(node) : null;
 				},
 				findAll: (it) => {
 					const nodeList = $node.querySelectorAll(it);
@@ -253,8 +254,10 @@ class M2D2 {
 	}
 
     /**
-     * Convert plain value into object if needed
-     */
+	 * Convert plain value into object if needed
+	 * @param {HTMLElement, Node} $node
+	 * @param {*} value
+	 */
     plainToObject($node, value) {
 		if(!Utils.isObject(value) &&! Utils.isFunction(value)) {
 			// When setting values to the node (simplified version):
@@ -774,10 +777,10 @@ class M2D2 {
 					    func = function(id) {
 					        let found = null;
 					        if(this.items.length) {
-					            this.items.forEach(item => {
+					            this.items.some(item => {
 					                if(item.dataset && (item.dataset.id * 1) === id) {
 					                    found = item;
-					                    break;
+					                    return true;
 					                }
 					            });
 					        }
@@ -806,11 +809,11 @@ class M2D2 {
 					case "removeId": // will return the item with data-id:
 					    func = function(id) {
 					        if(this.items.length) {
-					            this.items.forEach(item => {
+					            this.items.some(item => {
 					                if(item.dataset && (item.dataset.id * 1) === id) {
 					                    item.remove();
-					                    break;
-					                }
+										return true;
+									}
 					            });
 					        }
 					    }
