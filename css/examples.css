@@ -47,13 +47,16 @@ div.info dd {
     cursor: pointer;
 }
 #checkout tr[selected] {
-    background-color: yellow;
+    background-color: #EEE;
 }
 #checkout tr td:last-child {
     text-align: right;
 }
 #checkout td.loading {
 	text-align: center !important;
+}
+#checkout tfoot {
+    background-color: #EEE;
 }
 .controls {
     margin: 10px;
