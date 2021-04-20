@@ -132,26 +132,47 @@ class M2D2 {
 				}
 				// Look for elements:
 			} else {
-				//Look for ID:
-				let $nodeId = $node.find("#" + k);
-				//Look for class:
-				let $nodeCss = $node.find("." + k);	//TODO: findAll
-				//Look for element or free selector (e.g: "div > span"):
-				let $nodeElem = $node.find(k);			//TODO: findAll
-				//Look for name:
-				let $nodeName = $node.find("[name="+k+"]");
-				//Remove all "not found":
-				const options = Utils.cleanArray([$nodeId, $nodeCss, $nodeElem, $nodeName]);
+			    const options = [];
+			    try {
+                    //Look for ID:
+                    if(k && k.match(/^\w/)) {
+                        let elem = $node.find("#" + k);
+                        if(elem) { options.push(elem); }
+                        //Look for name:
+                        elem = $node.find("[name="+k+"]");
+                        if(elem) { options.push(elem); }
+                        //Look for class:
+                        const elems = $node.findAll("." + k);
+                        if(elems.length > 0) { options.push(elems); }
+                    }
+                    //Look for element or free selector (e.g: "div > span"):
+                    const elems = $node.findAll(k);
+                    if(elems.length > 0) { options.push(elems); }
+				} catch(e) {
+				    console.error("Invalid selector: " + k);
+				    console.log(e);
+				    return;
+				}
 				if(options.length > 1) {
 					console.error("Multiple options found for key: " + k + " under element: ");
 					console.log($node);
 					console.log("Options: ");
 					options.forEach(o => { console.log(o); });
 					console.log("Please rename key or adjust DOM");
-				} else if(options.length === 1) { //Found single option: fill
+				} else if(options.length === 1) { // Found single option: place values
 					const opt = options[0];
-					if(Utils.isNode(opt)) {
-						if(Utils.isArray(value)) { // Process Array:
+					if(opt instanceof NodeList) { // Multiple nodes
+					    if(opt.length == 1) { // Normal Object:
+							this.renderAndLink($node, opt[0], k, value);
+					    } else { //TODO: Document : multiple elements become array
+					        const items = [];
+                            opt.forEach(item => {
+                                items.push(this.render(item, k, value));
+                            });
+                            this.linkNode($node, k, items);
+                        }
+					} else if(Utils.isNode(opt)) {
+						if(Utils.isArray(value)) { // Process Array
 							const template = object["template"];
 							this.doItems(opt, value, template);
 							this.linkNode($node, k, opt);
@@ -164,7 +185,7 @@ class M2D2 {
 						console.log("Parent node:")
 						console.log($node);
 					}
-				} else if(options.length === 0) { //No options found: create
+				} else if(options.length === 0) { //No options found: create nodes
 					if(this.isValidElement(k)) {
 						const $newNode = this.appendElement($node, k);
 						this.renderAndLink($node, $newNode, k, value);
@@ -228,6 +249,22 @@ class M2D2 {
 		return $node;
 	}
 
+    /**
+     * Convert plain value into object if needed
+     */
+    plainToObject($node, value) {
+		if(!Utils.isObject(value) &&! Utils.isFunction(value)) {
+			// When setting values to the node (simplified version):
+			if(Utils.isHtml(value)) {
+				value = { html : value };
+			} else if(Utils.isString(value) || Utils.isNumeric(value)) {
+				value = { text : value };
+			} else if(this.hasProp($node, "value")) {
+				value = { value : value };
+			}
+		}
+		return value;
+    }
 	/**
 	 * Render and Link a node
 	 * @private
@@ -249,16 +286,7 @@ class M2D2 {
 	 * @returns {Proxy, HTMLElement}
 	 */
 	render($node, key, value) {
-		if(!Utils.isObject(value)) {
-			// When setting values to the node (simplified version):
-			if(Utils.isHtml(value)) {
-				value = { html : value };
-			} else if(Utils.isString(value) || Utils.isNumeric(value)) {
-				value = { text : value };
-			} else if(this.hasProp($node, "value")) {
-				value = { value : value };
-			}
-		}
+	    value = this.plainToObject($node, value);
 		return this.doDom($node, value); // Recursive for each element
 	}
 
@@ -556,22 +584,24 @@ class M2D2 {
                     }
                 },
                 set: (target, property, value) => {
-                	const oldValue = this.getAttrOrProp(target, property);
+                    let oldValue = "";
                     if(Utils.isNode(target[property])) {
                         let key = "";
                         if(Utils.isHtml(value)) {
                             key = "html";
-                        } else if(Utils.isString(value)) {
+                        } else if(Utils.isString(value) || Utils.isNumeric(value)) {
                             key = "text";
                         } else if(this.hasAttrOrProp(target[property], "value")) {
                             key = "value";
                         }
                         if(key) {
+                            oldValue = target[property][key];
                             target[property][key] = value;
                         }
                     } else if(property === "onupdate") {
                         if(Utils.isFunction(value)) {
                             target.addEventListener("onupdate", value);
+                            oldValue = target[property];
                             target[property] = value;
                         } else {
                             console.error("Value passed to 'onupdate' is incorrect, in node:");
@@ -580,6 +610,7 @@ class M2D2 {
                             console.log(value);
                         }
                     } else {
+                        oldValue = target[property];
                         target[property] = value;
                     }
 					// Check for onupdate //TODO: document
@@ -627,7 +658,8 @@ class M2D2 {
                         }));
                     }
 				} else if(m.type === "childList") { //TODO: improve for other types
-					if(m.addedNodes[0].nodeName === "#text") {
+				    const $child = m.addedNodes[0] || m.removedNodes[0];
+					if($child.nodeName === "#text") {
 						const value = m.addedNodes[0].textContent;
 						const oldValue = m.removedNodes[0].textContent;
 						if(value !== oldValue) {
@@ -635,6 +667,20 @@ class M2D2 {
                                  detail: {
                                      type     : typeof value,
                                      property : "text",
+                                     newValue : value,
+                                     oldValue : oldValue
+                                 }
+                             }));
+                         }
+					} else if(target.items !== undefined) { //Items updated
+					    //TODO: Document: in case of items, "new = added", "old = removed"
+						const value = m.addedNodes;
+						const oldValue = m.removedNodes;
+						if(value !== oldValue) {
+                            target.dispatchEvent(new CustomEvent("onupdate", {
+                                 detail: {
+                                     type     : typeof value,
+                                     property : "items",
                                      newValue : value,
                                      oldValue : oldValue
                                  }

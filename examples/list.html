@@ -12,10 +12,13 @@
 <!--                   -->
 <script type="text/javascript">
 
-//On ready...
+//Placed here so they are available on console
 let checkout;
 let actions;
 let test;
+let olist;
+
+//On ready...
 document.ready(m2d2 => {
 
     function selectItem(ev) {
@@ -27,12 +30,13 @@ document.ready(m2d2 => {
     }
 
     function onUpdate(ev) {
-        console.log(ev);
+        console.log(ev.detail);
     }
 
     // This example is to show how to generate lists
     checkout = m2d2("#checkout", {
-        list : [
+        list : {
+            items : [
             {
                 id : "it1",
                 item_id: "DB001",
@@ -40,7 +44,7 @@ document.ready(m2d2 => {
                 name: "Doggy Bag",
                 style : { color: "#713c3c" },
                 onclick : selectItem
-            },/* {
+            }, {
                 id : "it2",
                 item_id: "SB002",
                 price: 200,
@@ -96,11 +100,15 @@ document.ready(m2d2 => {
                 name: "Game Console",
                 style : { color: "#3c3f00" },
                 onclick : selectItem
-            }*/
-        ]
+            }
+        ]},
+        total : 0
     });
 
-    let i = checkout.list.items.length;
+    // When not using explicitly "items" in definition, you can call the update this way:
+    checkout.list.onupdate = function(ev) {
+        checkout.total = checkout.list.items.length;
+    }
 
     actions = m2d2("#actions", {
         // To Sort by Price:
@@ -118,8 +126,9 @@ document.ready(m2d2 => {
         prepend : {
             onupdate : onUpdate,
             onclick: function (ev) {
+                const i = checkout.total.text * 1;
                 checkout.list.items.unshift({
-                    id: "it" + (i++),
+                    id: "it" + (i + 1),
                     item_id: "EI" + (i + "").padStart(3, "0"),
                     price: Math.round((Math.random() * 100000 / 100)),
                     name: "Extra Item",
@@ -132,8 +141,9 @@ document.ready(m2d2 => {
         append : {
             onupdate : onUpdate,
             onclick: function (ev) {
+                const i = checkout.total.text * 1;
                 checkout.list.items.push({
-                    id: "it" + (i++),
+                    id: "it" + (i + 1),
                     item_id: "EI" + (i + "").padStart(3, "0"),
                     price: Math.round((Math.random() * 100000 / 100)),
                     name: "Extra Item",
@@ -178,8 +188,17 @@ document.ready(m2d2 => {
         }
     });
 
+    olist = m2d2("ol", {
+        li : {
+            style : { color : "green" }
+        }
+    });
+
+    // Multiple calls to "onupdate" are allowed:
     actions.box.price.onupdate = function(ev) {
-        console.log("Updated: " + ev.detail.newValue);
+        if(ev.detail.type !== "function") {
+            console.log("Updated: " + ev.detail.oldValue + " -> " + ev.detail.newValue);
+        }
     }
 
     // NOTE: as remove() function exists in node "div#actions",
@@ -204,6 +223,9 @@ document.ready(m2d2 => {
             </tr>
         </template>
       </tbody>
+      <tfoot>
+        <tr><td>Total:</td><td colspan="2" class="total"></td></tr>
+      </tfoot>
     </table>
     <div id="actions" class="controls">
         <div>
