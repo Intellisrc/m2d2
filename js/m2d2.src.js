@@ -9,10 +9,7 @@
  * M2D2 Class
  */
 class M2D2 {
-	constructor() {
-        //this.updateEvent = new Event("onupdate"); TODO: use Event
-        this.loadedEvent = new CustomEvent('onload');
-	}
+	constructor() {}
 	/**
 	 * M2 Will set all extensions to DOM objects
 	 * @param {string, HTMLElement} selector
@@ -203,13 +200,16 @@ class M2D2 {
 							console.log("Passed values are: ");
 							console.log(value);
 						}
+    				} else if(Utils.isFunction(value)) {
+    				    if(k === "onupdate") {
+    				        $node.addEventListener('onupdate', value);
+    				    }
+						$node[k] = value;
 					} else if(k !== "template") { //We handle templates inside items
-					    if(! Utils.isFunction(value)) {
-                            console.error("Not sure what you want to do with key: " + k + " under element: ");
-                            console.log($node);
-                            console.log("And object:");
-                            console.log(object);
-						}
+                        console.error("Not sure what you want to do with key: " + k + " under element: ");
+                        console.log($node);
+                        console.log("And object:");
+                        console.log(object);
 						$node[k] = value;
 					}
 				}
@@ -220,8 +220,9 @@ class M2D2 {
 		    const native = ["BODY","FRAME","IFRAME","IMG","LINK","SCRIPT","STYLE"].indexOf($node.tagName) >= 0;
 		    const inputImage = $node.tagName === "INPUT" && $node.type === "image";
 		    if(! (native || inputImage)) {
+                const loadedEvent = new CustomEvent('onload');
 		        $node.addEventListener("onload", $node.onload);
-		        $node.dispatchEvent(this.loadedEvent);
+		        $node.dispatchEvent(loadedEvent);
 		    }
 		}
 		return $node;
@@ -274,7 +275,6 @@ class M2D2 {
 			console.log("Property : " + key + " existed in node: " + $node.tagName +
 			". Using $" + key + " instead for node: " + $child.tagName + ".")
 		} else {
-			this.observe($child);
 	        $node[key] = this.proxy($child);
 		}
 	}
@@ -330,7 +330,6 @@ class M2D2 {
 		let i = 0;
 		values.forEach(val => {
 		    const $newItem = this.getItem($node, i++, val, $template);
-		    this.observe($newItem); //Add onupdate to children
 			$outElem.appendChild($newItem);
 		});
 		//Update all at once
@@ -570,13 +569,32 @@ class M2D2 {
                         if(key) {
                             target[property][key] = value;
                         }
+                    } else if(property === "onupdate") {
+                        if(Utils.isFunction(value)) {
+                            target.addEventListener("onupdate", value);
+                            target[property] = value;
+                        } else {
+                            console.error("Value passed to 'onupdate' is incorrect, in node:");
+                            console.log(target);
+                            console.log("Value: (not a function)");
+                            console.log(value);
+                        }
                     } else {
                         target[property] = value;
                     }
 					// Check for onupdate //TODO: document
 					// This will observe changes on values
 					if(target.onupdate !== undefined) {
-						target.onupdate.bind(target)(property, value, oldValue);
+					    if(value !== oldValue) {
+                            target.dispatchEvent(new CustomEvent("onupdate", {
+                                detail: {
+                                    type     : typeof value,
+                                    property : property,
+                                    newValue : value,
+                                    oldValue : oldValue
+                                }
+                            }));
+					    }
 					}
                     return true;
                 }
@@ -596,14 +614,32 @@ class M2D2 {
 			const target = m.target;
 			// Check for onupdate //TODO: document
 			if(target.onupdate !== undefined) {
-				if(m.type === "Attribute") {
+				if(m.type === "attributes") {
 					const value = this.getAttrOrProp(target, m.attributeName);
-					target.onupdate.bind(target)(m.attributeName, value, m.oldValue);
+					if(value !== m.oldValue) {
+                        target.dispatchEvent(new CustomEvent("onupdate", {
+                            detail: {
+                                type     : typeof value,
+                                property : m.attributeName,
+                                newValue : value,
+                                oldValue : m.oldValue
+                            }
+                        }));
+                    }
 				} else if(m.type === "childList") { //TODO: improve for other types
 					if(m.addedNodes[0].nodeName === "#text") {
 						const value = m.addedNodes[0].textContent;
 						const oldValue = m.removedNodes[0].textContent;
-						target.onupdate.bind(target)("text", value, oldValue);
+						if(value !== oldValue) {
+                            target.dispatchEvent(new CustomEvent("onupdate", {
+                                 detail: {
+                                     type     : typeof value,
+                                     property : "text",
+                                     newValue : value,
+                                     oldValue : oldValue
+                                 }
+                             }));
+                         }
 					}
 				}
 			}
@@ -612,15 +648,16 @@ class M2D2 {
 	/**
 	 * Add MutationObserver to object
 	 * @private
-	 * @param $node
+	 * @param { HTMLElement } $node
 	 */
 	observe($node) {
 		const mutationObserver = new MutationObserver(this.onObserve.bind(this))
-		mutationObserver.observe($node, {
-			attributeOldValue : true,
-			subtree: true,
-			childList: true
-		});
+		const options = {
+		    attributeOldValue : true
+		}
+        options.subtree = true;
+        options.childList = true;
+		mutationObserver.observe($node, options);
 	}
 
 	/**

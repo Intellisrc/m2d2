@@ -26,10 +26,8 @@ document.ready(m2d2 => {
         actions.box.price.focus();
     }
 
-    function onUpdate(prop, value, old) {
-        if(! Utils.isFunction(value)) {
-            console.log(prop + " : " + old + " -> " + value);
-        }
+    function onUpdate(ev) {
+        console.log(ev);
     }
 
     // This example is to show how to generate lists
@@ -41,15 +39,13 @@ document.ready(m2d2 => {
                 price: 100,
                 name: "Doggy Bag",
                 style : { color: "#713c3c" },
-                onupdate : onUpdate,
                 onclick : selectItem
-            }, {
+            },/* {
                 id : "it2",
                 item_id: "SB002",
                 price: 200,
                 name: "Skateboard",
                 style : { color: "#3c7141" },
-                onupdate : onUpdate,
                 onclick : selectItem
             }, {
                 id : "it3",
@@ -57,7 +53,6 @@ document.ready(m2d2 => {
                 price: 150,
                 name: "Doll House",
                 style : { color: "#3c7141" },
-                onupdate : onUpdate,
                 onclick : selectItem
             }, {
                 id : "it4",
@@ -65,7 +60,6 @@ document.ready(m2d2 => {
                 price: 125,
                 name: "Board Game",
                 style : { color: "#3c4133" },
-                onupdate : onUpdate,
                 onclick : selectItem
             }, {
                 id : "it5",
@@ -73,7 +67,6 @@ document.ready(m2d2 => {
                 price: 500,
                 name: "Sassy Pants",
                 style : { color: "#AA3f71" },
-                onupdate : onUpdate,
                 onclick : selectItem
             }, {
                 id : "it6",
@@ -81,7 +74,6 @@ document.ready(m2d2 => {
                 price: 350,
                 name: "Soccer Ball",
                 style : { color: "#3cAA71" },
-                onupdate : onUpdate,
                 onclick : selectItem
             }, {
                 id : "it7",
@@ -89,7 +81,6 @@ document.ready(m2d2 => {
                 price: 425,
                 name: "Red Rocket",
                 style : { color: "#3c3fAA" },
-                onupdate : onUpdate,
                 onclick : selectItem
             }, {
                 id : "it8",
@@ -97,7 +88,6 @@ document.ready(m2d2 => {
                 price: 50,
                 name: "Bubble Gum",
                 style : { color: "#3c0071" },
-                onupdate : onUpdate,
                 onclick : selectItem
             }, {
                 id : "it9",
@@ -105,9 +95,8 @@ document.ready(m2d2 => {
                 price: 550,
                 name: "Game Console",
                 style : { color: "#3c3f00" },
-                onupdate : onUpdate,
                 onclick : selectItem
-            }
+            }*/
         ]
     });
 
@@ -188,6 +177,10 @@ document.ready(m2d2 => {
             }
         }
     });
+
+    actions.box.price.onupdate = function(ev) {
+        console.log("Updated: " + ev.detail.newValue);
+    }
 
     // NOTE: as remove() function exists in node "div#actions",
     // this element will be linked as: '$remove' (see console logs).
