@@ -9,7 +9,10 @@
  * M2D2 Class
  */
 class M2D2 {
-	constructor() {}
+	constructor() {
+        //this.updateEvent = new Event("onupdate"); TODO: use Event
+        this.loadedEvent = new CustomEvent('onload');
+	}
 	/**
 	 * M2 Will set all extensions to DOM objects
 	 * @param {string, HTMLElement} selector
@@ -30,7 +33,7 @@ class M2D2 {
 				get() { return this.innerHTML; },
 				set(value) { this.innerHTML = value;  }
 			});
-			["find","findAll"].forEach(f => {
+			["find","findAll","onupdate"].forEach(f => {
 				if($node.hasOwnProperty(f)) {
 					console.log("Node already had ["+f+"] property. It might cause unexpected behaviour.")
 					console.log("You may need to update the M2D2 version or report it to: github.com/lepe/m2d2/")
@@ -212,6 +215,15 @@ class M2D2 {
 				}
 			}
 		});
+		// Dispatch onload event (if its not native): //TODO: Document
+		if($node.onload) {
+		    const native = ["BODY","FRAME","IFRAME","IMG","LINK","SCRIPT","STYLE"].indexOf($node.tagName) >= 0;
+		    const inputImage = $node.tagName === "INPUT" && $node.type === "image";
+		    if(! (native || inputImage)) {
+		        $node.addEventListener("onload", $node.onload);
+		        $node.dispatchEvent(this.loadedEvent);
+		    }
+		}
 		return $node;
 	}
 

@@ -21,13 +21,15 @@ document.ready(m2d2 => {
     function selectItem(ev) {
         this.selected = true;
         actions.$remove.disabled = false;
-        actions.price.disabled = false;
-        actions.price.value = "";
-        actions.price.focus();
+        actions.box.price.disabled = false;
+        actions.box.price.value = "";
+        actions.box.price.focus();
     }
 
     function onUpdate(prop, value, old) {
-        console.log(prop + " : " + old + " -> " + value);
+        if(! Utils.isFunction(value)) {
+            console.log(prop + " : " + old + " -> " + value);
+        }
     }
 
     // This example is to show how to generate lists
@@ -160,16 +162,28 @@ document.ready(m2d2 => {
                 if(sel) {
                     sel.remove();
                 }
+            },
+            onload : function(ev) {
+                //console.log(ev);
+                // console.log(this);
+                console.log("Remove was loaded");
             }
         },
-        price: {
-            disabled : true,
-            className : "default",
-            onupdate : onUpdate,
-            onkeyup: function (ev) {
-                const sel = checkout.list.find("[selected]");
-                if(sel) {
-                    sel.price.text = this.value * 1;
+        box: {
+            price: {
+                disabled : true,
+                className : "default",
+                onupdate : onUpdate,
+                onkeyup: function (ev) {
+                    const sel = checkout.list.find("[selected]");
+                    if(sel) {
+                        sel.price.text = this.value * 1;
+                    }
+                },
+                onload : function(ev) {
+                    //console.log(ev);
+                    // console.log(this);
+                    console.log("Price was loaded");
                 }
             }
         }
@@ -205,7 +219,7 @@ document.ready(m2d2 => {
             <button class="sort">Sort By Price</button>
             <button class="remove">Remove Item</button>
         </div>
-        <div>Change Price of selected item: <input class="price" type="number" /></div>
+        <div class="box">Change Price of selected item: <input class="price" type="number" /></div>
     </div>
     <p>
         There are many ways in which you can access the items in the list (the most common are):
