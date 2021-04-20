@@ -10,10 +10,37 @@
  */
 class M2D2 {
 	constructor() {}
+	static instance = new M2D2();
+	static collection = {}
+	static ready(callback) {
+		document.addEventListener("DOMContentLoaded", () => {
+			let m = (selector, object) => {
+				return this.instance.getProxyNode(selector, object)
+			}
+			// Additional features:
+			m.ext = this.instance.extDom
+			const handler = {
+				get: (target, property, receiver) => {
+					return this.collection[property];
+				},
+				set: (target, property, value) => {
+					this.collection[property] = value;
+					return true;
+				}
+			};
+			m = new Proxy(m, handler);
+			const ret = callback(m);
+			if(ret) {
+				Object.getOwnPropertyNames(ret).forEach(o => {
+					this.collection[o] = ret[o];
+				});
+			}
+		});
+	}
 	/**
 	 * M2 Will set all extensions to DOM objects
 	 * @param {string, HTMLElement} selector
-	 * @param {HTMLElement} [$root]
+	 * @param {HTMLElement, Node} [$root]
 	 * @returns {HTMLElement}
 	 */
 	extDom(selector, $root) {
@@ -21,7 +48,17 @@ class M2D2 {
 			console.error("Selector was empty");
 			return null;
 		}
-		const $node = Utils.isNode(selector) ? selector : ($root || document).querySelector(selector);
+		if($root === undefined) { $root = document }
+		const $node = Utils.isNode(selector) ? selector : $root.querySelector(selector);
+		if(! $node) {
+			if(Utils.isString(selector)) {
+				console.error("Selector: " + selector + " didn't match any element in node:");
+				console.log($root);
+			} else {
+				console.error("Node was null");
+			}
+			return null;
+		}
 		if($node._m2d2 === undefined) {
 			$node._m2d2 = true; //flag to prevent it from re-assign methods
 			Object.defineProperty($node, "text", {
@@ -851,7 +888,7 @@ class M2D2 {
 						func = function(obj) {
 							if(obj instanceof HTMLElement) {
 								this.prepend(obj);
-							} else if (Utils.isPlainObject(obj)) {
+						} else if (Utils.isPlainObject(obj)) {
 							    const index = this.items.length;
 							    const $child = _this.getItem(this, index, obj);
 							    this.prepend($child);
@@ -871,13 +908,4 @@ class M2D2 {
 			}
 		});
 	}
-}
-/**
- * Easy way to attach to DOMContentLoaded
- */
-document.ready = (callback) => {
-	const m2d2 = new M2D2();
-	document.addEventListener("DOMContentLoaded", () => {
-		callback((s, o) => { return m2d2.getProxyNode(s, o) }, (s) => { return m2d2.extDom(s) })
-	});
 }
