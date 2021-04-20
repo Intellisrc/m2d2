@@ -13,18 +13,21 @@ class M2D2 {
 	/**
 	 * M2 Will set all extensions to DOM objects
 	 * @param {string, HTMLElement} selector
-	 * @param {HTMLElement} $root
+	 * @param {HTMLElement} [$root]
 	 * @returns {HTMLElement}
 	 */
 	extDom(selector, $root) {
-		if(! selector) { return; } // Do not proceed if selector is null, empty or undefined
+		if(! selector) {  // Do not proceed if selector is null, empty or undefined
+			console.error("Selector was empty");
+			return null;
+		}
 		const $node = Utils.isNode(selector) ? selector : ($root || document).querySelector(selector);
 		if($node._m2d2 === undefined) {
 			$node._m2d2 = true; //flag to prevent it from re-assign methods
 			// TODO: innerText not sure if its the best approach:
 			Object.defineProperty($node, "text", {
 				get() { return this.childNodes.length ? this.innerText : this.textContent; },
-				set(value) { if(this.childNodes.length) { this.innerText = value } else { this.textContent = value }; }
+				set(value) { if(this.childNodes.length) { this.innerText = value } else { this.textContent = value }}
 			});
 			Object.defineProperty($node, "html", {
 				get() { return this.innerHTML; },
@@ -52,7 +55,7 @@ class M2D2 {
 	}
 	/**
 	 * M2D2 will create custom links and properties
-	 * @param {string, HTMLElement} selector
+	 * @param {string, HTMLElement, Node} selector
 	 * @param {Object} object
 	 * @returns {HTMLElement, Proxy}
 	 */
@@ -68,26 +71,26 @@ class M2D2 {
 			console.log(selector);
 			console.log("Second parameter must be an object:")
 			console.log(object);
-			return;
+			return null;
 		}
 		const $node = this.extDom(selector); // Be sure that $node is an extended DOM object
-		Object.keys(object).forEach(k => {
-			let value = object[k];
+		Object.keys(object).forEach(key => {
+			let value = object[key];
 			//Look for property first:
-			let isProp = this.hasProp($node, k);
-			let isAttr = this.hasAttr($node, k);
+			let isProp = this.hasProp($node, key);
+			let isAttr = this.hasAttr($node, key);
 			//Identify if value matches property type:
 			let foundMatch = false;
 			if(isAttr || isProp) {
 				// noinspection FallThroughInSwitchStatementJS
 				switch(true) {
 					// Math found:
-					case k === "value" && this.hasProp($node, "valueAsDate") && value instanceof Date: // Dates
-						k = "valueAsDate"; //renamed value to valueAsDate
-					case typeof value === typeof $node[k]: //Same Time
-					case Utils.isString($node[k]) && Utils.isNumeric(value): //Numeric properties
-					case (Utils.isFunction(value) && Utils.isObject($node[k])): //Functions
-					case Utils.isBool(value) && Utils.isString($node[k]): //Boolean
+					case key === "value" && this.hasProp($node, "valueAsDate") && value instanceof Date: // Dates
+						key = "valueAsDate"; //renamed value to valueAsDate
+					case typeof value === typeof $node[key]: //Same Time
+					case Utils.isString($node[key]) && Utils.isNumeric(value): //Numeric properties
+					case (Utils.isFunction(value) && Utils.isObject($node[key])): //Functions
+					case Utils.isBool(value) && Utils.isString($node[key]): //Boolean
 						foundMatch = true;
 						break;
 				}
@@ -95,14 +98,14 @@ class M2D2 {
 			// Properties and Attributes:
 			if(foundMatch) {
 				let error = false;
-				switch(k) {
+				switch(key) {
 					case "classList":
 						if(Utils.isArray(value)) {
 							value.forEach(v => {
-								$node[k].add(v);
+								$node[key].add(v);
 							});
 						} else if(Utils.isString(value)) {
-							$node[k].add(value);
+							$node[key].add(value);
 						} else {
 							error = true;
 						}
@@ -110,7 +113,7 @@ class M2D2 {
 					case "style":
 					case "dataset":
 						if(Utils.isPlainObject(value)) {
-							Object.assign($node[k], value);
+							Object.assign($node[key], value);
 						} else {
 							error = true;
 						}
@@ -118,14 +121,14 @@ class M2D2 {
 					default:
 						switch(true) {
 							case Utils.isBool(value): // boolean properties
-                                this.setPropOrAttr($node, k, value);
+                                this.setPropOrAttr($node, key, value);
 								break;
 							default:
-								$node[k] = value;
+								$node[key] = value;
 						}
 				}
 				if(error) {
-					console.error("Invalid value passed to '" + k + "': ")
+					console.error("Invalid value passed to '" + key + "': ")
 					console.log(value);
 					console.log("Into Node:");
 					console.log($node);
@@ -135,26 +138,26 @@ class M2D2 {
 			    const options = [];
 			    try {
                     //Look for ID:
-                    if(k && k.match(/^\w/)) {
-                        let elem = $node.find("#" + k);
+                    if(key && key.match(/^\w/)) {
+                        let elem = $node.find("#" + key);
                         if(elem) { options.push(elem); }
                         //Look for name:
-                        elem = $node.find("[name="+k+"]");
+                        elem = $node.find("[name="+key+"]");
                         if(elem) { options.push(elem); }
                         //Look for class:
-                        const elems = $node.findAll("." + k);
+                        const elems = $node.findAll("." + key);
                         if(elems.length > 0) { options.push(elems); }
                     }
                     //Look for element or free selector (e.g: "div > span"):
-                    const elems = $node.findAll(k);
+                    const elems = $node.findAll(key);
                     if(elems.length > 0) { options.push(elems); }
 				} catch(e) {
-				    console.error("Invalid selector: " + k);
+				    console.error("Invalid selector: " + key);
 				    console.log(e);
 				    return;
 				}
 				if(options.length > 1) {
-					console.error("Multiple options found for key: " + k + " under element: ");
+					console.error("Multiple options found for key: " + key + " under element: ");
 					console.log($node);
 					console.log("Options: ");
 					options.forEach(o => { console.log(o); });
@@ -162,22 +165,22 @@ class M2D2 {
 				} else if(options.length === 1) { // Found single option: place values
 					const opt = options[0];
 					if(opt instanceof NodeList) { // Multiple nodes
-					    if(opt.length == 1) { // Normal Object:
-							this.renderAndLink($node, opt[0], k, value);
+					    if(opt.length === 1) { // Normal Object:
+							this.renderAndLink($node, opt[0], key, value);
 					    } else { //TODO: Document : multiple elements become array
 					        const items = [];
                             opt.forEach(item => {
-                                items.push(this.render(item, k, value));
+                                items.push(this.render(item, key, value));
                             });
-                            this.linkNode($node, k, items);
+                            this.linkNode($node, key, items);
                         }
 					} else if(Utils.isNode(opt)) {
 						if(Utils.isArray(value)) { // Process Array
 							const template = object["template"];
 							this.doItems(opt, value, template);
-							this.linkNode($node, k, opt);
+							this.linkNode($node, key, opt);
 						} else { // Normal Objects:
-							this.renderAndLink($node, opt, k, value);
+							this.renderAndLink($node, opt, key, value);
 						}
 					} else {
 						console.error("BUG: It should have been a node but got: ");
@@ -186,15 +189,15 @@ class M2D2 {
 						console.log($node);
 					}
 				} else if(options.length === 0) { //No options found: create nodes
-					if(this.isValidElement(k)) {
-						const $newNode = this.appendElement($node, k);
-						this.renderAndLink($node, $newNode, k, value);
+					if(this.isValidElement(key)) {
+						const $newNode = this.appendElement($node, key);
+						this.renderAndLink($node, $newNode, key, value);
 					} else if(value.tagName !== undefined) {
 						const tag = value.tagName;
 						const $newNode = this.appendElement($node, tag);
 						delete(value.tagName);
-						this.renderAndLink($node, $newNode, k, value);
-					} else if(k === "items") { //Items creation
+						this.renderAndLink($node, $newNode, key, value);
+					} else if(key === "items") { //Items creation
 						const template = object["template"];
 						// Allow use of plain object to specify value -> text //TODO: documentation
 						if(Utils.isPlainObject(value)) {
@@ -206,7 +209,7 @@ class M2D2 {
 						        if(this.hasAttrOrProp($node, "value")) {
                                     obj.value = o;
                                 } else {
-                                    dataset : { id : o };
+                                    obj.dataset = { id : o };
                                 }
                                 valTmp.push(obj);
 						    });
@@ -222,16 +225,16 @@ class M2D2 {
 							console.log(value);
 						}
     				} else if(Utils.isFunction(value)) {
-    				    if(k === "onupdate") {
-    				        $node.addEventListener('onupdate', value);
+    				    if(key === "onupdate") {
+    				        $node.addEventListener(key, value);
     				    }
-						$node[k] = value;
-					} else if(k !== "template") { //We handle templates inside items
-                        console.error("Not sure what you want to do with key: " + k + " under element: ");
+						$node[key] = value;
+					} else if(key !== "template") { //We handle templates inside items
+                        console.error("Not sure what you want to do with key: " + key + " under element: ");
                         console.log($node);
                         console.log("And object:");
                         console.log(object);
-						$node[k] = value;
+						$node[key] = value;
 					}
 				}
 			}
@@ -330,8 +333,12 @@ class M2D2 {
 	}
 
     /**
-     * Get an item to be added
-     */
+	 * Get an item to be added
+	 * @param {HTMLElement|null} $node
+	 * @param {number|string} index
+	 * @param {*} obj
+	 * @param {HTMLElement} $template
+	 */
 	getItem($node, index, obj, $template) {
 	    if(!$template) {
 		    $template = this.getTemplate($node);
@@ -375,7 +382,7 @@ class M2D2 {
 	/** Returns a copy of the model to duplicate
 	 * @private
 	 * @param {HTMLElement} $node
-	 * @param {Object, string} template
+	 * @param {Object, string} [template]
 	 * @returns {HTMLElement}
 	 */
 	getTemplate ($node, template) {
@@ -522,7 +529,7 @@ class M2D2 {
 	/**
 	 * It will set a unique attribute among a group of nodes (grouped by parent)
 	 * @private
-	 * @param {HTMLElement} $node
+	 * @param {HTMLElement, Node} $node
 	 * @param {string} key
 	 */
 	setUniqueAttrib($node, key) {
@@ -770,7 +777,7 @@ class M2D2 {
 					            this.items.forEach(item => {
 					                if(item.dataset && (item.dataset.id * 1) === id) {
 					                    found = item;
-					                    return;
+					                    break;
 					                }
 					            });
 					        }
@@ -781,8 +788,7 @@ class M2D2 {
 					    func = function() {
 					        if(this.items.length) {
                                 const parent = this[0].parentNode;
-                                const last = parent.removeChild(this.items[this.items.length - 1]);
-                                return last;
+                                return parent.removeChild(this.items[this.items.length - 1]);
 					        }
 					    }
 					    break;
@@ -803,7 +809,7 @@ class M2D2 {
 					            this.items.forEach(item => {
 					                if(item.dataset && (item.dataset.id * 1) === id) {
 					                    item.remove();
-					                    return;
+					                    break;
 					                }
 					            });
 					        }
@@ -813,8 +819,7 @@ class M2D2 {
 					    func = function() {
 					        if(this.items.length) {
                                 const parent = this.items[0].parentNode;
-                                const first = parent.removeChild(this.items[0]);
-                                return first;
+                                return parent.removeChild(this.items[0]);
 					        }
 					    }
 					    break;
