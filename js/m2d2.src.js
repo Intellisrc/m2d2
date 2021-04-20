@@ -24,10 +24,20 @@ class M2D2 {
 		const $node = Utils.isNode(selector) ? selector : ($root || document).querySelector(selector);
 		if($node._m2d2 === undefined) {
 			$node._m2d2 = true; //flag to prevent it from re-assign methods
-			// TODO: innerText not sure if its the best approach:
 			Object.defineProperty($node, "text", {
 				get() { return this.childNodes.length ? this.innerText : this.textContent; },
-				set(value) { if(this.childNodes.length) { this.innerText = value } else { this.textContent = value }}
+				set(value) {
+					// text should only change Text nodes and not children: //TODO: documentation
+					if(this.childNodes.length) {
+						this.childNodes.forEach(n => {
+							if(n.constructor.name === "Text") {
+								n.nodeValue = value;
+							}
+						})
+					} else {
+						this.textContent = value
+					}
+				}
 			});
 			Object.defineProperty($node, "html", {
 				get() { return this.innerHTML; },

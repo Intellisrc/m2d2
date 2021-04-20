@@ -58,6 +58,11 @@ div.info dd {
 #checkout tfoot {
     background-color: #EEE;
 }
+.box {
+    border: 1px solid #CCC;
+    padding: 10px;
+    background: #EEE;
+}
 .controls {
     margin: 10px;
     padding: 10px;
