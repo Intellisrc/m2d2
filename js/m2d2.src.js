@@ -4,8 +4,8 @@
  * @since: May, 2018
  * @version: 2.0.0
  * @updated: 2021-04-16
- **/
-/**
+ *
+ *
  * M2D2 Class
  */
 class m2d2 {
@@ -16,6 +16,7 @@ class m2d2 {
 	static instance = new m2d2();
 	/**
 	 * Initialization. Use: m2d2.ready()
+	 * @param { function } callback
 	 */
 	static ready(callback) {
 		document.addEventListener("DOMContentLoaded", () => {
@@ -63,11 +64,16 @@ class m2d2 {
 				set(value) {
 					// text should only change Text nodes and not children: //TODO: documentation
 					if(this.childNodes.length) {
+						let found = false;
 						this.childNodes.forEach(n => {
 							if(n.constructor.name === "Text") {
 								n.nodeValue = value;
+								found = true;
 							}
-						})
+						});
+						if(! found) {
+							this.prepend(document.createTextNode(value));
+						}
 					} else {
 						this.textContent = value
 					}
@@ -203,6 +209,7 @@ class m2d2 {
 					case Utils.isString($node[key]) && Utils.isNumeric(value): //Numeric properties
 					case (Utils.isFunction(value) && Utils.isObject($node[key])): //Functions
 					case Utils.isBool(value) && Utils.isString($node[key]): //Boolean
+					case typeof $node[key] === "object" && $node.tagName === "INPUT": //Cases like "list" in input
 						foundMatch = true;
 						break;
 				}
@@ -233,8 +240,9 @@ class m2d2 {
 					default:
 						switch(true) {
 							case Utils.isBool(value): // boolean properties
+							case this.hasAttrOrProp($node, key):
                                 this.setPropOrAttr($node, key, value);
-								break;
+								break
 							default:
 								$node[key] = value;
 						}
@@ -253,16 +261,16 @@ class m2d2 {
                         //Look for ID:
                         if(key && key.match(/^\w/)) {
                             let elem = $node.find("#" + key);
-                            if(elem) { options.push(elem); }
+                            if(elem && options.indexOf(elem) === -1) { options.push(elem); }
                             //Look for name:
                             elem = $node.find("[name="+key+"]");
-                            if(elem) { options.push(elem); }
+                            if(elem && options.indexOf(elem) === -1) { options.push(elem); }
                             //Look for class:
-                            const elems = $node.findAll("." + key);
+                            const elems = Array.from($node.findAll("." + key)).filter(i => { return options.indexOf(i) === -1 })
                             if(elems.length > 0) { options.push(elems); }
                         }
                         //Look for element or free selector (e.g: "div > span"):
-                        const elems = $node.findAll(key);
+                        const elems =  Array.from($node.findAll(key)).filter(i => { return options.indexOf(i) === -1 })
                         if(elems.length > 0) { options.push(elems); }
                     }
 				} catch(e) {
@@ -278,7 +286,7 @@ class m2d2 {
 					console.log("Please rename key or adjust DOM");
 				} else if(options.length === 1) { // Found single option: place values
 					const opt = options[0];
-					if(opt instanceof NodeList) { // Multiple nodes
+					if(Utils.isArray(opt)) { // Multiple nodes
 					    if(opt.length === 1) { // Normal Object:
 							this.renderAndLink($node, opt[0], key, value);
 					    } else { //TODO: Document : multiple elements become array
@@ -381,10 +389,10 @@ class m2d2 {
 			// When setting values to the node (simplified version):
 			if(Utils.isHtml(value)) {
 				value = { html : value };
-			} else if(Utils.isString(value) || Utils.isNumeric(value)) {
-				value = { text : value };
 			} else if(this.hasProp($node, "value")) {
 				value = { value : value };
+			} else if(Utils.isString(value) || Utils.isNumeric(value)) {
+				value = { text : value };
 			} else if(Utils.isArray(value)) {
 			    value = { items : value };
 			}
@@ -424,12 +432,18 @@ class m2d2 {
 	 * @param {HTMLElement} $child
 	 */
 	linkNode($node, key, $child) {
-		if(this.hasAttrOrProp($node, key)) { // Only if its not an attribute or property, we "link" it.
+		if($node[key] === $child) {
+			try {
+				$node[key] = this.proxy($child);
+			} catch(ignore) {
+				//NOTE: although it fails when using forms, form is a proxy so it still works.
+			}
+		} else if(this.hasAttrOrProp($node, key)) { // Only if its not an attribute or property, we "link" it.
 			$node["$" + key] = $child; //Replace name with "$" + name
 			console.log("Property : " + key + " existed in node: " + $node.tagName +
 			". Using $" + key + " instead for node: " + $child.tagName + ".")
 		} else {
-	        $node[key] = this.proxy($child);
+			$node[key] = this.proxy($child);
 		}
 	}
 	/**
@@ -494,7 +508,7 @@ class m2d2 {
 			$outElem.appendChild($newItem);
 		});
 		//Update all at once
-		//$elem.append(...$outElem.childNodes); <-- works but it is slower
+		//$node.append(...$outElem.childNodes); //<-- works but it is slower
 		while ($outElem.firstChild) {
 			$node.appendChild($outElem.firstChild);
 		}
@@ -617,7 +631,7 @@ class m2d2 {
 	hasProp ($node, prop) {
 		let hasProp = false;
 		if($node && !Utils.isNumeric(prop)) {
-			hasProp = $node[prop] !== undefined &&! $node.hasAttribute(prop);
+			hasProp = ($node[prop] !== undefined &&! ($node[prop] instanceof Node)) &&! $node.hasAttribute(prop);
 		}
 		return hasProp;
 	}
@@ -631,7 +645,11 @@ class m2d2 {
 	 */
 	setPropOrAttr ($node, key, value) {
 	    if(this.hasProp($node, key)) {
-            $node[key] = value;
+	    	try {
+				$node[key] = value;
+			} catch(ignore) { //If fails, set it as attribute: (e.g. input.list)
+				this.setAttr($node, key, value);
+			}
 	    } else {
 	        this.setAttr($node, key, value);
     	}
@@ -666,7 +684,7 @@ class m2d2 {
                     return this.hasAttribute(key);
                 },
                 set : function(val) {
-                    const prevSel = this.parentNode.find("["+key+"]");
+                    const prevSel = this.parentNode ? this.parentNode.find("["+key+"]") : null;
                     if(prevSel) {
                         prevSel.removeAttribute(key);
                     }
@@ -718,10 +736,10 @@ class m2d2 {
                         let key = "";
                         if(Utils.isHtml(value)) {
                             key = "html";
-                        } else if(Utils.isString(value) || Utils.isNumeric(value)) {
+						} else if(this.hasAttrOrProp(target[property], "value")) {
+							key = "value";
+						} else if(Utils.isString(value) || Utils.isNumeric(value)) {
                             key = "text";
-                        } else if(this.hasAttrOrProp(target[property], "value")) {
-                            key = "value";
                         }
                         if(key) {
                             oldValue = target[property][key];

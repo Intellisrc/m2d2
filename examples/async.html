@@ -14,9 +14,9 @@
         return JSON.parse(JSON.stringify(object));
     }
 	//On ready..
-	document.addEventListener("DOMContentLoaded", function() {
+	m2d2.ready ($ => {
         // Showing when it is loading
-        const loading = m2d2("#loading", {
+        const loading = $("#loading", {
             show : false
         });
         const empty_user =  {
@@ -34,7 +34,7 @@
         }
 
         // This example uses the content inside <select> as template, which is an <option> tag.
-        const users = m2d2("#users", function() {
+        const users = $("#users", function() {
             // This part will load the users asynchronously and fill the list:
             (async() => {
                 loading.show = true;
@@ -84,7 +84,7 @@
                 let info = json[0]; //get the first item
                 loading.show = false;
                 users.disabled = false;
-                m2d2(user, {
+                $(user, {
                     user: info.username,
                     name: info.name,
                     email: info.email,
@@ -97,10 +97,10 @@
                     }
                 });
             } else {
-                m2d2(user, cloneObject(empty_user));
+                $(user, cloneObject(empty_user));
             }
         }
-        const user = m2d2("#user", cloneObject(empty_user));
+        const user = $("#user", cloneObject(empty_user));
     });
 </script>
 </head>
