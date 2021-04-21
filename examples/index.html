@@ -13,61 +13,48 @@
 <script type="text/javascript">
 	//On page ready...
 	// title.js
-	m2d2.ready(async ($) => {
-        const input = (await $.input);
-
+	m2d2.ready($ => {
 		// Most simple example using a String as data
         const default_text = "M2D2 Demo";
-		const title = $(".title", {
+		const title = $("#title", {
             text: default_text,
             onclick : function() {
-                $.input.className = "done";
+                input.className = "done";
             }
         });
 
-        // Preferred way to use objects (using ID):
-        $("#shared", {
-            text : "Text in title.js"
-        });
+        // Use ID to share it between "ready" blocks
+        shared.text = "Text in title.js";
 
-        // Here $.input is actually a Promise object, so it makes no sense:
-        // $.input.className = "error";
-
-        // This is the correct usage:
-        input.className = "ok";
-
-        return { title : title }
+        input.classList.add("title");
 	});
-/*
+
     // time.js
     m2d2.ready($ => {
-        $("#time", {
-            text : new Date().toDateString()
-        });
-        //$.input.className = "err";
+        time.text = new Date().toDateString()
+        input.classList.add("time");
     });
-*/
+
 	// input.js
     m2d2.ready($ => {
-        const input = $("#new_title", {
+        const input = $("#input", {
             autofocus: true,
             onkeyup: function () {
-                $.title.text = this.value;
+                title.text = this.value;
             }
         });
         shared.text = "Text in input.js";
-        return { input : input }
     });
 
 </script>
 </head>
 <body>
 <article>
-    <h1 class="title">Title</h1>
+    <h1 id="title">Title</h1>
     <p>This is the most simple example. We define two objects: 'title' and 'input'.</p>
     <p>To update the title, input some text:</p>
     <div class="controls">
-        <div>New Title: <input id="new_title" type="text" /></div>
+        <div>New Title: <input id="input" type="text" /></div>
     </div>
     <div id="shared">Some</div>
     <div id="time"></div>

@@ -14,7 +14,6 @@ class m2d2 {
 	constructor() {}
 	//------------------------- STATIC -----------------------------
 	static instance = new m2d2();
-	static collection = {}
 	/**
 	 * Initialization. Use: m2d2.ready()
 	 */
@@ -25,96 +24,7 @@ class m2d2 {
 			}
 			// Additional features:
 			m.extendDom = this.instance.extDom;
-			const handler = {
-				get: (target, objName, receiver) => {
-				    let promise = (async() => {
-                        if(target[objName] !== undefined) {
-                            const t = target[objName];
-                            if(typeof t === "function") {
-                                return t.bind(target);
-                            } else {
-                                return t;
-                            }
-                        } else {
-                            // Be sure the object we are looking for exists:
-                            if(this.collection[objName] === undefined) {
-                                let promiseWait = new Promise((resolve) => {
-                                    let timeout = 20; //Max 1 second
-                                    const checker = setInterval(() => {
-                                        if(this.collection[objName] !== undefined) {
-                                            clearInterval(checker);
-                                            return resolve(this.collection[objName]);
-                                        } else if(! timeout--) {
-                                            clearInterval(checker);
-                                            console.error("Object " + objName + " was never resolved but it was requested.");
-                                            console.log("Perhaps the object was called without 'await'?")
-                                            console.log("Other reason could be that the block related to that object was never executed,");
-                                            console.log("didn't finished or didn't exported the object, for example: `return { " + objName + " : " + objName +  "}`");
-                                            return resolve({});
-                                        }
-                                    }, 50);
-                                });
-                                let result = await promiseWait; // wait until the promise resolves (*)
-                                return result;
-                            }
-                            return this.collection[objName];
-                        }
-					})();
-					promise._objectName = objName;
-					return new Proxy(promise, {
-					    get : (target, property, receiver) => {
-					        if(target[property] !== undefined) {
-					            const t = target[property];
-                                if(typeof t === "function") {
-                                    return t.bind(target);
-                                } else {
-                                    return t;
-                                }
-					        } else {
-					            const objName = target._objectName;
-                                console.error("Trying to modify a Promise Object: " + objName + "." + property);
-                                console.log("To solve this issue, your options are (in recommended order):");
-                                console.log(" 1. move your statement inside an event like 'onclick' if possible.");
-                                console.log(" 2. use `m2d2.ready(async $ => { ... });` and then:");
-                                console.log("    `const " + objName + " = (await $." + objName + ");`");
-                                console.log("    `console.log(" + objName + "." + property + ");`");
-                                console.log(" 3. reorder your 'm2d2.ready' blocks");
-                                console.log(" 4. delay the request wrapping it in a setTimeout function");
-                                return {};
-                            }
-					    },
-					    set : (target, property, value) => {
-					        if(target[property] !== undefined) {
-					            target[property] = value;
-					            return true;
-					        } else {
-					            const objName = target._objectName;
-                                console.error("Trying to modify a Promise Object: " + objName + "." + property);
-                                console.log("To solve this issue, your options are (in recommended order):");
-                                console.log(" 1. move your statement inside an event like 'onclick' if possible.");
-                                console.log(" 2. use `m2d2.ready(async $ => { ... });` and then:");
-                                console.log("    `const " + objName + " = (await $." + objName + ");`");
-                                console.log("    `" + objName + "." + property + " = " + value +";`");
-                                console.log(" 3. reorder your 'm2d2.ready' blocks");
-                                console.log(" 4. delay the request wrapping it in a setTimeout function");
-					            return false;
-                            }
-					    }
-					});
-				},
-				set: (target, objName, value) => {
-					this.collection[objName] = value;
-					return true;
-				}
-			};
-			m = new Proxy(m, handler);
-            const ret = callback(m);
-            // Here we import objects to be available to other:
-            if(ret) {
-                Object.getOwnPropertyNames(ret).forEach(o => {
-                    this.collection[o] = ret[o];
-                });
-            }
+            callback(m);
 		});
 	}
 	/**
@@ -714,11 +624,7 @@ class m2d2 {
             const handler = {
                 get: (target, property, receiver) => {
                     const t = target[property];
-                    if(typeof t === "function") {
-                        return t.bind(target);
-                    } else {
-                        return t;
-                    }
+                    return typeof t === "function" ? t.bind(target) : t;
                 },
                 set: (target, property, value) => {
                     let oldValue = "";
