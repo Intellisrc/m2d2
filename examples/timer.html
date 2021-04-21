@@ -11,17 +11,20 @@
     <!--                   -->
     <script type="text/javascript">
         //On ready...
-        document.addEventListener("DOMContentLoaded", function() {
-            const clock = m2d2("#now", {
+        m2d2.ready($ => {
+            const clock = $("#now", {
                 text : "",
                 title : ""
             });
 
             function updTime() {
                 const date = new Date();
-                clock.text = "The current date / time is: " + date.toLocaleString();
-                clock.dateTime = date;
-                clock.title = "Attribute datetime is also changing!";
+                // JS way to update several properties at once:
+                with(clock) {
+                    text = "The current date / time is: " + date.toLocaleString();
+                    dateTime = date;
+                    title = "Attribute datetime is also changing!";
+                }
             }
             // This example, is to demonstrate how to use the interval
             // call function each 1sec.

@@ -15,7 +15,7 @@ m2d2.ready($ => {
         "Form validation" : "form.html",
         "Custom extensions" : "extend.html",
     }
-    $("body", function() {
+    $(function() {
         const links = [];
         const baseURL = window.location.href.indexOf("examples/") >= 0 ? "" : "examples/";
         for(let title in menuLinks) {

@@ -26,30 +26,38 @@ m2d2.ready($ => {
         });
         let data = await promise;
         list.items = data;
-        // To update the status text:
-        status.text = "Loaded !";
+        movies.status = "Loaded !";
         // This example is to show how to generate lists
     })();
-    list = $("#items", {
-        template : {
-            li : {
-                title : "This is a Movie"
-            }
-        },
-        //items : [] <-- optional when "template" is set
+    /*
+     * Here, instead of specifying the template as object, we
+     * specified it as HTML template, so we don't need it in the
+     * declaration. We can use an array as second argument:
+     */
+    list = $("#items", []);
+    /*
+     * Another difference with original code is that instead of
+     * just "status", we are wrapping it around "movies", so
+     * we can set it lated as: "movies.status = 'something'"
+     */
+    const movies = $("#movies", {
+        status : "Loading..."
     });
-    const status = $(".status", "Loading...");
 });
 </script>
 </head>
 <body>
-<article>
+<article id="movies">
     <h1>M2D2 Async List:</h1>
     <p>This example uses an async function to get the data and then it displays the list using the template.</p>
     <hr>
     <div>Status: <span class="status"></span></div>
     <p>Movie List:</p>
-    <ol id="items"></ol>
+    <ol id="items">
+        <template>
+            <li title="This is a Movie"></li>
+        </template>
+    </ol>
 </article>
 </body>
 </html>

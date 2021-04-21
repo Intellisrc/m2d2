@@ -17,7 +17,7 @@ let actions;
 let olist;
 
 //On ready...
-document.ready(m2d2 => {
+m2d2.ready($ => {
 
     function selectItem(ev) {
         this.selected = true;
@@ -32,7 +32,7 @@ document.ready(m2d2 => {
     }
 
     // This example is to show how to generate lists
-    checkout = m2d2("#checkout", {
+    checkout = $("#checkout", {
         list : {
             items : [
             {
@@ -108,7 +108,7 @@ document.ready(m2d2 => {
         checkout.total = checkout.list.items.length;
     }
 
-    actions = m2d2("#actions", {
+    actions = $("#actions", {
         // To Sort by Price:
         sort : {
             onupdate : onUpdate,
@@ -186,7 +186,7 @@ document.ready(m2d2 => {
         }
     });
 
-    olist = m2d2("ol", {
+    olist = $("ol", {
         li : {
             style : { color : "green" }
         }

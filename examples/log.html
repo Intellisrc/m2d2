@@ -40,7 +40,7 @@ function getRandom(array) {
     return array[Math.floor(Math.random() * array.length)];
 }
 //On ready...
-document.addEventListener("DOMContentLoaded", function() {
+m2d2.ready($ => {
     const users = ["admin","editor","guest"]
     const actions = {
         "read": "The user [USER] viewed an item",
@@ -58,7 +58,7 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
     // This example is to show how append to a list
-    const list = m2d2("#log", {
+    const list = $("#log", {
         template : {
             li : {
                 date : {

@@ -119,6 +119,7 @@ class m2d2 {
 					console.log("You may need to update the M2D2 version or report it to: github.com/lepe/m2d2/")
 				}
 			});
+			// Properties:
 			Object.defineProperty($node, "text", {
 				get() { return this.childNodes.length ? this.innerText : this.textContent; },
 				set(value) {
@@ -207,6 +208,7 @@ class m2d2 {
                     }
 				}
 			});
+			// Functions:
 			Object.assign($node, {
 				find: (it) => {
 					const node = $node.querySelector(it)
@@ -235,15 +237,16 @@ class m2d2 {
 			object = selector;
 			selector = "body";
 		}
-		if(!((Utils.isString(selector) || Utils.isNode(selector)) && Utils.isObject(object))) {
+		if(!((Utils.isString(selector) || Utils.isNode(selector)) && object)) {
 			console.error("Passed parameters to m2d2 are wrong.")
 			console.log("First parameter must be string:")
 			console.log(selector);
-			console.log("Second parameter must be an object:")
+			console.log("Second parameter must be not be empty:")
 			console.log(object);
 			return null;
 		}
 		const $node = this.extDom(selector); // Be sure that $node is an extended DOM object
+		object = this.plainToObject($node, object); // Be sure it's an object //TODO: documentation : text parameter
 		Object.keys(object).forEach(key => {
 			let value = object[key];
 			//Look for property first:
@@ -308,20 +311,22 @@ class m2d2 {
 			} else {
 			    const options = [];
 			    try {
-                    //Look for ID:
-                    if(key && key.match(/^\w/)) {
-                        let elem = $node.find("#" + key);
-                        if(elem) { options.push(elem); }
-                        //Look for name:
-                        elem = $node.find("[name="+key+"]");
-                        if(elem) { options.push(elem); }
-                        //Look for class:
-                        const elems = $node.findAll("." + key);
+			        if(key !== "template") {
+                        //Look for ID:
+                        if(key && key.match(/^\w/)) {
+                            let elem = $node.find("#" + key);
+                            if(elem) { options.push(elem); }
+                            //Look for name:
+                            elem = $node.find("[name="+key+"]");
+                            if(elem) { options.push(elem); }
+                            //Look for class:
+                            const elems = $node.findAll("." + key);
+                            if(elems.length > 0) { options.push(elems); }
+                        }
+                        //Look for element or free selector (e.g: "div > span"):
+                        const elems = $node.findAll(key);
                         if(elems.length > 0) { options.push(elems); }
                     }
-                    //Look for element or free selector (e.g: "div > span"):
-                    const elems = $node.findAll(key);
-                    if(elems.length > 0) { options.push(elems); }
 				} catch(e) {
 				    console.error("Invalid selector: " + key);
 				    console.log(e);
@@ -360,6 +365,11 @@ class m2d2 {
 						console.log($node);
 					}
 				} else if(options.length === 0) { //No options found: create nodes
+				    // Make "items" optional: //TODO: document
+					if(key === "template" && object["items"] === undefined) {
+					    key = "items";
+					    value = [];
+					}
 					if(this.isValidElement(key)) {
 						const $newNode = this.appendElement($node, key);
 						this.renderAndLink($node, $newNode, key, value);
@@ -429,7 +439,7 @@ class m2d2 {
 	 * @param {*} value
 	 */
     plainToObject($node, value) {
-		if(!Utils.isObject(value) &&! Utils.isFunction(value)) {
+		if(!Utils.isPlainObject(value) &&! Utils.isFunction(value)) {
 			// When setting values to the node (simplified version):
 			if(Utils.isHtml(value)) {
 				value = { html : value };
@@ -437,6 +447,8 @@ class m2d2 {
 				value = { text : value };
 			} else if(this.hasProp($node, "value")) {
 				value = { value : value };
+			} else if(Utils.isArray(value)) {
+			    value = { items : value };
 			}
 		}
 		return value;
@@ -487,10 +499,12 @@ class m2d2 {
 	 * @private
 	 * @param {string} tagName
 	 * @returns {boolean}
+	 * Note: although "<template>" is a valid HTML element, we ignore it here as the only
+	 *       purpose is to be used with "items".
 	 */
 	isValidElement(tagName) {
 		const $node = Utils.newNode(tagName);
-		return $node.constructor.name !== "HTMLUnknownElement";
+		return tagName !== "template" && $node.constructor.name !== "HTMLUnknownElement";
 	}
 	/**
 	 * Creates a dom element inside $node
@@ -537,6 +551,7 @@ class m2d2 {
 		const $outElem = new DocumentFragment()
 		let i = 0;
 		values.forEach(val => {
+		    val = this.plainToObject($node, val);
 		    const $newItem = this.getItem($node, i++, val, $template);
 			$outElem.appendChild($newItem);
 		});
@@ -785,6 +800,9 @@ class m2d2 {
                             console.log("Value: (not a function)");
                             console.log(value);
                         }
+                    } else if(property === "items") { //Reset items
+                        target.items.clear();
+                        this.doItems(target, value);
                     } else {
                         oldValue = target[property];
                         target[property] = value;
