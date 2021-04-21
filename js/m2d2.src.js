@@ -8,28 +8,59 @@
 /**
  * M2D2 Class
  */
-class M2D2 {
+class m2d2 {
 	constructor() {}
-	static instance = new M2D2();
+	//------------------------- STATIC -----------------------------
+	static instance = new m2d2();
 	static collection = {}
+	/**
+	 * Initialization. Use: m2d2.ready()
+	 */
 	static ready(callback) {
 		document.addEventListener("DOMContentLoaded", () => {
 			let m = (selector, object) => {
-				return this.instance.getProxyNode(selector, object)
+				return this.instance.getProxyNode(selector, object);
 			}
 			// Additional features:
-			m.ext = this.instance.extDom
+			m.extendDom = this.instance.extDom;
+			// Be sure the object we are looking for exists:
+			m.ready = async (objName) => {
+			    let promise = new Promise((resolve) => {
+                    const checker = setInterval(() => {
+                        if(this.collection[objName] !== undefined) {
+                            clearInterval(checker);
+                            return resolve(this.collection[objName]);
+                        }
+                    }, 100);
+                });
+                let result = await promise; // wait until the promise resolves (*)
+                return result;
+			};
 			const handler = {
-				get: (target, property, receiver) => {
-					return this.collection[property];
+				get: (target, objName, receiver) => {
+				    if(target[objName] !== undefined) {
+				        return target[objName];
+				    } else {
+                        if(this.collection[objName] === undefined) {
+                            console.error("Object: " + objName + " is not ready yet.");
+                            console.log("To solve this issue, your options are (in recommended order):");
+                            console.log(" 1. move it inside an event like 'onclick' if possible.");
+                            console.log(" 2. use $.ready('" + objName + "').then(" + objName + " => { ... your code ... });");
+                            console.log(" or (async() => { const " + objName + " = await $.ready('" + objName + "') })();");
+                            console.log(" 3. reorder your 'm2d2.ready' blocks");
+                            console.log(" 4. delay the request wrapping it in a setTimeout function");
+                        }
+                        return this.collection[objName];
+					}
 				},
-				set: (target, property, value) => {
-					this.collection[property] = value;
+				set: (target, objName, value) => {
+					this.collection[objName] = value;
 					return true;
 				}
 			};
 			m = new Proxy(m, handler);
 			const ret = callback(m);
+			// Here we import objects to be available to other:
 			if(ret) {
 				Object.getOwnPropertyNames(ret).forEach(o => {
 					this.collection[o] = ret[o];

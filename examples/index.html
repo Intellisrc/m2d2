@@ -12,27 +12,47 @@
 <!--                   -->
 <script type="text/javascript">
 	//On page ready...
-	M2D2.ready($ => {
+	// title.js
+	m2d2.ready($ => {
 		// Most simple example using a String as data
         const default_text = "M2D2 Demo";
-		return {
-		    title : $(".title", {
-                text: default_text,
-                onclick : function() {
-                    $.input.className = "done";
-                }
-            })
-        }
+		const title = $(".title", {
+            text: default_text,
+            onclick : function() {
+                $.input.className = "done";
+            }
+        });
+        $("#shared", {
+            text : "Text in title.js"
+        });
+
+        // Here $.input is not available and will throw an error:
+        //$.input.className = "error";
+
+        // Method 1:
+        $.ready("input").then(input => {
+            input.className = "ok";
+        });
+
+        // Method 2:
+        (async() => {
+            const input = await $.ready("input");
+            input.className = "ok";
+        })();
+
+        return { title : title }
 	});
-    M2D2.ready($ => {
-        return {
-            input : $("#new_title", {
-                autofocus: true,
-                onkeyup: function () {
-                    $.title.text = this.value;
-                }
-            })
-        }
+
+	// input.js
+    m2d2.ready($ => {
+        const input = $("#new_title", {
+            autofocus: true,
+            onkeyup: function () {
+                $.title.text = this.value;
+            }
+        });
+        shared.text = "Text in input.js";
+        return { input : input }
     });
 </script>
 </head>
@@ -44,6 +64,7 @@
     <div class="controls">
         <div>New Title: <input id="new_title" type="text" /></div>
     </div>
+    <div id="shared">Some</div>
 </article>
 </body>
 </html>
