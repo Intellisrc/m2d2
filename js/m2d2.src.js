@@ -23,12 +23,12 @@ class m2d2 {
 				return this.instance.getProxyNode(selector, object);
 			}
 			// Additional features:
-			m.extendDom = this.instance.extDom;
+			m.extendDOM = this.instance.extDom;
             callback(m);
 		});
 	}
 	/**
-	 * M2 Will set all extensions to DOM objects
+	 * M2 Will set all extensions to DOM objects //TODO: documentation
 	 * @param {string, HTMLElement} selector
 	 * @param {HTMLElement, Node} [$root]
 	 * @returns {HTMLElement}
@@ -51,6 +51,12 @@ class m2d2 {
 		}
 		if($node._m2d2 === undefined) {
 			$node._m2d2 = true; //flag to prevent it from re-assign methods
+			["find","findAll","onupdate","show","css","text","html"].forEach(f => {
+				if($node.hasOwnProperty(f)) {
+					console.log("Node already had ["+f+"] property. It might cause unexpected behaviour.")
+					console.log("You may need to update the M2D2 version or report it to: github.com/lepe/m2d2/")
+				}
+			});
 			Object.defineProperty($node, "text", {
 				get() { return this.childNodes.length ? this.innerText : this.textContent; },
 				set(value) {
@@ -70,13 +76,76 @@ class m2d2 {
 				get() { return this.innerHTML; },
 				set(value) { this.innerHTML = value;  }
 			});
-			["find","findAll","onupdate"].forEach(f => {
-				if($node.hasOwnProperty(f)) {
-					console.log("Node already had ["+f+"] property. It might cause unexpected behaviour.")
-					console.log("You may need to update the M2D2 version or report it to: github.com/lepe/m2d2/")
+			Object.defineProperty($node, "css", {   //TODO: document new behaviour
+				get() {
+				    return this.classList;
+				},
+				set(value) {
+				    if(Utils.isArray(value)) {
+    				    this.className = value.join(" ");
+				    } else if(Utils.isString(value)) {
+    				    this.className = value;
+				    } else if(Utils.isPlainObject(value)) {
+				        Object.keys(value).forEach(c => {
+				            if(value[c]) {
+				                this.classList.add(c);
+				            } else {
+				                this.classList.remove(c);
+				            }
+				        });
+				    } else {
+				        console.error("Trying to assign a wrong value to css : " + value);
+				    }
 				}
 			});
-			return Object.assign($node, {
+			Object.defineProperty($node, "show", {
+				get() { //TODO: document
+                    const rect = this.getBoundingClientRect();
+                    const display = this.style.display !== "none";
+                    const notHidden = this.style.visibility !== "hidden";
+                    return (
+                        display && notHidden &&
+                        rect.top >= 0 && rect.left >= 0 &&
+                        rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+                        rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+                    );
+				},
+				set(show) {
+                    const cssDisplay = () => {
+                        return getComputedStyle(this, null).display;
+                    };
+                    const defaultDisplay = () => {
+                        const b = document.getElementsByTagName("body")[0];
+                        const t = document.createElement("template");
+                        const n = document.createElement(this.tagName);
+                        t.appendChild(n);
+                        b.appendChild(t);
+                        const display = getComputedStyle(n, null).display;
+                        t.remove();
+                        return display;
+                    };
+                    if(show) {
+                        if(cssDisplay() === "none") {
+                            if(this._m2d2_display) {
+                                this.style.display = this._m2d2_display;
+                            } else {
+                                this.style.removeProperty("display");
+                                if(cssDisplay() === "none") {
+                                    const defaultShow = defaultDisplay();
+                                    this.style.display = this.dataset.display || (defaultShow !== "none" ? defaultShow : "block");
+                                }
+                            }
+                        }
+                    } else {
+                        const stored = this.style.display !== "none" ? this.style.display : cssDisplay();
+                        if(stored !== "none") {
+                            this._m2d2_display = stored;
+                        }
+                        this.style.display = "none"
+                    }
+				}
+			});
+			Object.assign($node, {
 				find: (it) => {
 					const node = $node.querySelector(it)
 					return node ? this.extDom(node) : null;
@@ -87,6 +156,7 @@ class m2d2 {
 					return nodeList;
 				}
 			});
+			return $node;
 		} else {
 			return $node;
 		}
@@ -125,6 +195,7 @@ class m2d2 {
 					// Math found:
 					case key === "value" && this.hasProp($node, "valueAsDate") && value instanceof Date: // Dates
 						key = "valueAsDate"; //renamed value to valueAsDate
+					case key === "css": // css is a Proxy so it fails to verify:
 					case typeof value === typeof $node[key]: //Same Time
 					case Utils.isString($node[key]) && Utils.isNumeric(value): //Numeric properties
 					case (Utils.isFunction(value) && Utils.isObject($node[key])): //Functions

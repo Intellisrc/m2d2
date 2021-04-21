@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", function() {
+m2d2.ready($ => {
     const menuLinks = {
         "Update from input" : "index.html",
         "Update from input using object" : "object.html",
@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", function() {
         "Form validation" : "form.html",
         "Custom extensions" : "extend.html",
     }
-    m2d2(function() {
+    $("body", function() {
         const links = [];
         const baseURL = window.location.href.indexOf("examples/") >= 0 ? "" : "examples/";
         for(let title in menuLinks) {
