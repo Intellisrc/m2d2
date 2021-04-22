@@ -556,7 +556,35 @@ class m2d2 {
         // Add "selected" property
         this.setUniqueAttrib($newItem, "selected"); //TODO: Document
         // Set values
-        return this.doDom($newItem, obj);
+		let $newNode = this.doDom($newItem, obj);
+		// Place Events:
+		return this.getItemWithEvents($node, $newNode);
+	}
+
+	/**
+	 * Returns a Node with events
+	 * @param {HTMLElement, Node} $node
+	 * @param {HTMLElement, Node} $newNode
+	 * @returns {HTMLElement|Proxy}
+	 */
+	getItemWithEvents($node, $newNode) {
+		if($node.__template !== undefined) {
+			const scan = (object, result) => {
+				result = result || {};
+				Object.keys(object).forEach(key=> {
+					if (Utils.isPlainObject(object[key])) {
+						result[key] = scan(object[key]);
+					} else if(Utils.isFunction(object[key])) {
+						result[key] = object[key];
+					}
+				});
+				return result;
+			}
+			let tree = scan($node.__template);
+			if(tree) { tree = tree[Object.keys(tree)[0]] }
+			$newNode = this.doDom($newNode, tree);
+		}
+		return $newNode;
 	}
 
 	/**
@@ -601,16 +629,17 @@ class m2d2 {
 			let $template;
 			if (template) {
 				if (Utils.isPlainObject(template)) {
-					const $base = Utils.newNode("div");
+					const $base = Utils.newNode("template");
 					$template = this.doDom($base, template);
+					this.defineProp($node, "__template", template); // This is the original template with events
 				} else if (Utils.isHtml(template)) {
 					$template = Utils.htmlNode("<div>" + template + "</div>");
 				} else if (Utils.isSelectorID(template)) { //Only IDs are allowed
 					$template = document.querySelector(template);
 				} else { //When its just a tag name
-					$template = Utils.htmlNode("<div>" + Utils.newNode(template).outerHTML + "</div>");
+					$template = Utils.newNode(template);
 				}
-				if($template && $template.childElementCount > 0) {
+				if ($template && $template.childElementCount > 0) {
 					$template = $template.firstChild;
 				}
 			} else if($node.find("template")) {	// No template specified, look into HTML under node:
@@ -640,7 +669,7 @@ class m2d2 {
 				}
 			}
 			if ($template) {
-				this.defineProp($node, "_template", $template);
+				this.defineProp($node, "_template", $template); // This is the DOM
 			}
 			return $template;
 		}
@@ -987,7 +1016,7 @@ class m2d2 {
 					case "reverse": // reverse the order
 						func = function(...args) {
 					        if(this.items.length) {
-                                const items = Array.from(this.items);
+                                const items = Array.from(this.items); //Keep a copy
                                 const retObj = items[method](...args);
                                 reattach(items);
                                 return retObj;
@@ -1005,7 +1034,7 @@ class m2d2 {
 					        let found = null;
 					        if(this.items.length) {
 					            this.items.some(item => {
-					                if(item.dataset && (item.dataset.id * 1) === id) {
+					                if(item.dataset && (item.dataset.id * 1) === id * 1) {
 					                    found = item;
 					                    return true;
 					                }
@@ -1037,7 +1066,7 @@ class m2d2 {
 					    func = function(id) {
 					        if(this.items.length) {
 					            this.items.some(item => {
-					                if(item.dataset && (item.dataset.id * 1) === id) {
+					                if(item.dataset && (item.dataset.id * 1) === id * 1) {
 					                    item.remove();
 										return true;
 									}
@@ -1056,7 +1085,7 @@ class m2d2 {
 					case "sort": // You can pass a function to compare items:
 						func = function(compareFunc) {
 					        if(this.items.length) {
-                                const items = Array.from(this.items);
+                                const items = Array.from(this.items); //Keep copy
                                 items.sort(compareFunc || ((a, b) => {
                                     return a.text.localeCompare(b.text);
                                 }));
@@ -1079,7 +1108,9 @@ class m2d2 {
 					    // at, every, filter, find, findIndex, forEach, includes, indexOf, join,
 					    // keys, lastIndexOf, map, reduce, reduceRight, slice, some, values
 						if(typeof Array.prototype[method] == "function") {
-							func = Array.prototype[method];
+							func = function (...args) {
+								return Array.from($node.items)[method](...args);
+							}
 						}
 				}
 				if(func) {

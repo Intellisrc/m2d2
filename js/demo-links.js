@@ -10,7 +10,7 @@ m2d2.ready($ => {
         "Movie list - Async" : "list-async.html",
         "Item list" : "list.html",
         "Item list (sort)" : "list-sort.html",
-        "Item list (advanced)" : "list-adv.html",
+        "Item list (advanced)" : "list-alt.html",
         "Phone book - Async" : "async.html",
         "Form validation" : "form.html"
     }

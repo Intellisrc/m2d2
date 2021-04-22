@@ -11,9 +11,9 @@
     <script src="../js/demo-links.js" type="text/javascript"></script>
     <!--                   -->
     <script type="text/javascript">
-        document.addEventListener("DOMContentLoaded", function() {
-            const list = m2d2("#list", {
-                template : "li",
+        m2d2.ready($ => {
+            $("#list", {
+                //template : "li", <-- optional as it is automatically guessed
                 dataset : { sorted : false },
                 items : [
                     "Apple",
@@ -27,15 +27,14 @@
                     "Strawberry"
                 ]
             });
-            m2d2("button", {
+            $("button", {
                 onclick : (ev) => {
                     if(list.dataset.sorted) {
                         list.items.reverse()
                     } else {
                         list.items.sort()
-                        list.dataset.sorted = true
+                        list.dataset.sorted = true;
                     }
-                    console.log(list);
                 }
             })
         });
