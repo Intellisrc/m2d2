@@ -10,7 +10,7 @@
 	</style>
 <script src="../dist/m2d2.src.js" type="text/javascript"></script>
 <!-- Import Demo menu: -->
-<!--script src="../js/demo-links.js" type="text/javascript"></script-->
+<script src="../js/demo-links.js" type="text/javascript"></script>
 <!--- --->
 <script type="text/javascript">
 	//On page ready...
@@ -27,6 +27,11 @@
 				autofocus: true,
 				value: "Default title",
 				size: 50
+			},
+			button : {
+				onclick : () => {
+					user.name = "Button clicked.";
+				}
 			}
 		});
 		// Prepare recipients: (initialized with textContent)
@@ -56,6 +61,7 @@
 	<div class="user">
 		<form>
 			<label for="name">Name : </label><input id="name" type="text" value="" />
+			<button>Click Me</button>
 		</form>
 	</div>
 	<hr>
@@ -65,6 +71,11 @@
 		And you will see the input and the 2 titles change.
 		Additionally, try changing the "value" attribute in HTML directly, and it will also change the titles.
 	</p>
+	<h3>Lesson:</h3>
+	<p>When you click on the button, you don't need to update the title and subtitle manually. which is
+		different from using:<br>
+		<code>user.name.oninput</code> event, in which the title and subtitle won't be updated when the
+		button is clicked.</p>
 </article>
 </body>
 </html>

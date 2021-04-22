@@ -72,6 +72,8 @@ class Utils {
  */
 class m2d2 {
     'use strict';
+	_storedEvents = [];
+	__storedEventsTimeout = 50; //ms to group same events
 
 	constructor() {}
 	//------------------------- STATIC -----------------------------
@@ -225,8 +227,8 @@ class m2d2 {
 				}
 			});
 			// Let attributes know about changes in values
-			if($node.tagName === "INPUT" && this.hasAttrOrProp($node, "value")) {
-				$node.oninput = function (ev) { this.setAttribute("value", this.value )}
+			if(["INPUT", "TEXTAREA", "SELECT"].indexOf($node.tagName) >= 0 && this.hasAttrOrProp($node, "value")) {
+				$node.oninput = function() { this.setAttribute("value", this.value )}
 			}
 			return $node;
 		} else {
@@ -417,7 +419,7 @@ class m2d2 {
 						}
     				} else if(Utils.isFunction(value)) {
     				    if(key === "onupdate") {
-    				        $node.addEventListener(key, value);
+    				        $node.addEventListener(key, value, true);
     				    }
 						$node[key] = value;
 					} else if(key !== "template") { //We handle templates inside items
@@ -436,7 +438,7 @@ class m2d2 {
 		    const inputImage = $node.tagName === "INPUT" && $node.type === "image";
 		    if(! (native || inputImage)) {
                 const loadedEvent = new CustomEvent('onload');
-		        $node.addEventListener("onload", $node.onload);
+		        $node.addEventListener("onload", $node.onload, true);
 		        $node.dispatchEvent(loadedEvent);
 		    }
 		}
@@ -497,11 +499,13 @@ class m2d2 {
 	 */
 	linkNode($node, key, $child) {
 		if($node[key] === $child) {
+			const $proxy = this.proxy($child);
 			try {
-				$node[key] = this.proxy($child);
+				$node[key] = $proxy;
 			} catch(ignore) {
 				//NOTE: although it fails when using forms, form is a proxy so it still works.
 			}
+			$node["$" + key] = $proxy;
 		} else if(this.hasAttrOrProp($node, key)) { // Only if its not an attribute or property, we "link" it.
 			$node["$" + key] = $child; //Replace name with "$" + name
 			console.log("Property : " + key + " existed in node: " + $node.tagName +
@@ -509,7 +513,6 @@ class m2d2 {
 		} else {
 			$node[key] = this.proxy($child);
 		}
-		this.observe($child)
 	}
 	/**
 	 * Returns true if the tag is a registered HTMLElement
@@ -783,17 +786,25 @@ class m2d2 {
 	 * NOTE: for reading, "div.a" will return a Node and not the value.
 	 * @private
 	 * @param {Object} obj
+	 * @param {boolean} [force] Force to update
 	 * @returns {Proxy, Object}
 	 */
-	proxy (obj) {
-	    if(obj._proxy !== undefined) {
+	proxy (obj, force) {
+	    if(obj._proxy !== undefined && force === undefined) {
 	        return obj;
 	    } else {
 	        obj._proxy = true;
             const handler = {
                 get: (target, property, receiver) => {
                     const t = target[property];
-                    return typeof t === "function" ? t.bind(target) : t;
+                    switch (true) {
+						case t === null || t === undefined: return null;
+                    	// Functions should bind target as "this"
+						case typeof t === "function": return t.bind(target);
+						// If there was a failed attempt to set proxy, return it on read:
+						case t._proxy === true && target["$" + property] !== undefined: return target["$" + property];
+						default: return t;
+					}
                 },
                 set: (target, property, value) => {
                     let oldValue = "";
@@ -812,10 +823,10 @@ class m2d2 {
                         }
                     } else if(property === "onupdate") {
                         if(Utils.isFunction(value)) {
-                            target.addEventListener("onupdate", value);
+                            target.addEventListener("onupdate", value, true);
                             oldValue = target[property];
                             target[property] = value;
-                        } else {
+						} else {
                             console.error("Value passed to 'onupdate' is incorrect, in node:");
                             console.log(target);
                             console.log("Value: (not a function)");
@@ -858,6 +869,17 @@ class m2d2 {
 	onObserve(mutationsList, observer) {
 		mutationsList.forEach(m => {
 			const target = m.target;
+			// We store the events to remove immediately repeated events.
+			// Forms will link elements which can not be set as proxy so we
+			// add a link named `"$" + key` but this have the side effect to
+			// generate two triggers (one for the element and one for the Proxy).
+			if(this._storedEvents.indexOf(m) >= 0) { return } else {
+				this._storedEvents.push(m);
+				setTimeout(() => {
+					const i = this._storedEvents.indexOf(m);
+					if(i >= 0) { this._storedEvents.splice(i, 1); }
+				}, this.__storedEventsTimeout); //TODO: this will prevent repeated events to be triggered in less than 50ms : document
+			}
 			// Check for onupdate //TODO: document
 			if(target.onupdate !== undefined) {
 				if(m.type === "attributes") {
