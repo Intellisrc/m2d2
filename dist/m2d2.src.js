@@ -85,8 +85,6 @@ class m2d2 {
 			let m = (selector, object) => {
 				return this.instance.getProxyNode(selector, object);
 			}
-			// Additional features:
-			m.extendDOM = this.instance.extDom;
             callback(m);
 		});
 	}
@@ -226,6 +224,10 @@ class m2d2 {
 					return nodeList;
 				}
 			});
+			// Let attributes know about changes in values
+			if($node.tagName === "INPUT" && this.hasAttrOrProp($node, "value")) {
+				$node.oninput = function (ev) { this.setAttribute("value", this.value )}
+			}
 			return $node;
 		} else {
 			return $node;
@@ -243,15 +245,15 @@ class m2d2 {
 			object = selector;
 			selector = "body";
 		}
-		if(!((Utils.isString(selector) || Utils.isNode(selector)) && object)) {
-			console.error("Passed parameters to m2d2 are wrong.")
-			console.log("First parameter must be string:")
+		if(!(Utils.isString(selector) || Utils.isNode(selector))) {
+			console.error("Selector is not a string or a Node:")
 			console.log(selector);
-			console.log("Second parameter must be not be empty:")
-			console.log(object);
 			return null;
 		}
 		const $node = this.extDom(selector); // Be sure that $node is an extended DOM object
+		if(object === undefined) {
+			object = $node.text;
+		}
 		object = this.plainToObject($node, object); // Be sure it's an object //TODO: documentation : text parameter
 		Object.keys(object).forEach(key => {
 			let value = object[key];
@@ -497,7 +499,9 @@ class m2d2 {
 		if($node[key] === $child) {
 			try {
 				$node[key] = this.proxy($child);
-			} catch(ignore) {}
+			} catch(ignore) {
+				//NOTE: although it fails when using forms, form is a proxy so it still works.
+			}
 		} else if(this.hasAttrOrProp($node, key)) { // Only if its not an attribute or property, we "link" it.
 			$node["$" + key] = $child; //Replace name with "$" + name
 			console.log("Property : " + key + " existed in node: " + $node.tagName +
@@ -505,6 +509,7 @@ class m2d2 {
 		} else {
 			$node[key] = this.proxy($child);
 		}
+		this.observe($child)
 	}
 	/**
 	 * Returns true if the tag is a registered HTMLElement

@@ -9,13 +9,12 @@
 <!-- Import Demo menu: -->
 <script src="../js/demo-links.js" type="text/javascript"></script>
 <!--                   -->
-<script type="text/javascript">
+<script type="text/javascript"> // title.js
 	//On page ready...
-	// title.js
 	m2d2.ready($ => {
 		// Most simple example using a String as data
         const default_text = "M2D2 Demo";
-		const title = $("#title", {
+		$("#title", {
             text: default_text,
             onclick : function() {
                 input.className = "done";
@@ -24,30 +23,30 @@
 
         // Use ID to share it between "ready" blocks
         //$("#shared", { text : "Text in title.js" });
+        $("#shared", "Text from title.js");
 
-        // Alternative (for simple objects):
-        $.extendDOM(shared);
-        shared.text = "Text in title.js";
-
-        input.classList.add("title");
+        input.css.add("title");
 	});
+</script>
 
-    // time.js
-    m2d2.ready($ => {
-        time.text = new Date().toDateString()
-        input.classList.add("time");
-    });
+<script type="text/javascript">   // time.js
+m2d2.ready($ => {
+    $("#time", new Date().toDateString());
+    input.css.add("time");
+});
+</script>
 
-	// input.js
-    m2d2.ready($ => {
-        const input = $("#input", {
-            autofocus: true,
-            onkeyup: function () {
-                title.text = this.value;
-            }
-        });
-        shared.text = "Text in input.js";
+<script type="text/javascript"> // input.js
+m2d2.ready($ => {
+    $("#input", {
+        autofocus: true,
+        onkeyup: function () {
+            title.text = this.value;
+        }
     });
+    shared.text += ", Text from input.js";
+});
+</script>
 
 </script>
 </head>
@@ -59,7 +58,7 @@
     <div class="controls">
         <div>New Title: <input id="input" type="text" /></div>
     </div>
-    <div id="shared">Some</div>
+    <div id="shared" class="box">Some</div>
     <div id="time"></div>
 </article>
 </body>
