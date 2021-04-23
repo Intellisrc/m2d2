@@ -73,7 +73,9 @@ class Utils {
 class m2d2 {
     'use strict';
 	_storedEvents = [];
-	__storedEventsTimeout = 50; //ms to group same events
+	static storedEventsTimeout = 50; //ms to group same events
+	static short = true; //Enable short assignation (false = better performance) TODO: document
+	static updates = true; //Enable "onupdate" (false = better performance) TODO: document
 
 	constructor() {}
 	//------------------------- STATIC -----------------------------
@@ -418,10 +420,12 @@ class m2d2 {
 							console.log(value);
 						}
     				} else if(Utils.isFunction(value)) {
-    				    if(key === "onupdate") {
-    				        $node.addEventListener(key, value, true);
-    				    }
-						$node[key] = value;
+						if(m2d2.updates) {
+							if (key === "onupdate") {
+								$node.addEventListener(key, value, true);
+							}
+							$node[key] = value;
+						}
 					} else if(key !== "template") { //We handle templates inside items
                         console.error("Not sure what you want to do with key: " + key + " under element: ");
                         console.log($node);
@@ -728,8 +732,11 @@ class m2d2 {
 	hasProp ($node, prop) {
 		let hasProp = false;
 		if($node && !Utils.isNumeric(prop)) {
-		    const notEmpty = !($node[prop] === undefined || $node[prop] === null);
-			hasProp = (notEmpty &&! ($node[prop] instanceof Node)) &&! $node.hasAttribute(prop);
+		    let has = $node[prop] !== undefined;
+		    if(has && $node[prop] === null && prop === "value") {
+				has = false;
+			}
+			hasProp = (has &&! ($node[prop] instanceof Node)) &&! $node.hasAttribute(prop);
 		}
 		return hasProp;
 	}
@@ -820,7 +827,7 @@ class m2d2 {
 	 * @returns {Proxy, Object}
 	 */
 	proxy (obj, force) {
-	    if(obj._proxy !== undefined && force === undefined) {
+	    if(!m2d2.short || (obj._proxy !== undefined && force === undefined)) {
 	        return obj;
 	    } else {
 	        obj._proxy = obj;
@@ -853,16 +860,21 @@ class m2d2 {
                             target[property][key] = value;
                         }
                     } else if(property === "onupdate") {
-                        if(Utils.isFunction(value)) {
-                            target.addEventListener("onupdate", value, true);
-                            oldValue = target[property];
-                            target[property] = value;
+                    	if(m2d2.updates) {
+							if (Utils.isFunction(value)) {
+								target.addEventListener("onupdate", value, true);
+								oldValue = target[property];
+								target[property] = value;
+							} else {
+								console.error("Value passed to 'onupdate' is incorrect, in node:");
+								console.log(target);
+								console.log("Value: (not a function)");
+								console.log(value);
+							}
 						} else {
-                            console.error("Value passed to 'onupdate' is incorrect, in node:");
-                            console.log(target);
-                            console.log("Value: (not a function)");
-                            console.log(value);
-                        }
+                    		console.log("Updates are not available when `m2d2.updates == false`:")
+							console.log(target);
+						}
                     } else if(property === "items") { //Reset items
                         target.items.clear();
                         this.doItems(target, value);
@@ -872,7 +884,7 @@ class m2d2 {
                     }
 					// Check for onupdate //TODO: document
 					// This will observe changes on values
-					if(target.onupdate !== undefined) {
+					if(m2d2.updates && target.onupdate !== undefined) {
 					    if(value !== oldValue) {
                             target.dispatchEvent(new CustomEvent("onupdate", {
                                 detail: {
@@ -909,7 +921,7 @@ class m2d2 {
 				setTimeout(() => {
 					const i = this._storedEvents.indexOf(m);
 					if(i >= 0) { this._storedEvents.splice(i, 1); }
-				}, this.__storedEventsTimeout); //TODO: this will prevent repeated events to be triggered in less than 50ms : document
+				}, m2d2.storedEventsTimeout); //TODO: this will prevent repeated events to be triggered in less than 50ms : document
 			}
 			// Check for onupdate //TODO: document
 			if(target.onupdate !== undefined) {
@@ -965,14 +977,16 @@ class m2d2 {
 	 * @param { HTMLElement } $node
 	 */
 	observe($node) {
-        const mutationObserver = new MutationObserver(this.onObserve.bind(this))
-        const options = {
-            attributeOldValue : true
-        }
-        options.subtree = true;
-        options.childList = true;
-        const toObserve = $node._proxy || $node;
-        mutationObserver.observe(toObserve, options);
+		if(m2d2.updates) {
+			const mutationObserver = new MutationObserver(this.onObserve.bind(this))
+			const options = {
+				attributeOldValue: true
+			}
+			options.subtree = true;
+			options.childList = true;
+			const toObserve = $node._proxy || $node;
+			mutationObserver.observe(toObserve, options);
+		}
 	}
 
 	/**
