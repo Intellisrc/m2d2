@@ -69,7 +69,7 @@ m2d2.ready($ => {
                             const id = td.parentNode.dataset.id;
                             let newId = prompt("Please enter new item ID: ", td.text);
                             if (newId) {
-                                checkout.list.items.getId(id).item_id.text = newId;
+                                checkout.list.items.get(id).item_id.text = newId;
                             }
                         }
                     },
@@ -83,7 +83,7 @@ m2d2.ready($ => {
                             const id = td.parentNode.dataset.id;
                             let newName = prompt("Please enter new item name: ", td.text);
                             if (newName) {
-                                checkout.list.items.getId(id).name.text = newName;
+                                checkout.list.items.get(id).name.text = newName;
                             }
                         }
                     },
@@ -97,7 +97,7 @@ m2d2.ready($ => {
                             const id = td.parentNode.dataset.id;
                             let newPrice = prompt("Please enter new price: ", td.text);
                             if (newPrice) {
-                                checkout.list.items.getId(id).price.text = newPrice;
+                                checkout.list.items.get(id).price.text = newPrice;
                             }
                         }
                     },
@@ -110,7 +110,7 @@ m2d2.ready($ => {
                         onclick: function (event) {
                             const td = event.target;
                             const id = td.parentNode.dataset.id;
-                            checkout.list.items.removeId(id);
+                            checkout.list.items.remove(id);
                         }
                     }
                 }

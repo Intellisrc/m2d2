@@ -155,10 +155,12 @@ m2d2.ready($ => {
             disabled : true,
             onupdate : onUpdate,
             onclick: function (ev) {
-                const sel = checkout.list.find("[selected]");
+                const sel = checkout.list.items.selected();
                 if(sel) {
                     sel.remove();
                 }
+                // You can as well remove by Id:
+                // checkout.list.items.remove(2);
             },
             onload : function(ev) {
                 //console.log(ev);
@@ -172,7 +174,7 @@ m2d2.ready($ => {
                 className : "default",
                 onupdate : onUpdate,
                 onkeyup: function (ev) {
-                    const sel = checkout.list.find("[selected]");
+                    const sel = checkout.list.items.selected();
                     if(sel) {
                         sel.price.text = this.value * 1;
                     }
@@ -238,10 +240,12 @@ m2d2.ready($ => {
         There are many ways in which you can access the items in the list (the most common are):
         <ol>
             <li><b>By index:</b>  <code>checkout.list.items[index];</code></li>
-            <li><b>By data-id:</b>  <code>checkout.list.items.getId(id);</code></li>
+            <li><b>By data-id:</b>  <code>checkout.list.items.get(id);</code></li>
             <li><b>By element id:</b>  <code>checkout.list.items.it4;</code></li>
             <li><b>By searching in parent:</b>  <code>checkout.list.find("#it4");</code></li>
-        </ol>
+            <li><b>By position:</b> <code>checkout.list.items.first()</code> or <code>checkout.list.items.last()</code></li>
+            <li><b>Selected:</b> <code>checkout.list.items.selected()</code> (You need to set manually: `item.selected = true`)</li>
+</ol>
     </p>
 </article>
 </body>

@@ -17,7 +17,7 @@
 		$("#title", {
             text: default_text,
             onclick : function() {
-                input.className = "done";
+                input.css = "done";
             }
         });
 
@@ -25,14 +25,14 @@
         //$("#shared", { text : "Text in title.js" });
         $("#shared", "Text from title.js");
 
-        input.css.add("title");
+        $("#input").css.add("title");
 	});
 </script>
 
 <script type="text/javascript">   // time.js
 m2d2.ready($ => {
     $("#time", new Date().toDateString());
-    input.css.add("time");
+    $("#input").css.add("time");
 });
 </script>
 

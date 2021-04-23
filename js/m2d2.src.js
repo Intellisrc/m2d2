@@ -666,7 +666,8 @@ class m2d2 {
 	hasProp ($node, prop) {
 		let hasProp = false;
 		if($node && !Utils.isNumeric(prop)) {
-			hasProp = ($node[prop] !== undefined &&! ($node[prop] instanceof Node)) &&! $node.hasAttribute(prop);
+		    const notEmpty = !($node[prop] === undefined || $node[prop] === null);
+			hasProp = (notEmpty &&! ($node[prop] instanceof Node)) &&! $node.hasAttribute(prop);
 		}
 		return hasProp;
 	}
@@ -770,6 +771,7 @@ class m2d2 {
 						case typeof t === "function": return t.bind(target);
 						// If there was a failed attempt to set proxy, return it on read:
 						case t._proxy === true && target["$" + property] !== undefined: return target["$" + property];
+						case t._proxy === undefined && Utils.isNode(t): return this.proxy(t);
 						default: return t;
 					}
                 },
@@ -928,6 +930,7 @@ class m2d2 {
 	 * @param {NodeList, HTMLCollection} $node
 	 */
 	extendItems($node) {
+	    const _this = this;
 		// We try to add most of the array functions into NodeList and HTMLCollection:
 		// NOTE: Not all will work as expected.
 		// NOTE: function() {} is not the same here as () => {} as "this" is not as expected
@@ -940,7 +943,7 @@ class m2d2 {
 		}
 		const items = $node.items;
 		// Non-Standard or non-existent in Array:
-		const nonStd = ["clear", "getId", "removeId"];
+		const nonStd = ["clear", "get", "remove", "selected", "first", "last"];
 		// Array properties:
 		Object.getOwnPropertyNames(Array.prototype).concat(nonStd).forEach(method => {
 			if(items[method] === undefined) {
@@ -967,7 +970,7 @@ class m2d2 {
 							while(this.items[0]) this.items[0].remove()
 						}
 						break;
-					case "getId": // will return the item with data-id:
+					case "get": // will return the item with data-id:
 					    func = function(id) {
 					        let found = null;
 					        if(this.items.length) {
@@ -981,11 +984,26 @@ class m2d2 {
 					        return found;
 					    }
 					    break;
+					case "selected": // will return the selected item in list
+					    func = function() {
+					        return _this.proxy(this.find("[selected]"));
+					    }
+					    break;
+					case "first": // returns the first item in list
+					    func = function() {
+					        return _this.proxy(this.items[0]);
+					    }
+					    break;
+					case "last": // returns the last item in list
+					    func = function() {
+					        return _this.proxy(this.items[this.items.length - 1]);
+					    }
+					    break;
 					case "pop" : //Remove and return last element:
 					    func = function() {
 					        if(this.items.length) {
                                 const parent = this[0].parentNode;
-                                return parent.removeChild(this.items[this.items.length - 1]);
+                                return _this.proxy(parent.removeChild(this.items[this.items.length - 1]));
 					        }
 					    }
 					    break;
@@ -1000,7 +1018,7 @@ class m2d2 {
 							}
 						}
 						break;
-					case "removeId": // will return the item with data-id:
+					case "remove": // will return the item with data-id:
 					    func = function(id) {
 					        if(this.items.length) {
 					            this.items.some(item => {
@@ -1016,7 +1034,7 @@ class m2d2 {
 					    func = function() {
 					        if(this.items.length) {
                                 const parent = this.items[0].parentNode;
-                                return parent.removeChild(this.items[0]);
+                                return _this.proxy(parent.removeChild(this.items[0]));
 					        }
 					    }
 					    break;
@@ -1046,8 +1064,13 @@ class m2d2 {
 					    // at, every, filter, find, findIndex, forEach, includes, indexOf, join,
 					    // keys, lastIndexOf, map, reduce, reduceRight, slice, some, values
 						if(typeof Array.prototype[method] == "function") {
+						    // Convert nodes to proxy so we can use short assignment
 							func = function (...args) {
-								return Array.from($node.items)[method](...args);
+							    const proxies = [];
+							    Array.from($node.items).forEach(n => {
+							        proxies.push(_this.proxy(n));
+							    });
+								return Array.from(proxies)[method](...args);
 							}
 						}
 				}
