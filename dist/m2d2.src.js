@@ -823,7 +823,7 @@ class m2d2 {
 	    if(obj._proxy !== undefined && force === undefined) {
 	        return obj;
 	    } else {
-	        obj._proxy = true;
+	        obj._proxy = obj;
             const handler = {
                 get: (target, property, receiver) => {
                     const t = target[property];
@@ -832,7 +832,7 @@ class m2d2 {
                     	// Functions should bind target as "this"
 						case typeof t === "function": return t.bind(target);
 						// If there was a failed attempt to set proxy, return it on read:
-						case t._proxy === true && target["$" + property] !== undefined: return target["$" + property];
+						case t._proxy && target["$" + property] !== undefined: return target["$" + property];
 						case t._proxy === undefined && Utils.isNode(t): return this.proxy(t);
 						default: return t;
 					}
@@ -965,13 +965,14 @@ class m2d2 {
 	 * @param { HTMLElement } $node
 	 */
 	observe($node) {
-		const mutationObserver = new MutationObserver(this.onObserve.bind(this))
-		const options = {
-		    attributeOldValue : true
-		}
+        const mutationObserver = new MutationObserver(this.onObserve.bind(this))
+        const options = {
+            attributeOldValue : true
+        }
         options.subtree = true;
         options.childList = true;
-		mutationObserver.observe($node, options);
+        const toObserve = $node._proxy || $node;
+        mutationObserver.observe(toObserve, options);
 	}
 
 	/**

@@ -18,27 +18,27 @@
             // 'color' is from the plugin 'style' (m2d2.style.src.js)
             {
                 h1: "M2D2 Callback Demo",
-                h3: {
+                status : {
                     text: "Loading ... (2s)",
-                    color: "red"
+                    style : { color: "red" }
                 }
             }
         );
         // Waiting to show async condition:
         setTimeout(function () {
             $(title, {
-                h3: {
+                status: {
                     text: "Loading ... (1s)",
-                    color: "orange"
+                    style : { color: "orange" }
                 }
             })
         }, 1000);
         // Waiting to show async condition:
         setTimeout(function () {
             $(title, {
-                h3: {
+                status: {
                     text: "Done.",
-                    color: "green"
+                    style : { color: "green" }
                 }
             })
         }, 2000);
@@ -48,7 +48,7 @@
 <body>
 <article>
     <h1>Title</h1>
-    <h3>???</h3>
+    <h3 class="status">???</h3>
     <p>Sometimes we may want to update many properties of an object at once. This example shows how to do it.</p>
 </article>
 </body>
