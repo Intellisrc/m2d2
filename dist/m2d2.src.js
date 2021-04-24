@@ -58,6 +58,10 @@ class Utils {
     static cleanArray(a) {
         return a.filter(function(e){ return e === 0 || e });
     };
+    static isValidElement(tagName) {
+        const $node = Utils.newNode(tagName);
+        return tagName !== "template" && $node.constructor.name !== "HTMLUnknownElement";
+    }
 }
 
 /**
@@ -80,17 +84,41 @@ class m2d2 {
 	constructor() {}
 	//------------------------- STATIC -----------------------------
 	static instance = new m2d2();
+	static extensions = {}; // Additional properties for DOM
+	static main = (selector, object) => {
+		return this.instance.getProxyNode(selector, object);
+	}
 	/**
 	 * Initialization. Use: m2d2.ready()
 	 * @param { function } callback
 	 */
 	static ready(callback) {
 		document.addEventListener("DOMContentLoaded", () => {
-			let m = (selector, object) => {
-				return this.instance.getProxyNode(selector, object);
-			}
-            callback(m);
+            callback(m2d2.main);
 		});
+	}
+
+	/**
+	 * Execute something on load. It will search for extensions.
+	 * @param {function} callback
+	 */
+	static load(callback) {
+		const ext = callback(m2d2.main); //main can be extended here
+		if(Utils.isObject(ext) && !Utils.isEmpty(ext)) {
+			Object.keys(ext).forEach(k => {
+				if(Utils.isValidElement(k)) {
+					if(m2d2.extensions[k] === undefined) {
+						m2d2.extensions[k] = {};
+					}
+					Object.assign(m2d2.extensions[k], ext[k]);
+				} else {
+					if(m2d2.extensions["*"] === undefined) {
+						m2d2.extensions["*"] = {};
+					}
+					Object.assign(m2d2.extensions["*"], ext[k]);
+				}
+			});
+		}
 	}
 	/**
 	 * M2 Will set all extensions to DOM objects //TODO: documentation
@@ -116,7 +144,7 @@ class m2d2 {
 		}
 		if($node._m2d2 === undefined) {
 			$node._m2d2 = true; //flag to prevent it from re-assign methods
-			["find","findAll","onupdate","show","css","text","html"].forEach(f => {
+			["find","findAll","onupdate","show","css","text","html","getData"].forEach(f => {
 				if($node.hasOwnProperty(f)) {
 					console.log("Node already had ["+f+"] property. It might cause unexpected behaviour.")
 					console.log("You may need to update the M2D2 version or report it to: github.com/lepe/m2d2/")
@@ -216,6 +244,14 @@ class m2d2 {
                     }
 				}
 			});
+			//TODO: document how to extend
+			let extend = {};
+			if(m2d2.extensions["*"] !== undefined) {
+				Object.assign(extend, m2d2.extensions["*"]);
+			}
+			if(m2d2.extensions[$node.tagName] !== undefined) {
+				Object.assign(extend, m2d2.extensions[$node.tagName]);
+			}
 			// Functions:
 			Object.assign($node, {
 				find: (it) => {
@@ -227,10 +263,25 @@ class m2d2 {
 					nodeList.forEach(n => { this.extDom(n) });
 					return nodeList;
 				}
-			});
+			}, extend);
 			// Let attributes know about changes in values
 			if(["INPUT", "TEXTAREA", "SELECT"].indexOf($node.tagName) >= 0 && this.hasAttrOrProp($node, "value")) {
 				$node.oninput = function() { this.setAttribute("value", this.value )}
+			}
+			// Add getData() to form: //TODO: document
+			if($node.tagName === "FORM") {
+				$node.getData = function () {
+					const data = {};
+					if(this.checkValidity()) {
+						const fd = new FormData(this);
+						for (let pair of fd.entries()) {
+							if(pair[1] !== "") {
+								data[pair[0]] = pair[1];
+							}
+						}
+					}
+					return data;
+				}
 			}
 			return $node;
 		} else {
@@ -384,7 +435,7 @@ class m2d2 {
 					    key = "items";
 					    value = [];
 					}
-					if(this.isValidElement(key)) {
+					if(Utils.isValidElement(key)) {
 						const $newNode = this.appendElement($node, key);
 						this.renderAndLink($node, $newNode, key, value);
 					} else if(value.tagName !== undefined) {
@@ -517,18 +568,6 @@ class m2d2 {
 		} else {
 			$node[key] = this.proxy($child);
 		}
-	}
-	/**
-	 * Returns true if the tag is a registered HTMLElement
-	 * @private
-	 * @param {string} tagName
-	 * @returns {boolean}
-	 * Note: although "<template>" is a valid HTML element, we ignore it here as the only
-	 *       purpose is to be used with "items".
-	 */
-	isValidElement(tagName) {
-		const $node = Utils.newNode(tagName);
-		return tagName !== "template" && $node.constructor.name !== "HTMLUnknownElement";
 	}
 	/**
 	 * Creates a dom element inside $node

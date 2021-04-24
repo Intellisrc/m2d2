@@ -78,7 +78,7 @@ class m2d2 {
 		}
 		if($node._m2d2 === undefined) {
 			$node._m2d2 = true; //flag to prevent it from re-assign methods
-			["find","findAll","onupdate","show","css","text","html"].forEach(f => {
+			["find","findAll","onupdate","show","css","text","html","getData"].forEach(f => {
 				if($node.hasOwnProperty(f)) {
 					console.log("Node already had ["+f+"] property. It might cause unexpected behaviour.")
 					console.log("You may need to update the M2D2 version or report it to: github.com/lepe/m2d2/")
@@ -201,6 +201,21 @@ class m2d2 {
 			// Let attributes know about changes in values
 			if(["INPUT", "TEXTAREA", "SELECT"].indexOf($node.tagName) >= 0 && this.hasAttrOrProp($node, "value")) {
 				$node.oninput = function() { this.setAttribute("value", this.value )}
+			}
+			// Add getData() to form: //TODO: document
+			if($node.tagName === "FORM") {
+				$node.getData = function () {
+					const data = {};
+					if(this.checkValidity()) {
+						const fd = new FormData(this);
+						for (let pair of fd.entries()) {
+							if(pair[1] !== "") {
+								data[pair[0]] = pair[1];
+							}
+						}
+					}
+					return data;
+				}
 			}
 			return $node;
 		} else {
