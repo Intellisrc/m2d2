@@ -272,12 +272,10 @@ class m2d2 {
 			if($node.tagName === "FORM") {
 				$node.getData = function () {
 					const data = {};
-					if(this.checkValidity()) {
-						const fd = new FormData(this);
-						for (let pair of fd.entries()) {
-							if(pair[1] !== "") {
-								data[pair[0]] = pair[1];
-							}
+					const fd = new FormData(this);
+					for (let pair of fd.entries()) {
+						if(pair[1] !== "") {
+							data[pair[0]] = pair[1];
 						}
 					}
 					return data;
