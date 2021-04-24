@@ -58,4 +58,8 @@ class Utils {
     static cleanArray(a) {
         return a.filter(function(e){ return e === 0 || e });
     };
+    static isValidElement(tagName) {
+        const $node = Utils.newNode(tagName);
+        return tagName !== "template" && $node.constructor.name !== "HTMLUnknownElement";
+    }
 }

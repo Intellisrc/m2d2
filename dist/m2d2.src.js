@@ -585,8 +585,10 @@ class m2d2 {
 				return result;
 			}
 			let tree = scan($node.__template);
-			if(tree) { tree = tree[Object.keys(tree)[0]] }
-			$newNode = this.doDom($newNode, tree);
+			if(!Utils.isEmpty(tree)) {
+				tree = tree[Object.keys(tree)[0]]
+				$newNode = this.doDom($newNode, tree);
+			}
 		}
 		return $newNode;
 	}

@@ -18,17 +18,41 @@ class m2d2 {
 	constructor() {}
 	//------------------------- STATIC -----------------------------
 	static instance = new m2d2();
+	static extensions = {}; // Additional properties for DOM
+	static main = (selector, object) => {
+		return this.instance.getProxyNode(selector, object);
+	}
 	/**
 	 * Initialization. Use: m2d2.ready()
 	 * @param { function } callback
 	 */
 	static ready(callback) {
 		document.addEventListener("DOMContentLoaded", () => {
-			let m = (selector, object) => {
-				return this.instance.getProxyNode(selector, object);
-			}
-            callback(m);
+            callback(m2d2.main);
 		});
+	}
+
+	/**
+	 * Execute something on load. It will search for extensions.
+	 * @param {function} callback
+	 */
+	static load(callback) {
+		const ext = callback(m2d2.main); //main can be extended here
+		if(Utils.isObject(ext) && !Utils.isEmpty(ext)) {
+			Object.keys(ext).forEach(k => {
+				if(Utils.isValidElement(k)) {
+					if(m2d2.extensions[k] === undefined) {
+						m2d2.extensions[k] = {};
+					}
+					Object.assign(m2d2.extensions[k], ext[k]);
+				} else {
+					if(m2d2.extensions["*"] === undefined) {
+						m2d2.extensions["*"] = {};
+					}
+					Object.assign(m2d2.extensions["*"], ext[k]);
+				}
+			});
+		}
 	}
 	/**
 	 * M2 Will set all extensions to DOM objects //TODO: documentation
@@ -154,6 +178,14 @@ class m2d2 {
                     }
 				}
 			});
+			//TODO: document how to extend
+			let extend = {};
+			if(m2d2.extensions["*"] !== undefined) {
+				Object.assign(extend, m2d2.extensions["*"]);
+			}
+			if(m2d2.extensions[$node.tagName] !== undefined) {
+				Object.assign(extend, m2d2.extensions[$node.tagName]);
+			}
 			// Functions:
 			Object.assign($node, {
 				find: (it) => {
@@ -165,7 +197,7 @@ class m2d2 {
 					nodeList.forEach(n => { this.extDom(n) });
 					return nodeList;
 				}
-			});
+			}, extend);
 			// Let attributes know about changes in values
 			if(["INPUT", "TEXTAREA", "SELECT"].indexOf($node.tagName) >= 0 && this.hasAttrOrProp($node, "value")) {
 				$node.oninput = function() { this.setAttribute("value", this.value )}
@@ -322,7 +354,7 @@ class m2d2 {
 					    key = "items";
 					    value = [];
 					}
-					if(this.isValidElement(key)) {
+					if(Utils.isValidElement(key)) {
 						const $newNode = this.appendElement($node, key);
 						this.renderAndLink($node, $newNode, key, value);
 					} else if(value.tagName !== undefined) {
@@ -457,18 +489,6 @@ class m2d2 {
 		}
 	}
 	/**
-	 * Returns true if the tag is a registered HTMLElement
-	 * @private
-	 * @param {string} tagName
-	 * @returns {boolean}
-	 * Note: although "<template>" is a valid HTML element, we ignore it here as the only
-	 *       purpose is to be used with "items".
-	 */
-	isValidElement(tagName) {
-		const $node = Utils.newNode(tagName);
-		return tagName !== "template" && $node.constructor.name !== "HTMLUnknownElement";
-	}
-	/**
 	 * Creates a dom element inside $node
 	 * @private
 	 * @param {HTMLElement} $node
@@ -523,8 +543,10 @@ class m2d2 {
 				return result;
 			}
 			let tree = scan($node.__template);
-			if(tree) { tree = tree[Object.keys(tree)[0]] }
-			$newNode = this.doDom($newNode, tree);
+			if(!Utils.isEmpty(tree)) {
+				tree = tree[Object.keys(tree)[0]]
+				$newNode = this.doDom($newNode, tree);
+			}
 		}
 		return $newNode;
 	}
