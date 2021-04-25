@@ -2,8 +2,8 @@ m2d2.load($ => {
     //------------------------ WS --------------------------------
     /**
      * @author: A.Lepe
-     * @version: 210406 : Retry until reconnect
-     210323 : Added try/catch
+     * @version: 210425 : Added secure, host and converted to m2d2 extension
+     *           210406 : Retry until reconnect
      * @since : 2018
      * WebSocket wrapper
      *
@@ -13,8 +13,10 @@ m2d2.load($ => {
         connect      : () => {}, // Function to execute when it successfully connects
         disconnected : () => {}, // Function to execute when it gets disconnected
         reconnect    : true, // Try to reconnect if it gets disconnected (default: true)
+        secure       : false, // If true, will use wss
+        host         : "localhost", // Server name
         path         : "", // WebSocket's URL path, for example: ws://server/<path> (default: "")
-        port         : 8000, // Port in which the WebSocket server is listening (default: 8000)
+        port         : 80, // Port in which the WebSocket server is listening (default: 80, 443)
    });
      wsc.connect(response => {
         // response is the object which the server is sending.
@@ -39,7 +41,10 @@ m2d2.load($ => {
             this.onConnect = options.connected || (() => {});
             this.onDisconnect = options.disconnected || (() => {});
             this.reconnect = options.reconnect !== false;
-            this.path = "ws://" + window.location.hostname + ":" + (options.port || "8000") + "/" + (options.path || "");
+            this.host = options.host || window.location.hostname;
+            this.secure = options.secure === true;
+            this.port = options.port || (this.secure ? 443 : 80);
+            this.path = "ws" + (this.secure ? "s" : "") + "://" + this.host + ":" + this.port + "/" + (options.path || "");
             this.connected = false;
             this.interval = null;
             //-------- Connect ----------
