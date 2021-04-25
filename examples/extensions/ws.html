@@ -39,13 +39,6 @@
 <script type="text/javascript">
 	//On ready..
 	m2d2.ready ($ => {
-	    $.ws.connect({
-            host    : "demo.websocket.me",
-            secure  : true,
-            path    : "v3/channel_1?api_key=oCdCMcMPQpbvNjUIzqtvF1d2X2okWpDQj4AwARJuAgtjhzKxVEjQU6IdCjwm&notify_self"
-        }, json => {
-            addLog("Received", "pong");
-        });
         function addLog(action, message) {
             list.items.push({
                 date    : new Date().toISOString().slice(0, 22).replace("T"," "),
@@ -73,12 +66,27 @@
             },
             items: [] //Initialize list with empty values
         });
-        setInterval(() => {
+        addLog("CONNECT", "");
+        $.ws.connect({
+            host    : "demo.websocket.me",
+            secure  : true,
+            path    : "v3/channel_1?api_key=oCdCMcMPQpbvNjUIzqtvF1d2X2okWpDQj4AwARJuAgtjhzKxVEjQU6IdCjwm&notify_self",
+            disconnected : () => {
+                addLog("QUIT", "");
+            }
+        }, json => {
+            addLog("Received", "pong");
+        });
+        const interval = setInterval(() => {
             addLog("Sent", "ping");
             $.ws.request({
                 msg : "ping",
             });
         }, 1000);
+        setTimeout(() => {
+            $.ws.disconnect();
+            clearInterval(interval);
+        }, 10000);
     });
 </script>
 </head>
