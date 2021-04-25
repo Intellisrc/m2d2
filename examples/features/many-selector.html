@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>M2D2 Feature : Selecting multiple elements</title>
+    <meta name="HandheldFriendly" content="1">
+    <meta name="viewport" content="width=device-width, maximum-scale=1.0">
+    <meta name="theme-color" content="#333333">
+    <link rel="stylesheet" href="../../css/examples.css" type="text/css" />
+    <script src="../../dist/m2d2.src.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        m2d2.ready($ => {
+           $("nav", {
+               a : {
+                   onclick : function () {
+                       alert("Going to : " + this.text)
+                   }
+               }
+           })
+        });
+    </script>
+</head>
+<body>
+    <nav>
+        <a href="#">here</a>
+        <a href="#">nowhere</a>
+        <a href="#">anywhere</a>
+        <a href="#">everywhere</a>
+    </nav>
+</body>
+</html>

@@ -281,7 +281,7 @@ class m2d2 {
 						}
 						break
 					case "style":
-					case "dataset":
+					case "dataset": //TODO: as it is already a DOM, we don't need it maybe?
 						if(Utils.isPlainObject(value)) {
 							Object.assign($node[key], value);
 						} else {
