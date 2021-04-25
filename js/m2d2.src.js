@@ -573,6 +573,13 @@ class m2d2 {
 	 */
 	doItems ($node, values, template) {
 		const $template = this.getTemplate($node, template);
+		if($template === undefined) {
+			console.error("Template not found. Probably an array is being used where it is not expected. Node:");
+			console.log($node);
+			console.log("Value (mistaken?):")
+			console.log(values);
+			return;
+		}
 		const $outElem = new DocumentFragment()
 		let i = 0;
 		values.forEach(val => {
