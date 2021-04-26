@@ -14,6 +14,7 @@ class m2d2 {
 	static storedEventsTimeout = 50; //ms to group same events
 	static short = true; //Enable short assignation (false = better performance) TODO: document
 	static updates = true; //Enable "onupdate" (false = better performance) TODO: document
+	static utils = new this.utils();
 
 	constructor() {}
 	//------------------------- STATIC -----------------------------
@@ -37,10 +38,13 @@ class m2d2 {
 	 * @param {function} callback
 	 */
 	static load(callback) {
+	    Object.assign(m2d2.main, m2d2.utils); // Extends Utils
 		const ext = callback(m2d2.main); //main can be extended here
-		if(Utils.isObject(ext) && !Utils.isEmpty(ext)) {
+		if(m2d2.utils.isObject(ext) && !m2d2.utils.isEmpty(ext)) {
 			Object.keys(ext).forEach(k => {
-				if(Utils.isValidElement(k)) {
+				if(m2d2.utils.isValidElement(k)) {
+				    const $node = m2d2.utils.newNode(k);
+
 					if(m2d2.extensions[k] === undefined) {
 						m2d2.extensions[k] = {};
 					}
@@ -66,9 +70,9 @@ class m2d2 {
 			return null;
 		}
 		if($root === undefined) { $root = document }
-		const $node = Utils.isNode(selector) ? selector : $root.querySelector(selector);
+		const $node = this.utils.isNode(selector) ? selector : $root.querySelector(selector);
 		if(! $node) {
-			if(Utils.isString(selector)) {
+			if(this.utils.isString(selector)) {
 				console.error("Selector: " + selector + " didn't match any element in node:");
 				console.log($root);
 			} else {
@@ -114,11 +118,11 @@ class m2d2 {
 				    return this.classList;
 				},
 				set(value) {
-				    if(Utils.isArray(value)) {
+				    if(this.utils.isArray(value)) {
     				    this.className = value.join(" ");
-				    } else if(Utils.isString(value)) {
+				    } else if(this.utils.isString(value)) {
     				    this.className = value;
-				    } else if(Utils.isPlainObject(value)) {
+				    } else if(this.utils.isPlainObject(value)) {
 				        Object.keys(value).forEach(c => {
 				            if(value[c]) {
 				                this.classList.add(c);
@@ -199,7 +203,7 @@ class m2d2 {
 				}
 			}, extend);
 			// Let attributes know about changes in values
-			if(["INPUT", "TEXTAREA", "SELECT"].indexOf($node.tagName) >= 0 && this.hasAttrOrProp($node, "value")) {
+			if(["INPUT", "TEXTAREA", "SELECT"].indexOf($node.tagName) >= 0 && this.utils.hasAttrOrProp($node, "value")) {
 				$node.oninput = function() { this.setAttribute("value", this.value )}
 			}
 			// Add getData() to form: //TODO: document
@@ -228,11 +232,11 @@ class m2d2 {
 	 */
 	doDom(selector, object) {
 		// When no selector is specified, set "body"
-		if(Utils.isObject(selector) && object === undefined) {
+		if(this.utils.isObject(selector) && object === undefined) {
 			object = selector;
 			selector = "body";
 		}
-		if(!(Utils.isString(selector) || Utils.isNode(selector))) {
+		if(!(this.utils.isString(selector) || this.utils.isNode(selector))) {
 			console.error("Selector is not a string or a Node:")
 			console.log(selector);
 			return null;
@@ -257,9 +261,9 @@ class m2d2 {
 						key = "valueAsDate"; //renamed value to valueAsDate
 					case key === "css": // css is a Proxy so it fails to verify:
 					case typeof value === typeof $node[key]: //Same Time
-					case Utils.isString($node[key]) && Utils.isNumeric(value): //Numeric properties
-					case (Utils.isFunction(value) && Utils.isObject($node[key])): //Functions
-					case Utils.isBool(value) && Utils.isString($node[key]): //Boolean
+					case this.utils.isString($node[key]) && this.utils.isNumeric(value): //Numeric properties
+					case (this.utils.isFunction(value) && this.utils.isObject($node[key])): //Functions
+					case this.utils.isBool(value) && this.utils.isString($node[key]): //Boolean
 					case typeof $node[key] === "object" && $node.tagName === "INPUT": //Cases like "list" in input
 						foundMatch = true;
 						break;
@@ -270,11 +274,11 @@ class m2d2 {
 				let error = false;
 				switch(key) {
 					case "classList":
-						if(Utils.isArray(value)) {
+						if(this.utils.isArray(value)) {
 							value.forEach(v => {
 								$node[key].add(v);
 							});
-						} else if(Utils.isString(value)) {
+						} else if(this.utils.isString(value)) {
 							$node[key].add(value);
 						} else {
 							error = true;
@@ -282,7 +286,7 @@ class m2d2 {
 						break
 					case "style":
 					case "dataset": //TODO: as it is already a DOM, we don't need it maybe?
-						if(Utils.isPlainObject(value)) {
+						if(this.utils.isPlainObject(value)) {
 							Object.assign($node[key], value);
 						} else {
 							error = true;
@@ -290,8 +294,8 @@ class m2d2 {
 						break
 					default:
 						switch(true) {
-							case Utils.isBool(value): // boolean properties
-							case this.hasAttrOrProp($node, key):
+							case this.utils.isBool(value): // boolean properties
+							case this.utils.hasAttrOrProp($node, key):
                                 this.setPropOrAttr($node, key, value);
 								break
 							default:
@@ -337,7 +341,7 @@ class m2d2 {
 					console.log("Please rename key or adjust DOM");
 				} else if(options.length === 1) { // Found single option: place values
 					const opt = options[0];
-					if(Utils.isArray(opt)) { // Multiple nodes
+					if(this.utils.isArray(opt)) { // Multiple nodes
 					    if(opt.length === 1) { // Normal Object:
 							this.renderAndLink($node, opt[0], key, value);
 					    } else { //TODO: Document : multiple elements become array
@@ -347,8 +351,8 @@ class m2d2 {
                             });
                             this.linkNode($node, key, items);
                         }
-					} else if(Utils.isNode(opt)) {
-						if(Utils.isArray(value)) { // Process Array
+					} else if(this.utils.isNode(opt)) {
+						if(this.utils.isArray(value)) { // Process Array
 							const template = object["template"];
 							this.doItems(opt, value, template);
 							this.linkNode($node, key, opt);
@@ -367,7 +371,7 @@ class m2d2 {
 					    key = "items";
 					    value = [];
 					}
-					if(Utils.isValidElement(key)) {
+					if(this.utils.isValidElement(key)) {
 						const $newNode = this.appendElement($node, key);
 						this.renderAndLink($node, $newNode, key, value);
 					} else if(value.tagName !== undefined) {
@@ -378,13 +382,13 @@ class m2d2 {
 					} else if(key === "items") { //Items creation
 						const template = object["template"];
 						// Allow use of plain object to specify value -> text //TODO: documentation
-						if(Utils.isPlainObject(value)) {
+						if(this.utils.isPlainObject(value)) {
 						    const valTmp = [];
 						    Object.keys(value).forEach(o => {
 						        const obj = {
                                     text  : value[o]
 						        };
-						        if(this.hasAttrOrProp($node, "value")) {
+						        if(this.utils.hasAttrOrProp($node, "value")) {
                                     obj.value = o;
                                 } else {
                                     obj.dataset = { id : o };
@@ -394,7 +398,7 @@ class m2d2 {
 						    value = valTmp;
 						}
 						// Process Array:
-						if(Utils.isArray(value)) {
+						if(this.utils.isArray(value)) {
 							this.doItems($node, value, template);
 						} else {
 							console.log("Warning: 'items' specified but value is not and array, in element: ");
@@ -402,7 +406,7 @@ class m2d2 {
 							console.log("Passed values are: ");
 							console.log(value);
 						}
-    				} else if(Utils.isFunction(value)) {
+    				} else if(this.utils.isFunction(value)) {
 						if(m2d2.updates) {
 							if (key === "onupdate") {
 								$node.addEventListener(key, value, true);
@@ -438,15 +442,15 @@ class m2d2 {
 	 * @param {*} value
 	 */
     plainToObject($node, value) {
-		if(!Utils.isPlainObject(value) &&! Utils.isFunction(value)) {
+		if(!this.utils.isPlainObject(value) &&! this.utils.isFunction(value)) {
 			// When setting values to the node (simplified version):
-			if(Utils.isHtml(value)) {
+			if(this.utils.isHtml(value)) {
 				value = { html : value };
 			} else if(this.hasProp($node, "value")) {
 				value = { value : value };
-			} else if(Utils.isString(value) || Utils.isNumeric(value)) {
+			} else if(this.utils.isString(value) || this.utils.isNumeric(value)) {
 				value = { text : value };
-			} else if(Utils.isArray(value)) {
+			} else if(this.utils.isArray(value)) {
 			    value = { items : value };
 			}
 		}
@@ -493,7 +497,7 @@ class m2d2 {
 				//NOTE: although it fails when using forms, form is a proxy so it still works.
 			}
 			$node["$" + key] = $proxy;
-		} else if(this.hasAttrOrProp($node, key)) { // Only if its not an attribute or property, we "link" it.
+		} else if(this.utils.hasAttrOrProp($node, key)) { // Only if its not an attribute or property, we "link" it.
 			$node["$" + key] = $child; //Replace name with "$" + name
 			console.log("Property : " + key + " existed in node: " + $node.tagName +
 			". Using $" + key + " instead for node: " + $child.tagName + ".")
@@ -509,7 +513,7 @@ class m2d2 {
 	 * @returns {HTMLElement}
 	 */
 	appendElement ($node, tagName) {
-		const $newElem = Utils.newNode(tagName);
+		const $newElem = this.utils.newNode(tagName);
 		$node.append($newElem);
 		return $newElem;
 	}
@@ -547,16 +551,16 @@ class m2d2 {
 			const scan = (object, result) => {
 				result = result || {};
 				Object.keys(object).forEach(key=> {
-					if (Utils.isPlainObject(object[key])) {
+					if (this.utils.isPlainObject(object[key])) {
 						result[key] = scan(object[key]);
-					} else if(Utils.isFunction(object[key])) {
+					} else if(this.utils.isFunction(object[key])) {
 						result[key] = object[key];
 					}
 				});
 				return result;
 			}
 			let tree = scan($node.__template);
-			if(!Utils.isEmpty(tree)) {
+			if(!this.utils.isEmpty(tree)) {
 				tree = tree[Object.keys(tree)[0]]
 				$newNode = this.doDom($newNode, tree);
 			}
@@ -612,37 +616,37 @@ class m2d2 {
 		} else {
 			let $template;
 			if (template) {
-				if (Utils.isPlainObject(template)) {
-					const $base = Utils.newNode("template");
+				if (this.utils.isPlainObject(template)) {
+					const $base = this.utils.newNode("template");
 					$template = this.doDom($base, template);
 					this.defineProp($node, "__template", template); // This is the original template with events
-				} else if (Utils.isHtml(template)) {
-					$template = Utils.htmlNode("<div>" + template + "</div>");
-				} else if (Utils.isSelectorID(template)) { //Only IDs are allowed
+				} else if (this.utils.isHtml(template)) {
+					$template = this.utils.htmlNode("<div>" + template + "</div>");
+				} else if (this.utils.isSelectorID(template)) { //Only IDs are allowed
 					$template = document.querySelector(template);
 				} else { //When its just a tag name
-					$template = Utils.newNode(template);
+					$template = this.utils.newNode(template);
 				}
 				if ($template && $template.childElementCount > 0) {
 					$template = $template.firstChild;
 				}
 			} else if($node.find("template")) {	// No template specified, look into HTML under node:
-				$template = Utils.htmlNode(Utils.node("template", $node).innerHTML);
+				$template = this.utils.htmlNode(this.getNode("template", $node).innerHTML);
 			} else {
 				switch ($node.tagName) {
 					case "SELECT":
 					case "DATALIST":
-						$template = Utils.newNode("option");
+						$template = this.utils.newNode("option");
 						break;
 					case "UL":
 					case "OL":
-						$template = Utils.newNode("li");
+						$template = this.utils.newNode("li");
 						break;
 					case "NAV":
-						$template = Utils.newNode("a");
+						$template = this.utils.newNode("a");
 						break;
 					case "DL":
-						$template = Utils.htmlNode("<dt></dt><dd></dd>");
+						$template = this.utils.htmlNode("<dt></dt><dd></dd>");
 						break;
 					default:
 						// If not template is found, use html as of element
@@ -657,102 +661,6 @@ class m2d2 {
 			}
 			return $template;
 		}
-	}
-
-	/**
-	 * Get attribute or property
-	 * @param {HTMLElement} $node
-	 * @param {string} key
-	 * @returns {*}
-	 */
-	getAttrOrProp ($node, key) {
-		let value = "";
-		if(this.hasAttrOrProp($node,  key)) {
-			value = this.hasAttr($node, key) ? $node.getAttribute(key): $node[key];
-		}
-		return value
-	}
-	/**
-	 * If a node contains either a property or an attribute
-	 * @private
-	 * @param {HTMLElement} $node
-	 * @param {String} key
-	 * @return {boolean}
-	 */
-	hasAttrOrProp ($node, key) {
-		return this.hasAttr($node, key) || this.hasProp($node, key);
-	}
-	/**
-	 * If a node has an attribute
-	 * @private
-	 * @param {HTMLElement} $node
-	 * @param {string} attr
-	 * @return {boolean}
-	 */
-	hasAttr ($node, attr) {
-		let hasAttr = false;
-		if($node && !Utils.isNumeric(attr)) {
-			switch(attr) {
-				case "checked":
-					hasAttr = ($node.type !== undefined && ($node.type === "radio" || $node.type === "checkbox"));
-					break;
-				default:
-					hasAttr = $node.hasAttribute(attr);
-			}
-		}
-		return hasAttr;
-	}
-	/**
-	 * If a node has a property which is not an attribute
-	 * @private
-	 * @param {HTMLElement} $node
-	 * @param {string} prop
-	 * @returns {boolean}
-	 */
-	hasProp ($node, prop) {
-		let hasProp = false;
-		if($node && !Utils.isNumeric(prop)) {
-		    let has = $node[prop] !== undefined;
-		    if(has && $node[prop] === null && prop === "value") {
-				has = false;
-			}
-			hasProp = (has &&! ($node[prop] instanceof Node)) &&! $node.hasAttribute(prop);
-		}
-		return hasProp;
-	}
-
-	/**
-	 * Set the value of a property which is true/false
-	 * @private
-	 * @param {HTMLElement} $node
-	 * @param {string} key
-	 * @param {*} value
-	 */
-	setPropOrAttr ($node, key, value) {
-	    if(this.hasProp($node, key)) {
-	    	try {
-				$node[key] = value;
-			} catch(ignore) { //If fails, set it as attribute: (e.g. input.list)
-				this.setAttr($node, key, value);
-			}
-	    } else {
-	        this.setAttr($node, key, value);
-    	}
-	}
-
-    /**
-     * Set attribute to node. If value is false, will remove it.
-	 * @private
-	 * @param {HTMLElement} $node
-	 * @param {string} key
-	 * @param {*} value
-     */
-	setAttr ($node, key, value) {
-        if(value) {
-            $node.setAttribute(key, value);
-        } else {
-            $node.removeAttribute(key);
-        }
 	}
 
 	/**
@@ -780,23 +688,20 @@ class m2d2 {
 	}
 
 	/**
-	 * Define a property to an object
+	 * If selector is a Node, will return that node,
+	 * otherwise will look inside root
 	 * @private
-	 * @param {Object} obj
-	 * @param {string} prop
-	 * @param {string} def
+	 * @param {string, HTMLElement, Node} selector
+	 * @param {HTMLElement, Node} $root
+	 * @returns {HTMLElement, Node}
 	 */
-	defineProp (obj, prop, def) {
-		if(Utils.isObject(obj)) {
-			if(obj[prop] === undefined) {
-				Object.defineProperty(obj, prop, {
-					enumerable: false,
-					writable: true
-				});
-				obj[prop] = def;
-			}
-		}
-	}
+    getNode(selector, root) {
+        if (root === undefined) {
+            root = document;
+        }
+        return selector instanceof Node ? selector : root.querySelector(selector);
+    };
+
 	/**
 	 * Basic Proxy to enable assign values to elements
 	 * for example: div.a = "Click me" (instead of using: div.a.text)
@@ -820,19 +725,19 @@ class m2d2 {
 						case typeof t === "function": return t.bind(target);
 						// If there was a failed attempt to set proxy, return it on read:
 						case t._proxy && target["$" + property] !== undefined: return target["$" + property];
-						case t._proxy === undefined && Utils.isNode(t): return this.proxy(t);
+						case t._proxy === undefined && this.utils.isNode(t): return this.proxy(t);
 						default: return t;
 					}
                 },
                 set: (target, property, value) => {
                     let oldValue = "";
-                    if(Utils.isNode(target[property])) {
+                    if(this.utils.isNode(target[property])) {
                         let key = "";
-                        if(Utils.isHtml(value)) {
+                        if(this.utils.isHtml(value)) //
                             key = "html";
-						} else if(this.hasAttrOrProp(target[property], "value")) {
+						} else if(this.utils.hasAttrOrProp(target[property], "value")) {
 							key = "value";
-						} else if(Utils.isString(value) || Utils.isNumeric(value)) {
+						} else if(this.utils.isString(value) || this.utils.isNumeric(value)) {
                             key = "text";
                         }
                         if(key) {
@@ -841,7 +746,7 @@ class m2d2 {
                         }
                     } else if(property === "onupdate") {
                     	if(m2d2.updates) {
-							if (Utils.isFunction(value)) {
+							if (this.utils.isFunction(value)) {
 								target.addEventListener("onupdate", value, true);
 								oldValue = target[property];
 								target[property] = value;
@@ -906,7 +811,7 @@ class m2d2 {
 			// Check for onupdate //TODO: document
 			if(target.onupdate !== undefined) {
 				if(m.type === "attributes") {
-					const value = this.getAttrOrProp(target, m.attributeName);
+					const value = this.utils.getAttrOrProp(target, m.attributeName);
 					if(value !== m.oldValue) {
                         target.dispatchEvent(new CustomEvent("onupdate", {
                             detail: {
@@ -1068,7 +973,7 @@ class m2d2 {
 						func = function(obj) {
 							if(obj instanceof HTMLElement) {
 								this.appendChild(obj);
-							} else if (Utils.isPlainObject(obj)) {
+							} else if (this.utils.isPlainObject(obj)) {
 							    const index = this.items.length;
 							    const $child = _this.getItem(this, index, obj);
 							    this.appendChild($child);
@@ -1110,7 +1015,7 @@ class m2d2 {
 						func = function(obj) {
 							if(obj instanceof HTMLElement) {
 								this.prepend(obj);
-						} else if (Utils.isPlainObject(obj)) {
+						} else if (this.utils.isPlainObject(obj)) {
 							    const index = this.items.length;
 							    const $child = _this.getItem(this, index, obj);
 							    this.prepend($child);

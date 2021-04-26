@@ -5,61 +5,168 @@
  * @Author: A.Lepe <dev@alepe.com>
  */
 class Utils {
-    static sleep(ms) {
+    sleep(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
-    static htmlNode(html) {
+    htmlNode(html) {
         const template = Utils.newNode("template");
         template.innerHTML = html.trim();
         return template.content.firstChild;
     };
-    static newNode(tagName) {
+    newNode(tagName) {
         return document.createElement(tagName);
     };
-    static node(selector, root) {
-        if (root === undefined) {
-            root = document;
-        }
-        return selector instanceof Node ? selector : root.querySelector(selector);
-    };
-    static isString(v) {
+    isString(v) {
         return typeof v === 'string';
     };
-    static isBool(b) {
+    isBool(b) {
         return typeof b === 'boolean';
     };
-    static isNumeric(n) {
+    isNumeric(n) {
         return !isNaN(parseFloat(n)) && isFinite(n);
     };
-    static isSelectorID(s) {
+    isSelectorID(s) {
         return (s + "").trim().indexOf("#") === 0;
     };
-    static isPlainObject(o) {
+    isPlainObject(o) {
         return Utils.isObject(o) && !Utils.isArray(o);
     };
-    static isObject(oa) {
+    isObject(oa) {
         return typeof oa === 'object';
     };
-    static isArray(a) {
+    isArray(a) {
         return Array.isArray(a);
     };
-    static isFunction(f) {
+    isFunction(f) {
         return typeof f === 'function';
     };
-    static isNode(n) {
+    isNode(n) {
         return n instanceof HTMLElement;
     };
-    static isHtml(s) {
+    isHtml(s) {
         return (s + "").trim().indexOf("<") !== -1;
     };
-    static isEmpty(obj) {
+    isEmpty(obj) {
         return obj === undefined || (Utils.isObject(obj) && Object.keys(obj).length === 0) || obj === "";
     };
-    static cleanArray(a) {
+    cleanArray(a) {
         return a.filter(function(e){ return e === 0 || e });
     };
-    static isValidElement(tagName) {
+    isValidElement(tagName) {
         const $node = Utils.newNode(tagName);
         return tagName !== "template" && $node.constructor.name !== "HTMLUnknownElement";
     }
+	/**
+	 * Get attribute or property
+	 * @param {HTMLElement} $node
+	 * @param {string} key
+	 * @returns {*}
+	 */
+	getAttrOrProp ($node, key) {
+		let value = "";
+		if(this.hasAttrOrProp($node,  key)) {
+			value = this.hasAttr($node, key) ? $node.getAttribute(key): $node[key];
+		}
+		return value
+	}
+	/**
+	 * If a node contains either a property or an attribute
+	 * @private
+	 * @param {HTMLElement} $node
+	 * @param {String} key
+	 * @return {boolean}
+	 */
+	hasAttrOrProp ($node, key) {
+		return this.hasAttr($node, key) || this.hasProp($node, key);
+	}
+	/**
+	 * If a node has an attribute
+	 * @private
+	 * @param {HTMLElement} $node
+	 * @param {string} attr
+	 * @return {boolean}
+	 */
+	hasAttr ($node, attr) {
+		let hasAttr = false;
+		if($node && !this.utils.isNumeric(attr)) {
+			switch(attr) {
+				case "checked":
+					hasAttr = ($node.type !== undefined && ($node.type === "radio" || $node.type === "checkbox"));
+					break;
+				default:
+					hasAttr = $node.hasAttribute(attr);
+			}
+		}
+		return hasAttr;
+	}
+	/**
+	 * If a node has a property which is not an attribute
+	 * @private
+	 * @param {HTMLElement} $node
+	 * @param {string} prop
+	 * @returns {boolean}
+	 */
+	hasProp ($node, prop) {
+		let hasProp = false;
+		if($node && !this.utils.isNumeric(prop)) {
+		    let has = $node[prop] !== undefined;
+		    if(has && $node[prop] === null && prop === "value") {
+				has = false;
+			}
+			hasProp = (has &&! ($node[prop] instanceof Node)) &&! $node.hasAttribute(prop);
+		}
+		return hasProp;
+	}
+
+	/**
+	 * Set the value of a property which is true/false
+	 * @private
+	 * @param {HTMLElement} $node
+	 * @param {string} key
+	 * @param {*} value
+	 */
+	setPropOrAttr ($node, key, value) {
+	    if(this.hasProp($node, key)) {
+	    	try {
+				$node[key] = value;
+			} catch(ignore) { //If fails, set it as attribute: (e.g. input.list)
+				this.setAttr($node, key, value);
+			}
+	    } else {
+	        this.setAttr($node, key, value);
+    	}
+	}
+
+    /**
+     * Set attribute to node. If value is false, will remove it.
+	 * @private
+	 * @param {HTMLElement} $node
+	 * @param {string} key
+	 * @param {*} value
+     */
+	setAttr ($node, key, value) {
+        if(value) {
+            $node.setAttribute(key, value);
+        } else {
+            $node.removeAttribute(key);
+        }
+	}
+	/**
+	 * Define a property to an object
+	 * @private
+	 * @param {Object} obj
+	 * @param {string} prop
+	 * @param {string} def
+	 */
+	defineProp (obj, prop, def) {
+		if(this.utils.isObject(obj)) {
+			if(obj[prop] === undefined) {
+				Object.defineProperty(obj, prop, {
+					enumerable: false,
+					writable: true
+				});
+				obj[prop] = def;
+			}
+		}
+	}
 }
