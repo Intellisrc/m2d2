@@ -280,9 +280,8 @@ class m2d2 {
 		const f = (selector, object) => {
 			return this.instance.getProxyNode(selector, object);
 		}
-		m2d2.utils.getMethods(m2d2.utils).forEach(k => {
-			f[k] = m2d2.utils[k];
-		}); // Extends Utils;
+		// Extends Utils:
+		m2d2.utils.getMethods(m2d2.utils).forEach(k => { f[k] = m2d2.utils[k] });
 		return f;
 	})();
 	/**
@@ -597,11 +596,11 @@ class m2d2 {
                             elem = $node.find("[name="+key+"]");
                             if(elem && options.indexOf(elem) === -1) { options.push(elem); }
                             //Look for class:
-                            const elems = Array.from($node.findAll("." + key)).filter(i => { return options.indexOf(i) === -1 })
+                            const elems = Array.from($node.findAll("." + key)).filter(i => options.indexOf(i) < 0)
                             if(elems.length > 0) { options.push(elems); }
                         }
                         //Look for element or free selector (e.g: "div > span"):
-                        const elems =  Array.from($node.findAll(key)).filter(i => { return options.indexOf(i) === -1 })
+                        const elems =  Array.from($node.findAll(key)).filter(i => options.indexOf(i) < 0)
                         if(elems.length > 0) { options.push(elems); }
                     }
 				} catch(e) {

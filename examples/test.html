@@ -9,28 +9,10 @@
     <style> i.sel { margin-left: 10px; } </style>
     <script type="text/javascript">
         // When ready...
-        let list
         m2d2.ready($ => {
-            // Simple example using an object
-            list = $("#list", [
-                { a : { 
-                    href : "#", 
-                    text : "One", 
-                    i : { 
-                        text : "selected",
-                        css : "sel"
-                    }
-                  } 
-                },
-                { a : { href : "#", text : "Two" } },
-                { a : { href : "#", text : "Three" } },
-                { a : { href : "#", text : "Four" } },
-                { a : { href : "#", text : "Five" } },
-                { a : { href : "#", text : "Six" } },
-            ]);
-            list.onupdate = () => {
-                $("#total").text = list.items.length;
-            }
+            $("form", {
+                user : "some"
+            });
         });
     </script>
 </head>
@@ -39,6 +21,9 @@
     <h1>Test</h1>
     <ul id="list"></ul>
     Total: <b id="total"></b>
+    <form class="form">
+        <input type="text" name="user" />
+    </form>
 </article>
 </body>
 </html>
