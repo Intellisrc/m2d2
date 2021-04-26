@@ -15,6 +15,7 @@ m2d2.load($ => {
     const XHR = function(method, url, data, callback, error_callback, json) {
         const request = new XMLHttpRequest();
         if(json === undefined) { json = false }
+        if(error_callback === undefined) { error_callback = function(e) { console.log(e); } }
         if(data && Object.entries(data).length === 0) {
             data = "";
         }
@@ -35,11 +36,21 @@ m2d2.load($ => {
         request.open(method, url, true);
         if(json) {
             request.setRequestHeader('Content-Type', 'application/json');
+        } else {
+            request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        }
+        request.onerror = function(e) {
+            error_callback({type : "Connection", reason: "Connection Refused"});
         }
         request.onload = function() {
-            const data = request.responseText ? JSON.parse(request.responseText) : {
-                error: {type: "Unknown", reason: "Unknown Error"}
-            };
+            let data = {};
+            try {
+                data = request.responseText ? JSON.parse(request.responseText) : {
+                    error: {type: "Unknown", reason: "Unknown Error"}
+                };
+            } catch(err) {
+                data.error = { type : "Parse Error", reason : err.message }
+            }
             if (request.status >= 200 && request.status < 400) {
                 if(callback !== undefined) {
                     callback(data);
