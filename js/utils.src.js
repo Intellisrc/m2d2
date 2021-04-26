@@ -5,55 +5,109 @@
  * @Author: A.Lepe <dev@alepe.com>
  */
 class Utils {
-    sleep(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    }
-    htmlNode(html) {
-        const template = Utils.newNode("template");
-        template.innerHTML = html.trim();
-        return template.content.firstChild;
-    };
-    newNode(tagName) {
-        return document.createElement(tagName);
-    };
+	/**
+	 * Return true if variable is string
+	 * @param {*} v
+	 * @returns {boolean}
+	 */
     isString(v) {
         return typeof v === 'string';
     };
+	/**
+	 * Return true if variable is a boolean
+	 * @param {*} b
+	 * @returns {boolean}
+	 */
     isBool(b) {
         return typeof b === 'boolean';
     };
+	/**
+	 * Return true if variable is a number
+	 * @param {*} n
+	 * @returns {boolean}
+	 */
     isNumeric(n) {
         return !isNaN(parseFloat(n)) && isFinite(n);
     };
+	/**
+	 * Return true if selector us an id selector
+	 * @param {string} s
+	 * @returns {boolean}
+	 */
     isSelectorID(s) {
         return (s + "").trim().indexOf("#") === 0;
     };
+	/**
+	 * Returns true if object is a "plain" object (not an array)
+	 * @param o
+	 * @returns {boolean}
+	 */
     isPlainObject(o) {
-        return Utils.isObject(o) && !Utils.isArray(o);
+        return o.constructor.name === "Object";
     };
+	/**
+	 * Returns true if variable is an object (any kind, e.g. Array)
+	 * @param {*} oa
+	 * @returns {boolean}
+	 */
     isObject(oa) {
         return typeof oa === 'object';
     };
+	/**
+	 * Returns true if object is an array
+	 * @param {object} a
+	 * @returns {boolean}
+	 */
     isArray(a) {
         return Array.isArray(a);
     };
+	/**
+	 * Returns true if object is a function
+	 * @param {object} f
+	 * @returns {boolean}
+	 */
     isFunction(f) {
         return typeof f === 'function';
     };
+	/**
+	 * Returns true if object is an HTMLElement
+	 * @param {object} n
+	 * @returns {boolean}
+	 */
     isNode(n) {
         return n instanceof HTMLElement;
     };
+	/**
+	 * Return true if string seems to be an HTML code
+	 * @param {string} s
+	 * @returns {boolean}
+	 */
     isHtml(s) {
         return (s + "").trim().indexOf("<") !== -1;
     };
+	/**
+	 * Checks if an object is empty
+	 * @param {object} obj
+	 * @returns {boolean}
+	 */
     isEmpty(obj) {
-        return obj === undefined || (Utils.isObject(obj) && Object.keys(obj).length === 0) || obj === "";
+        return obj === undefined || (this.isObject(obj) && Object.keys(obj).length === 0) || obj === "";
     };
+	/**
+	 * Remove null, empty or undefined values from an array
+	 * @param {Array} a
+	 * @returns {Array}
+	 */
     cleanArray(a) {
         return a.filter(function(e){ return e === 0 || e });
     };
+	/**
+	 * Checks if a tag name is a valid HTML element
+	 * @param {string} tagName
+	 * @returns {boolean}
+	 */
     isValidElement(tagName) {
-        const $node = Utils.newNode(tagName);
+        const $node = this.newNode(tagName);
         return tagName !== "template" && $node.constructor.name !== "HTMLUnknownElement";
     }
 	/**
@@ -88,7 +142,7 @@ class Utils {
 	 */
 	hasAttr ($node, attr) {
 		let hasAttr = false;
-		if($node && !this.utils.isNumeric(attr)) {
+		if($node && !this.isNumeric(attr)) {
 			switch(attr) {
 				case "checked":
 					hasAttr = ($node.type !== undefined && ($node.type === "radio" || $node.type === "checkbox"));
@@ -108,7 +162,7 @@ class Utils {
 	 */
 	hasProp ($node, prop) {
 		let hasProp = false;
-		if($node && !this.utils.isNumeric(prop)) {
+		if($node && !this.isNumeric(prop)) {
 		    let has = $node[prop] !== undefined;
 		    if(has && $node[prop] === null && prop === "value") {
 				has = false;
@@ -159,7 +213,7 @@ class Utils {
 	 * @param {string} def
 	 */
 	defineProp (obj, prop, def) {
-		if(this.utils.isObject(obj)) {
+		if(this.isObject(obj)) {
 			if(obj[prop] === undefined) {
 				Object.defineProperty(obj, prop, {
 					enumerable: false,
@@ -169,4 +223,33 @@ class Utils {
 			}
 		}
 	}
+	/**
+	 * Creates a Node using HTML code
+	 * @param {string} html
+	 * @returns {HTMLElement}
+	 */
+	htmlNode(html) {
+		const template = this.newNode("template");
+		template.innerHTML = html.trim();
+		return template.content.firstChild;
+	};
+	/**
+	 * Creates a Node with a tag name
+	 * @param {string} tagName
+	 * @returns {HTMLElement}
+	 */
+	newNode(tagName) {
+		return document.createElement(tagName);
+	};
+	/**
+	 * Get all methods of class object
+	 * https://stackoverflow.com/a/67260131/196507
+	 * @param {object} obj
+	 * @returns {Array}
+	 */
+	getMethods(obj) {
+		const o = Reflect.getPrototypeOf(obj);
+		const x = Reflect.getPrototypeOf(o);
+		return Reflect.ownKeys(o).filter(it => Reflect.ownKeys(x).indexOf(it) < 0);
+	};
 }

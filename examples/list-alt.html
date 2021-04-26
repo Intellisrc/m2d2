@@ -39,6 +39,9 @@
 <script type="text/javascript">
 //On ready...
 let checkout, actions, loading; //For debugging purposes
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
 m2d2.ready($ => {
     // This example is to show how to generate lists using a function
     checkout = $("#checkout", {
@@ -139,7 +142,7 @@ m2d2.ready($ => {
         // Simulating loading data from remote server:
         // let response = await fetch("/some.service"); // Something like that
         // let data = await response.json();
-        await Utils.sleep(1000);
+        await sleep(1000);
         const data = [
             {
                 id : "it1",
