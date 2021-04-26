@@ -341,11 +341,11 @@ class m2d2 {
                             if(elem && options.indexOf(elem) === -1) { options.push(elem); }
                             //Look for class:
                             const elems = Array.from($node.findAll("." + key)).filter(i => options.indexOf(i) < 0)
-                            if(elems.length > 0) { options.push(elems); }
+                            if(elems.length > 0) { elems.forEach(e => options.push(e)) }
                         }
                         //Look for element or free selector (e.g: "div > span"):
                         const elems =  Array.from($node.findAll(key)).filter(i => options.indexOf(i) < 0)
-                        if(elems.length > 0) { options.push(elems); }
+                        if(elems.length > 0) { elems.forEach(e => options.push(e)) }
                     }
 				} catch(e) {
 				    console.error("Invalid selector: " + key);
