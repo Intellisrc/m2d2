@@ -19,13 +19,17 @@ m2d2.load($ => {
             data = "";
         }
         if(data) {
-            if(method.toUpperCase() === "GET" &&! json) {
-                if(data) {
-                    url += (url.indexOf("?") !== -1 ? "&" : "?") + (Object.keys(data).map(key => key + '=' + data[key]).join('&'));
-                    data = "";
-                }
-            } else {
+            if(json) {
                 data = JSON.stringify(data);
+            } else {
+                switch(method.toUpperCase()) {
+                    case "GET":
+                        url += (url.indexOf("?") !== -1 ? "&" : "?") + (Object.keys(data).map(key => key + '=' + data[key]).join('&'));
+                        data = "";
+                        break
+                    default:
+                        data = (Object.keys(data).map(key => key + '=' + data[key]).join('&'));
+                }
             }
         }
         request.open(method, url, true);
