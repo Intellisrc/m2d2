@@ -617,8 +617,8 @@ class m2d2 {
 					if(object.warn === undefined || object.warn !== false) { //TODO: document
 						console.log("Multiple elements were assigned with key: [" + key + "] under node: ")
 						console.log($node);
-						console.log("Usually it is what we expect, but if its not expected it could result " +
-									"on some elements mistakenly rendered. If its intended by design, specify " +
+						console.log("It might be what we expect, but if it is not expected it could result " +
+									"on some elements mistakenly rendered. You can specify " +
 									"'warn : false' under that node to hide this message.")
 					}
 				} else if(options.length === 1) { // Found single option: place values
