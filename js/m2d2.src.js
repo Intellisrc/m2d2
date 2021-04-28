@@ -433,10 +433,15 @@ class m2d2 {
 							$node[key] = value;
 						}
 					} else if(key !== "template") { //We handle templates inside items
-                        console.error("Not sure what you want to do with key: " + key + " under element: ");
-                        console.log($node);
-                        console.log("And object:");
-                        console.log(object);
+						if($node.warn === undefined || $node.warn !== false) { //TODO: document
+							console.error("Not sure what you want to do with key: " + key + " under element: ");
+							console.log($node);
+							console.log("And object:");
+							console.log(object);
+							console.log("Most likely the element's property or child no longer exists or the value" +
+										" passed to it is incorrect.");
+							console.log("You can set 'warn : false' property to the element to dismiss this message.");
+						}
 						$node[key] = value;
 					}
 				}
