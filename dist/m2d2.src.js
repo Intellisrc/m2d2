@@ -614,6 +614,13 @@ class m2d2 {
 						items.push(this.render(item, key, value));
 					});
 					this.linkNode($node, key, items);
+					if(object.warn === undefined || object.warn !== false) { //TODO: document
+						console.log("Multiple elements were assigned with key: [" + key + "] under node: ")
+						console.log($node);
+						console.log("Usually it is what we expect, but if its not expected it could result " +
+									"on some elements mistakenly rendered. If its intended by design, specify " +
+									"'warn : false' under that node to hide this message.")
+					}
 				} else if(options.length === 1) { // Found single option: place values
 					const opt = options[0];
 					 if(m2d2.utils.isNode(opt)) {
@@ -678,8 +685,8 @@ class m2d2 {
 							}
 							$node[key] = value;
 						}
-					} else if(key !== "template") { //We handle templates inside items
-						if($node.warn === undefined || $node.warn !== false) { //TODO: document
+					} else if(key !== "template" && (key !== "warn" && value !== false)) { //We handle templates inside items
+						if(object.warn === undefined || object.warn !== false) { //TODO: document
 							console.error("Not sure what you want to do with key: " + key + " under element: ");
 							console.log($node);
 							console.log("And object:");
