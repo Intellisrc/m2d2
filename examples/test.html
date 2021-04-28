@@ -10,17 +10,22 @@
     <script type="text/javascript">
         // When ready...
         m2d2.ready($ => {
-            $("form", {
+            $("form", { //form is element and class
                 user : "some"
+            });
+            $(main, {
+                div : "ok"
             });
         });
     </script>
 </head>
 <body>
-<article>
+<article id="main">
     <h1>Test</h1>
     <ul id="list"></ul>
-    Total: <b id="total"></b>
+    <div></div>
+    <div></div>
+    <div></div>
     <form class="form">
         <input type="text" name="user" />
     </form>

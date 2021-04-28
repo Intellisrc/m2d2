@@ -609,24 +609,14 @@ class m2d2 {
 				    return;
 				}
 				if(options.length > 1) {
-					console.error("Multiple options found for key: " + key + " under element: ");
-					console.log($node);
-					console.log("Options: ");
-					options.forEach(o => { console.log(o); });
-					console.log("Please rename key or adjust DOM");
+					const items = [];
+					options.forEach(item => {
+						items.push(this.render(item, key, value));
+					});
+					this.linkNode($node, key, items);
 				} else if(options.length === 1) { // Found single option: place values
 					const opt = options[0];
-					if(m2d2.utils.isArray(opt)) { // Multiple nodes
-					    if(opt.length === 1) { // Normal Object:
-							this.renderAndLink($node, opt[0], key, value);
-					    } else { //TODO: Document : multiple elements become array
-					        const items = [];
-                            opt.forEach(item => {
-                                items.push(this.render(item, key, value));
-                            });
-                            this.linkNode($node, key, items);
-                        }
-					} else if(m2d2.utils.isNode(opt)) {
+					 if(m2d2.utils.isNode(opt)) {
 						if(m2d2.utils.isArray(value)) { // Process Array
 							const template = object["template"];
 							this.doItems(opt, value, template);
@@ -689,10 +679,15 @@ class m2d2 {
 							$node[key] = value;
 						}
 					} else if(key !== "template") { //We handle templates inside items
-                        console.error("Not sure what you want to do with key: " + key + " under element: ");
-                        console.log($node);
-                        console.log("And object:");
-                        console.log(object);
+						if($node.warn === undefined || $node.warn !== false) { //TODO: document
+							console.error("Not sure what you want to do with key: " + key + " under element: ");
+							console.log($node);
+							console.log("And object:");
+							console.log(object);
+							console.log("Most likely the element's property or child no longer exists or the value" +
+										" passed to it is incorrect.");
+							console.log("You can set 'warn : false' property to the element to dismiss this message.");
+						}
 						$node[key] = value;
 					}
 				}
