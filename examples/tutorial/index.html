@@ -9,31 +9,6 @@
     <!-- CSS used by examples and tutorial: -->
     <link rel="stylesheet" href="../css/examples.css" type="text/css" />
     <!-- CSS used to highlight code: -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.2/styles/atom-one-dark.min.css">
-    <!-- M2D2 library: (usually you will use m2d2.min.js, but using source for debugging purposes) -->
-    <script src="../../dist/m2d2.src.js" type="text/javascript"></script>
-    <!-- Beutify and highlight JS and HTML code: -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.2/highlight.min.js" type="text/javascript"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.13.13/beautify.min.js" type="text/javascript"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.13.13/beautify-html.min.js"></script>
-    <!-- The following script will add the tutorial links -->
-    <script src="../js/tutorial.js"></script>
-    <!-- The following script will add the HTML code into the view (before processing) -->
-    <script src="../js/show_html.js"></script>
-    <!-- The example code is this: -->
-    <script id="code" type="text/javascript">
-        m2d2.ready($ => {
-            $("#profile", {
-                uid : 100,
-                username : "sam1",
-                name : "Sam Jackson",
-                email : "sam@example.com",
-                age : 22
-            });
-        });
-    </script>
-    <!-- The following script will add the JS code into the view -->
-    <script src="../js/show_code.js"></script>
 </head>
 <body>
     <header>
@@ -42,20 +17,8 @@
             a simple user profile. We "fill" the fields using a javascript
             plain object.</p>
     </header>
-    <section id="out">
-        <h1>Example Output:</h1>
-        <article id="example">
-            <div id="profile">
-                <h2>User Profile:</h2>
-                <div>ID: <span id="uid"></span></div>
-                <div>UserName: <span id="username"></span></div>
-                <div class="details">
-                    <div>Name: <span id="name"></span></div>
-                    <div>Email: <span id="email"></span></div>
-                    <div>Age: <span id="age"></span></div>
-                </div>
-            </div>
-        </article>
+    <section>
+        <script async src="//jsfiddle.net/alepe/v3pr6twe/3/embed/js,html,css,result/dark/"></script>
     </section>
     <footer>
         <h1>Lessons:</h1>

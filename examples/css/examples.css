@@ -4,26 +4,20 @@ body {
     border: 1px solid #CCC;
     padding: 20px;
     display: grid;
-    grid-template-columns: 300px 50% auto;
+    grid-template-columns: 300px auto;
     grid-template-areas:
-        ". header header"
-        "links html out"
-        "links js out"
-        "links footer footer";
+        ". header"
+        "links example"
+        "links footer";
     grid-gap: 10px;
     font-size: 16px;
 }
 header {
     grid-area: header;
 }
-article {
+section {
     padding: 10px;
-    grid-area: article;
-}
-#out {
-    grid-area: out;
-    background: #EEE;
-    padding: 20px;
+    grid-area: example;
 }
 nav {
     grid-area: links;
@@ -36,14 +30,12 @@ h1 {
     color: #333;
 }
 code {
-    white-space: pre;
+    background: #1f262e;
+    color: white;
+    padding: 5px;
+    display: block;
 }
-section.html {
-    grid-area: html;
-}
-section.js {
-    grid-area: js;
-}
+/*
 div.info {
     margin: 10px;
     padding: 10px;
@@ -132,3 +124,4 @@ input[type=text] {
 	text-align: center;
 	margin: auto;
 }
+*/
