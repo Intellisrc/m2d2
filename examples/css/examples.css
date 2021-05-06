@@ -1,22 +1,48 @@
 body {
-    max-width: 960px;
+    max-width: 1500px;
     margin: auto;
     border: 1px solid #CCC;
     padding: 20px;
     display: grid;
-    grid-template-columns: auto 300px;
+    grid-template-columns: 300px 50% auto;
+    grid-template-areas:
+        ". header header"
+        "links html out"
+        "links js out"
+        "links footer footer";
+    grid-gap: 10px;
     font-size: 16px;
+}
+header {
+    grid-area: header;
 }
 article {
     padding: 10px;
+    grid-area: article;
+}
+#out {
+    grid-area: out;
+    background: #EEE;
+    padding: 20px;
+}
+nav {
+    grid-area: links;
 }
 footer {
-    border-left: 1px solid #CCC;
-    padding-left: 10px;
+    grid-area: footer;
 }
 h1 {
     font-family: verdana, tahoma, sans-serif;
     color: #333;
+}
+code {
+    white-space: pre;
+}
+section.html {
+    grid-area: html;
+}
+section.js {
+    grid-area: js;
 }
 div.info {
     margin: 10px;

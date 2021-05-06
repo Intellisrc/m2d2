@@ -517,8 +517,9 @@ class m2d2 {
 			return null;
 		}
 		const $node = this.extDom(selector); // Be sure that $node is an extended DOM object
-		if(object === undefined) {
-			object = $node.text;
+		// If there is no object return only extension
+		if(object === undefined) { //TODO: documentation: extending nodes
+			return $node;
 		}
 		object = this.plainToObject($node, object); // Be sure it's an object //TODO: documentation : text parameter
 		Object.keys(object).forEach(key => {
@@ -988,7 +989,7 @@ class m2d2 {
 	 * @returns {Proxy, Object}
 	 */
 	proxy (obj, force) {
-	    if(!m2d2.short || (obj._proxy !== undefined && force === undefined)) {
+	    if(!m2d2.short || (obj === null || (obj._proxy !== undefined && force === undefined))) {
 	        return obj;
 	    } else {
 	        obj._proxy = obj;
