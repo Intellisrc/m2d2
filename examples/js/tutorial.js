@@ -13,11 +13,11 @@ const tutorial = [
         ]
       },
       {
-        id : "",
+        id : "4o5c83yn",
         title: "DOM objects",
-        description : "AAA",
+        description : "All objects returned by m2d2 are DOM objects with extra features.",
         lessons : [
-            'one'
+            'The value returned by the function: <code>$("#sample")</code> is indeed a DOM element (or Node) which has all standard Javascript properties and functions (like `appendChild`, `classList`, etc). Additionally it has <a href="dom_extend.html">some functions</a> that are useful to keep our code simple.'
         ]
       }
 ];
@@ -38,7 +38,7 @@ m2d2.ready($ => {
             if(hashId) {
                 sel = nav.items.get(hashId);
                 if(sel) {
-                    nav.items.select(hashId);
+                    sel.selected = true;
                 }
             }
             if(!sel) {
@@ -46,9 +46,15 @@ m2d2.ready($ => {
             }
         }
         example.items.clear();
+        let found = false;
+        buttons.prev.dataset.id = "";
+        buttons.prev.disabled = true;
+        buttons.next.disabled = true;
         tutorial.forEach(item => {
             if(item.id == sel.dataset.id) {
-                $("#lesson", item);
+                const copy = Object.assign({}, item);
+                delete copy.id; // Remove ID
+                $("#lesson", copy);
                 example.items.push({
                     css : "code",
                     src : getCodeURL(item)
@@ -57,6 +63,19 @@ m2d2.ready($ => {
                     css : "view",
                     src : getViewURL(item)
                 });
+                sel.selected = true;
+                found = true;
+            } else {
+                if(found) {
+                    buttons.next.dataset.id = item.id;
+                    buttons.next.disabled = false;
+                    buttons.next.text = item.title;
+                    return;
+                } else {
+                    buttons.prev.dataset.id = item.id;
+                    buttons.prev.disabled = false;
+                    buttons.prev.text = item.title;
+                }
             }
         });
     }
@@ -87,6 +106,28 @@ m2d2.ready($ => {
         },
         items : [
         ]
+    });
+    const buttons = $("#buttons", {
+        prev : {
+            onclick : function(ev) {
+                if(this.dataset.id) {
+                    window.location.hash = "#" + this.dataset.id;
+                    nav.items.get(this.dataset.id).selected = true;
+                    showPage();
+                }
+                return false;
+            }
+        },
+        next : {
+            onclick : function(ev) {
+                if(this.dataset.id) {
+                    window.location.hash = "#" + this.dataset.id;
+                    nav.items.get(this.dataset.id).selected = true;
+                    showPage();
+                }
+                return false;
+            }
+        }
     });
     // Load page:
     showPage();

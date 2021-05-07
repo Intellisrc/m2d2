@@ -1214,7 +1214,8 @@ class m2d2 {
 					        let found = null;
 					        if(this.items.length) {
 					            this.items.some(item => {
-					                if(item.dataset && (item.dataset.id * 1) === id * 1) {
+					                const sameId = m2d2.utils.isNumeric(id) ? (item.dataset.id * 1) === id * 1 : item.dataset.id === id;
+					                if(item.dataset && sameId) {
 					                    found = item;
 					                    return true;
 					                }
@@ -1261,7 +1262,8 @@ class m2d2 {
 					    func = function(id) {
 					        if(this.items.length) {
 					            this.items.some(item => {
-					                if(item.dataset && (item.dataset.id * 1) === id * 1) {
+					                const sameId = m2d2.utils.isNumeric(id) ? (item.dataset.id * 1) === id * 1 : item.dataset.id === id;
+					                if(item.dataset && sameId) {
 					                    item.remove();
 										return true;
 									}
