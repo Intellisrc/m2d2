@@ -19,21 +19,27 @@ section {
     padding: 10px;
     grid-area: example;
 }
-nav {
+ol.nav {
     grid-area: links;
+}
+ol.nav li {
+    background-color: #EEE;
+    padding: 10px;
+    margin: 1px;
+}
+ol.nav a {
+    text-decoration: none;
+    color: #333;
 }
 footer {
     grid-area: footer;
 }
+footer li {
+    margin: 20px 0;
+}
 h1 {
     font-family: verdana, tahoma, sans-serif;
     color: #333;
-}
-code {
-    background: #1f262e;
-    color: white;
-    padding: 5px;
-    display: block;
 }
 /*
 div.info {
