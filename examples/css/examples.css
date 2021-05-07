@@ -28,7 +28,8 @@ article {
 }
 section {
     display: grid;
-    grid-template-columns: 50% 50%;
+    grid-template-rows: 50% 50%;
+    border: 1px solid #333;
 }
 iframe {
     min-height: 300px;
