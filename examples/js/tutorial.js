@@ -46,10 +46,11 @@ m2d2.ready($ => {
             }
         }
         example.items.clear();
+        lessons.items.clear();
         let found = false;
-        buttons.prev.dataset.id = "";
-        buttons.prev.disabled = true;
-        buttons.next.disabled = true;
+        buttons.find(".prev").dataset.id = "";
+        buttons.find(".prev").disabled = true;
+        buttons.find(".next").disabled = true;
         tutorial.forEach(item => {
             if(item.id == sel.dataset.id) {
                 const copy = Object.assign({}, item);
@@ -63,24 +64,30 @@ m2d2.ready($ => {
                     css : "view",
                     src : getViewURL(item)
                 });
+                lessons.items.concat(item.lessons);
                 sel.selected = true;
                 found = true;
             } else {
                 if(found) {
-                    buttons.next.dataset.id = item.id;
-                    buttons.next.disabled = false;
-                    buttons.next.text = item.title;
+                    buttons.find(".next").dataset.id = item.id;
+                    buttons.find(".next").disabled = false;
+                    buttons.find(".next").text = item.title;
                     return;
                 } else {
-                    buttons.prev.dataset.id = item.id;
-                    buttons.prev.disabled = false;
-                    buttons.prev.text = item.title;
+                    buttons.find(".prev").dataset.id = item.id;
+                    buttons.find(".prev").disabled = false;
+                    buttons.find(".prev").text = item.title;
                 }
             }
         });
+        lessons.findAll('code').forEach(block => {
+            block.classList.add("js");
+            hljs.highlightElement(block);
+        });
     }
+
+    // Add links
     const links = [];
-    const lessons = [];
     tutorial.forEach(item => {
         links.push({
             dataset : { id : item.id },
@@ -94,31 +101,29 @@ m2d2.ready($ => {
             }
         });
     });
+
+    // Declare lessons list:
+    const lessons = $("#lessons", []);
+
+    // Render links:
     $(nav, {
         template : { li : { a : {} }},
         items : links
     });
+
+    // Declare example template:
     $(example, {
         template : {
             script : {
                 async : true
             }
-        },
-        items : [
-        ]
+        }
     });
+
+    // Buttons PREV and NEXT:
     const buttons = $("#buttons", {
-        prev : {
-            onclick : function(ev) {
-                if(this.dataset.id) {
-                    window.location.hash = "#" + this.dataset.id;
-                    nav.items.get(this.dataset.id).selected = true;
-                    showPage();
-                }
-                return false;
-            }
-        },
-        next : {
+        warn : false, // Do not warn
+        button : {  // Same for both buttons
             onclick : function(ev) {
                 if(this.dataset.id) {
                     window.location.hash = "#" + this.dataset.id;
@@ -129,10 +134,7 @@ m2d2.ready($ => {
             }
         }
     });
+
     // Load page:
     showPage();
-    $("#lessons", lessons).findAll('code').forEach(block => {
-        block.classList.add("js");
-        hljs.highlightElement(block);
-    });
 });
