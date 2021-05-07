@@ -6,28 +6,34 @@ body {
     display: grid;
     grid-template-columns: 300px auto;
     grid-template-areas:
-        ". header"
-        "links example"
-        "links footer";
+        "header header"
+        "links example";
     grid-gap: 10px;
     font-size: 16px;
 }
 header {
     grid-area: header;
 }
-section {
+article {
     padding: 10px;
     grid-area: example;
 }
-ol.nav {
+section {
+    display: grid;
+    grid-template-columns: 50% 50%;
+}
+iframe {
+    min-height: 300px;
+}
+aside {
     grid-area: links;
 }
-ol.nav li {
+aside li {
     background-color: #EEE;
     padding: 10px;
     margin: 1px;
 }
-ol.nav a {
+aside a {
     text-decoration: none;
     color: #333;
 }
@@ -41,93 +47,3 @@ h1 {
     font-family: verdana, tahoma, sans-serif;
     color: #333;
 }
-/*
-div.info {
-    margin: 10px;
-    padding: 10px;
-    border: 1px solid #EEE;
-}
-div.info a {
-    display: block;
-    text-align: center;
-    padding: 10px;
-}
-div.info dt, caption {
-    background: #EEE;
-    padding: 10px;
-}
-div.info dd {
-    padding: 10px;
-}
-#checkout, #user {
-    border-spacing: 0px;
-    border: 1px solid #EEE;
-    width: 100%;
-}
-#checkout td {
-    padding: 5px;
-}
-#checkout tr {
-    cursor: pointer;
-}
-#checkout tr[selected] {
-    background-color: #EEE;
-}
-#checkout tr td:last-child {
-    text-align: right;
-}
-#checkout td.loading {
-	text-align: center !important;
-}
-#checkout tfoot {
-    background-color: #EEE;
-}
-.box {
-    border: 1px solid #CCC;
-    padding: 10px;
-    background: #EEE;
-}
-.controls {
-    margin: 10px;
-    padding: 10px;
-    border-top: 2px solid #EEE;
-	text-align: center;
-}
-.controls div {
-    margin: 10px 0;
-}
-#now {
-    display: block;
-    text-align: center;
-    color: blue;
-}
-#user th {
-	text-align: right;
-	border-right: 2px solid #ccc;
-	padding-right: 10px;
-	width: 10%;
-}
-button {
-    border: 1px solid #CCC;
-    border-radius: 4px;
-    padding: 10px;
-    width: 200px;
-    margin: 0 10px;
-    color: #333;
-    cursor: pointer;
-    margin: 10px;
-}
-button[disabled] {
-    opacity: 0.3;
-}
-input[type=number],
-input[type=text] {
-    padding: 5px;
-}
-#loading {
-	border : 1px solid #DDD;
-	padding: 10px;
-	text-align: center;
-	margin: auto;
-}
-*/

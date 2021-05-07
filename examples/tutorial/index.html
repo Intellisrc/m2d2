@@ -19,39 +19,21 @@
 </head>
 <body>
     <header>
-        <h1>1. How to start</h1>
-        <p>In this example we will learn how to start using M2D2 with
-            a simple user profile. We "fill" the fields using a javascript
-            plain object.</p>
+        <button id="prev">Previous</button>
+        <button id="next">Next</button>
     </header>
-    <section>
-        <!--script async src="//jsfiddle.net/alepe/v3pr6twe/4/embed/result,js,html,css/dark/"></script-->
-        <p class="codepen" data-height="296" data-theme-id="dark" data-default-tab="js,result" data-user="lepe-the-animator" data-slug-hash="oNZgXEq"
-           style="height: 296px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 2px solid; margin: 1em 0; padding: 1em;"
-           data-pen-title="M2D2 : How to start...">
-  <span>See the Pen <a href="https://codepen.io/lepe-the-animator/pen/oNZgXEq">
-  M2D2 : How to start...</a> by lepe (<a href="https://codepen.io/lepe-the-animator">@lepe-the-animator</a>)
-  on <a href="https://codepen.io">CodePen</a>.</span>
-        </p>
-        <script async src="https://cpwebassets.codepen.io/assets/embed/ei.js"></script>
-    </section>
-    <footer>
-        <h1>Lessons:</h1>
-        <ol>
-            <li>We start by using the function: <code>m2d2.ready()</code> which executes your instructions
-                when the page (DOM) is ready.</li>
-            <li>The dollar sign in the callback function: <code>m2d2.ready($ => { $("#profile"); })</code>
-            is the suggested symbol for M2D2 (and the one used
-            across all examples and documentation). You can use anything
-            you want, for example: <code>m2d2.ready(m => { m("#profile"); })</code></li>
-            <li>Usually you want to use an ID as selector: <code>$("#profile")</code> but you can
-            use any supported selector, for example: <code>$("body section div:first-child")</code>
-            Although I don't recommend it because your code will perform better and it will be easier
-            to understand if you stick to IDs (more about this later in this tutorial).</li>
-            <li>You don't need to specify all parents to find an element, for example, instead of:
-            <code>$("#profile", { details : { age : 80 })</code> can be set in a more direct way:
-            <code>$("#profile", { age : 80 });</code></li>
-        </ol>
-    </footer>
+    <aside>
+        <ol id="nav"></ol>
+    </aside>
+    <article id="lesson">
+        <h1 id="title"></h1>
+        <p id="description"></p>
+        <section id="example"></section>
+        <footer>
+            <h1>Lessons:</h1>
+            <ol id="lessons">
+            </ol>
+        </footer>
+    </article>
 </body>
 </html>
