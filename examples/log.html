@@ -31,7 +31,7 @@
         color: #090;
     }
 </style>
-<script src="../dist/m2d2.min.js" type="text/javascript"></script>
+<script src="../dist/m2d2.src.js" type="text/javascript"></script>
 <!-- Import Demo menu: -->
 <script src="../js/demo-links.js" type="text/javascript"></script>
 <!--                   -->
@@ -40,7 +40,7 @@ function getRandom(array) {
     return array[Math.floor(Math.random() * array.length)];
 }
 //On ready...
-document.addEventListener("DOMContentLoaded", function() {
+m2d2.ready($ => {
     const users = ["admin","editor","guest"]
     const actions = {
         "read": "The user [USER] viewed an item",
@@ -58,7 +58,7 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
     // This example is to show how append to a list
-    const list = m2d2("#log", {
+    const list = $("#log", {
         template : {
             li : {
                 date : {

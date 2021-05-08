@@ -9,9 +9,7 @@ const paths = {
 	build: 'dist/',
 	js: [
 		'js/utils.src.js',
-		'js/m2d2.src.js',
-		'js/m2d2.show.src.js',
-		'js/m2d2.style.src.js'
+		'js/m2d2.src.js'
 	]
 };
 

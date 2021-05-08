@@ -1,21 +1,20 @@
-document.addEventListener("DOMContentLoaded", function() {
+m2d2.ready($ => {
     const menuLinks = {
         "Update from input" : "index.html",
         "Update from input using object" : "object.html",
         "Update from input (multiple targets)" : "multiple.html",
         "Update object" : "index-adv.html",
-        "Menu (show and style extensions)" : "menu.html",
+        "Menu (show and css)" : "menu.html",
         "Timer" : "timer.html",
         "Logging screen" : "log.html",
         "Movie list - Async" : "list-async.html",
         "Item list" : "list.html",
         "Item list (sort)" : "list-sort.html",
-        "Item list (advanced)" : "list-adv.html",
+        "Item list (advanced)" : "list-alt.html",
         "Phone book - Async" : "async.html",
-        "Form validation" : "form.html",
-        "Custom extensions" : "extend.html",
+        "Form validation" : "form.html"
     }
-    m2d2(function() {
+    $(function() {
         const links = [];
         const baseURL = window.location.href.indexOf("examples/") >= 0 ? "" : "examples/";
         for(let title in menuLinks) {

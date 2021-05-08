@@ -8,32 +8,49 @@
 	<style type="text/css">
 		code { background: #EEE; padding: 10px; display: block; white-space: pre; }
 	</style>
-<script src="../dist/m2d2.min.js" type="text/javascript"></script>
+<script src="../dist/m2d2.src.js" type="text/javascript"></script>
 <!-- Import Demo menu: -->
 <script src="../js/demo-links.js" type="text/javascript"></script>
 <!--- --->
 <script type="text/javascript">
 	//On page ready...
 	let user, title1, title2;
-	document.addEventListener("DOMContentLoaded", function() {
+	m2d2.ready($ => {
 		// Most simple example using a String as data
-		user = m2d2(".user", {
+		user = $(".user", {
 			form : {
 				method : "POST",
 				onsubmit : function() { return false; },
 			},
 			name: {
+				//onupdate : function(ev) { ... } // Its also possible to "Push" changes
 				autofocus: true,
-				value: "Some title",
+				value: "Default title",
 				size: 50
+			},
+			button : {
+				onclick : () => {
+					user.name = "Button clicked.";
+				}
 			}
 		});
-		title1 = m2d2("h1", {
-			text : [ user.name , "value" ]
-		});
-		title2 = m2d2("h2", {
-			text : [ user.name , "value" ]
-		});
+		// Prepare recipients: (initialized with textContent)
+		title1 = $("h1");
+		title2 = $("h2");
+
+		// Instead of "Pushing" changes, you can "Pull" changes this way
+		// which is useful to keep code logically separated
+		// You can add multiple "onupdate" listeners (as any other event):
+		user.name.onupdate = (ev) => {
+			if(ev.detail.property === "value") {
+				title1.text = user.name.value;
+			}
+		}
+		user.name.onupdate = (ev) => {
+			if(ev.detail.property === "value") {
+				title2.text = user.name.value;
+			}
+		}
 	});
 </script>
 </head>
@@ -44,30 +61,21 @@
 	<div class="user">
 		<form>
 			<label for="name">Name : </label><input id="name" type="text" value="" />
+			<button>Click Me</button>
 		</form>
 	</div>
 	<hr>
-	<p>To update the titles, input some text and press <b>ENTER KEY</b> (its triggered on change):</p>
-	<p>If you want it to change on keyup or other event, follow <a href="index.html">the simple example</a>.</p>
+	<p>To update the titles, input some text</p>
 	<p>You can open the console and execute:<br>
 		<code>user.name.value = "some text";</code>
 		And you will see the input and the 2 titles change.
 		Additionally, try changing the "value" attribute in HTML directly, and it will also change the titles.
 	</p>
-	<h2>Explanation:</h2>
-	<code>const user = m2d2(".user", {
-		name: {
-			value: "Hello"
-		}
-	});
-	const title = m2d2("h1", {
-		text : [ user.name , "value" ]
-	});
-	</code>
-	<p>
-		The important point is that we need to assign an array made of a m2d2 object and the property you want to assign.
-		If you set: <b>text : user.name.value</b> it will set the value only, and it won't be updated if it changes.
-	</p>
+	<h3>Lesson:</h3>
+	<p>When you click on the button, you don't need to update the title and subtitle manually. which is
+		different from using:<br>
+		<code>user.name.oninput</code> event, in which the title and subtitle won't be updated when the
+		button is clicked.</p>
 </article>
 </body>
 </html>

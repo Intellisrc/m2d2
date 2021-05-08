@@ -1,0 +1,61 @@
+body {
+    max-width: 1500px;
+    margin: auto;
+    border: 1px solid #CCC;
+    display: grid;
+    grid-template-columns: 300px auto;
+    grid-template-areas:
+        "header header"
+        "links example";
+    grid-gap: 10px;
+    font-size: 16px;
+}
+header {
+    grid-area: header;
+    padding: 20px;
+    display: grid;
+    grid-template-columns: 50% 50%;
+    background: #CCC;
+}
+header button {
+    margin: 0 20px;
+    padding: 10px;
+    cursor: pointer;
+}
+article {
+    padding: 10px;
+    grid-area: example;
+}
+section {
+    display: grid;
+    grid-template-rows: 50% 50%;
+    border: 1px solid #333;
+}
+iframe {
+    min-height: 300px;
+}
+aside {
+    grid-area: links;
+}
+aside li {
+    background-color: #EEE;
+    padding: 10px;
+    margin: 1px;
+}
+aside li[selected] {
+    background-color: #FF9;
+}
+aside a {
+    text-decoration: none;
+    color: #333;
+}
+footer {
+    grid-area: footer;
+}
+footer li {
+    margin: 20px 0;
+}
+h1 {
+    font-family: verdana, tahoma, sans-serif;
+    color: #333;
+}

@@ -1,0 +1,60 @@
+<html>
+<head>
+<title>Demo using M2D2 : Simple</title>
+<meta name="HandheldFriendly" content="1">
+<meta name="viewport" content="width=device-width, maximum-scale=1.0">
+<meta name="theme-color" content="#333333">
+<link rel="stylesheet" href="../css/examples.css" type="text/css" />
+<script type="text/javascript">
+	//On page ready...
+    let body
+	document.addEventListener("DOMContentLoaded", function() {
+	    const m2 = (selector, root) => {
+            const orig = (root || document).querySelector(selector);
+            Object.defineProperty(orig, "text", {
+                get() {
+                    return this.textContent;
+                },
+                set(value) {
+                    this.textContent = value;
+                }
+            });
+            return Object.assign(orig, {
+                find: orig.querySelector,
+                findAll: orig.querySelectorAll,
+            });
+        }
+	    const m2d2 = (selector, object) => {
+	        const root = m2(selector);
+	        return Object.assign(root, {
+                main : m2("#main", root), //set warning as title exists
+                controls : m2(".controls", root),
+                //title : orig.querySelector("#title"), //set warning as title exists
+                input : m2("input", root)
+            }, object);
+        }
+
+        body = m2d2("body", {
+            className : "some"
+        });
+        //body.find("#title").textContent = "Yee!";
+        body.main.textContent = "Yea!";
+        body.input.value = "100";
+        body.input.autofocus = true;
+        body.input.onkeyup = (ev) => {
+            body.main.textContent = ev.target.value;
+        }
+	});
+</script>
+</head>
+<body>
+<article>
+    <h1 id="main">Title</h1>
+    <p>This is the most simple example. We define two objects: 'title' and 'input'.</p>
+    <p>To update the title, input some text:</p>
+    <div class="controls">
+        <div>New Title: <input id="new_title" type="text" /></div>
+    </div>
+</article>
+</body>
+</html>
