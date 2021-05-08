@@ -101,7 +101,7 @@ class m2d2 {
 		}
 		if($node._m2d2 === undefined) {
 			$node._m2d2 = true; //flag to prevent it from re-assign methods
-			["find","findAll","onupdate","show","css","text","html","getData"].forEach(f => {
+			["parent","sibling","find","findAll","onupdate","show","css","text","html","getData"].forEach(f => {
 				if($node.hasOwnProperty(f)) {
 					console.log("Node already had ["+f+"] property. It might cause unexpected behaviour.")
 					console.log("You may need to update the M2D2 version or report it to: github.com/lepe/m2d2/")
@@ -211,6 +211,12 @@ class m2d2 {
 			}
 			// Functions:
 			Object.assign($node, {
+				parent: () => {
+					return this.extDom($node.parentElement);
+				},
+				sibling: (sel) => {
+					return $node.parentElement.find(sel);
+				},
 				find: (it) => {
 					const node = $node.querySelector(it)
 					return node ? this.extDom(node) : null;

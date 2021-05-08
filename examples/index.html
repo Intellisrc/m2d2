@@ -10,11 +10,11 @@
 <script src="../js/demo-links.js" type="text/javascript"></script>
 <!--                   -->
 <script type="text/javascript"> // title.js
-	//On page ready...
+    //On page ready...
 	m2d2.ready($ => {
 		// Most simple example using a String as data
         const default_text = "M2D2 Demo";
-		$("#title", {
+		$(title, {
             text: default_text,
             onclick : function() {
                 input.css = "done";
@@ -23,29 +23,30 @@
 
         // Use ID to share it between "ready" blocks
         //$("#shared", { text : "Text in title.js" });
-        $("#shared", "Text from title.js");
+        $(shared, "Text from title.js");
 
-        $("#input").css.add("title");
+        $(input).css.add("title");
 	});
 </script>
 
 <script type="text/javascript">   // time.js
-m2d2.ready($ => {
-    $("#time", new Date().toDateString());
-    $("#input").css.add("time");
-});
+    m2d2.ready($ => {
+        $(time, new Date().toDateString());
+        input.css.add("time");
+    });
 </script>
 
 <script type="text/javascript"> // input.js
-m2d2.ready($ => {
-    $("#input", {
-        autofocus: true,
-        onkeyup: function () {
-            title.text = this.value;
-        }
+    m2d2.ready($ => {
+        $(input, {
+            autofocus: true,
+            onkeyup: function () {
+                title.text = this.value;
+                $.addTimeToTitle()
+            }
+        });
+        shared.text += ", Text from input.js";
     });
-    shared.text += ", Text from input.js";
-});
 </script>
 </head>
 <body>
