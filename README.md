@@ -40,7 +40,6 @@ Repositories (synchronized):
 	});
 ```
 
-
 ## Tutorial:
 [Learn it Now](https://gl.githack.com/lepe/m2d2/raw/master/examples/tutorial/index.html)
 
