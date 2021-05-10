@@ -51,7 +51,7 @@ class m2d2 {
 						m2d2.extensions[k] = {};
 					}
 					// Check that we are not replacing any existing property:
-					const $node = m2d2.utils.newNode(k);
+					const $node = m2d2.utils.newElement(k);
 					Object.keys(ext[k]).forEach(it => {
 						if(m2d2.utils.hasProp($node, it)) {
 							console.log("Warning: property [" + it + "] already exists " +
@@ -64,7 +64,7 @@ class m2d2 {
 					if(m2d2.extensions["*"] === undefined) {
 						m2d2.extensions["*"] = {};
 					}
-					const $node = m2d2.utils.newNode("div");
+					const $node = m2d2.utils.newElement("div");
 					Object.keys(ext[k]).forEach(it => {
 						if(m2d2.utils.hasProp($node, it)) {
 							console.log("Warning: property [" + it + "] already exists " +
@@ -174,8 +174,8 @@ class m2d2 {
                         const b = document.getElementsByTagName("body")[0];
                         const t = document.createElement("template");
                         const n = document.createElement(this.tagName);
-                        t.appendChild(n);
-                        b.appendChild(t);
+                        t.append(n);
+                        b.append(t);
                         const display = getComputedStyle(n, null).display;
                         t.remove();
                         return display;
@@ -222,7 +222,7 @@ class m2d2 {
 					return node ? this.extDom(node) : null;
 				},
 				findAll: (it) => {
-					const nodeList = $node.querySelectorAll(it);
+					const nodeList = it === undefined ? Array.from($node.children) : $node.querySelectorAll(it);
 					nodeList.forEach(n => { this.extDom(n) });
 					return nodeList;
 				}
@@ -261,7 +261,7 @@ class m2d2 {
 			object = selector;
 			selector = "body";
 		}
-		if(!(m2d2.utils.isString(selector) || m2d2.utils.isNode(selector))) {
+		if(!(m2d2.utils.isString(selector) || m2d2.utils.isElement(selector))) {
 			console.error("Selector is not a string or a Node:")
 			console.log(selector);
 			return null;
@@ -338,7 +338,8 @@ class m2d2 {
 			} else {
 			    const options = [];
 			    try {
-			        if(key !== "template") {
+			        // Functions can not be placed directly into elements, so we skip
+			        if(key !== "template" &&! m2d2.utils.isFunction(value)) {
                         //Look for ID:
                         if(key && key.match(/^\w/)) {
                             let elem = $node.find("#" + key);
@@ -374,7 +375,7 @@ class m2d2 {
 					}
 				} else if(options.length === 1) { // Found single option: place values
 					const opt = options[0];
-					 if(m2d2.utils.isNode(opt)) {
+					 if(m2d2.utils.isElement(opt)) {
 						if(m2d2.utils.isArray(value)) { // Process Array
 							const template = object["template"];
 							this.doItems(opt, value, template);
@@ -394,7 +395,8 @@ class m2d2 {
 					    key = "items";
 					    value = [];
 					}
-					if(m2d2.utils.isValidElement(key)) {
+					const isFunc = m2d2.utils.isFunction(value);
+					if(m2d2.utils.isValidElement(key) &&! isFunc) {
 						const $newNode = this.appendElement($node, key);
 						this.renderAndLink($node, $newNode, key, value);
 					} else if(value.tagName !== undefined) {
@@ -408,16 +410,19 @@ class m2d2 {
 						if(m2d2.utils.isPlainObject(value)) {
 						    const valTmp = [];
 						    Object.keys(value).forEach(o => {
-						        const obj = {
-                                    text  : value[o]
-						        };
-						        if(m2d2.utils.hasAttrOrProp($node, "value")) {
-                                    obj.value = o;
-                                } else {
-                                    obj.dataset = { id : o };
-                                }
-                                valTmp.push(obj);
-						    });
+						    	let obj;
+						    	if($node.tagName === "DL") { //TODO: document DL
+									obj = { dt : o, dd : value[o] }
+								} else {
+									obj = { text: value[o] };
+									if (m2d2.utils.hasAttrOrProp($node, "value")) {
+										obj.value = o;
+									} else {
+										obj.dataset = {id: o};
+									}
+								}
+								valTmp.push(obj);
+							});
 						    value = valTmp;
 						}
 						// Process Array:
@@ -429,7 +434,7 @@ class m2d2 {
 							console.log("Passed values are: ");
 							console.log(value);
 						}
-    				} else if(m2d2.utils.isFunction(value)) {
+    				} else if(isFunc) {
 						if(m2d2.updates) {
 							if (key === "onupdate") {
 								$node.addEventListener(key, value, true);
@@ -541,7 +546,7 @@ class m2d2 {
 	 * @returns {HTMLElement}
 	 */
 	appendElement ($node, tagName) {
-		const $newElem = m2d2.utils.newNode(tagName);
+		const $newElem = m2d2.utils.newElement(tagName);
 		$node.append($newElem);
 		return $newElem;
 	}
@@ -589,7 +594,7 @@ class m2d2 {
 			}
 			let tree = scan($node.__template);
 			if(!m2d2.utils.isEmpty(tree)) {
-				tree = tree[Object.keys(tree)[0]]
+				tree = tree[Object.keys(tree)[0]];
 				$newNode = this.doDom($newNode, tree);
 			}
 		}
@@ -604,6 +609,7 @@ class m2d2 {
 	 * @param {Object} template
 	 */
 	doItems ($node, values, template) {
+	    // Create the structure for the item:
 		const $template = this.getTemplate($node, template);
 		if($template === undefined) {
 			console.error("Template not found. Probably an array is being used where it is not expected. Node:");
@@ -612,18 +618,14 @@ class m2d2 {
 			console.log(values);
 			return;
 		}
-		const $outElem = new DocumentFragment()
 		let i = 0;
 		values.forEach(val => {
 		    val = this.plainToObject($node, val);
 		    const $newItem = this.getItem($node, i++, val, $template);
-			$outElem.appendChild($newItem);
+		    if($newItem) {
+			    $node.append($newItem);
+			}
 		});
-		//Update all at once
-		//$node.append(...$outElem.childNodes); //<-- works but it is slower
-		while ($outElem.firstChild) {
-			$node.appendChild($outElem.firstChild);
-		}
 		//Cleanup
 		const $temp = $node.find("template");
 		if($temp) { $node.removeChild($temp); }
@@ -645,36 +647,36 @@ class m2d2 {
 			let $template;
 			if (template) {
 				if (m2d2.utils.isPlainObject(template)) {
-					const $base = m2d2.utils.newNode("template");
+					const $base = m2d2.utils.newElement("template");
 					$template = this.doDom($base, template);
 					m2d2.utils.defineProp($node, "__template", template); // This is the original template with events
 				} else if (m2d2.utils.isHtml(template)) {
-					$template = m2d2.utils.htmlNode("<div>" + template + "</div>");
+					$template = m2d2.utils.htmlElement("<div>" + template + "</div>"); //TODO: this is fragment
 				} else if (m2d2.utils.isSelectorID(template)) { //Only IDs are allowed
 					$template = document.querySelector(template);
 				} else { //When its just a tag name
-					$template = m2d2.utils.newNode(template);
+					$template = m2d2.utils.newElement(template);
 				}
 				if ($template && $template.childElementCount > 0) {
 					$template = $template.firstChild;
 				}
 			} else if($node.find("template")) {	// No template specified, look into HTML under node:
-				$template = m2d2.utils.htmlNode(this.getNode("template", $node).innerHTML);
+				$template = m2d2.utils.htmlElement(this.getNode("template", $node).innerHTML);
 			} else {
 				switch ($node.tagName) {
 					case "SELECT":
 					case "DATALIST":
-						$template = m2d2.utils.newNode("option");
+						$template = m2d2.utils.newElement("option");
 						break;
 					case "UL":
 					case "OL":
-						$template = m2d2.utils.newNode("li");
+						$template = m2d2.utils.newElement("li");
 						break;
 					case "NAV":
-						$template = m2d2.utils.newNode("a");
+						$template = m2d2.utils.newElement("a");
 						break;
 					case "DL":
-						$template = m2d2.utils.htmlNode("<dt></dt><dd></dd>");
+						$template = m2d2.utils.newElement("dd"); //FIXME: multiple elements not supported
 						break;
 					default:
 						// If not template is found, use html as of element
@@ -752,13 +754,13 @@ class m2d2 {
 						case typeof t === "function": return t.bind(target);
 						// If there was a failed attempt to set proxy, return it on read:
 						case t._proxy && target["$" + property] !== undefined: return target["$" + property];
-						case t._proxy === undefined && m2d2.utils.isNode(t): return this.proxy(t);
+						case t._proxy === undefined && m2d2.utils.isElement(t): return this.proxy(t);
 						default: return t;
 					}
                 },
                 set: (target, property, value) => {
                     let oldValue = "";
-                    if(m2d2.utils.isNode(target[property])) {
+                    if(m2d2.utils.isElement(target[property])) {
                         let key = "";
                         if(m2d2.utils.isHtml(value)) {
                             key = "html";
@@ -927,12 +929,12 @@ class m2d2 {
 			items.forEach(itm => {
 				const parent = itm.parentNode;
 				const detatchedItem = parent.removeChild(itm);	//We detach from original parent
-				$node.appendChild(detatchedItem); //Attach to $node (works with non-existing elements)
+				$node.append(detatchedItem); //Attach to $node (works with non-existing elements)
 			});
 		}
 		const items = $node.items;
 		// Non-Standard or non-existent in Array:
-		const nonStd = ["clear", "get", "remove", "selected", "first", "last"];
+		const nonStd = ["clear", "get", "remove", "selected", "first", "last", "findAll"];
 		// Array properties:
 		Object.getOwnPropertyNames(Array.prototype).concat(nonStd).forEach(method => {
 			if(items[method] === undefined) {
@@ -1000,7 +1002,7 @@ class m2d2 {
 					case "push": // Add one item at the end:
 						func = function(obj) {
 							if(obj instanceof HTMLElement) {
-								this.appendChild(obj);
+								this.append(obj);
 							} else if (m2d2.utils.isPlainObject(obj)) {
 							    const index = this.items.length;
 							    const $child = _this.getItem(this, index, obj);
@@ -1011,13 +1013,10 @@ class m2d2 {
 					case "remove": // will return the item with data-id:
 					    func = function(id) {
 					        if(this.items.length) {
-					            this.items.some(item => {
-					                const sameId = m2d2.utils.isNumeric(id) ? (item.dataset.id * 1) === id * 1 : item.dataset.id === id;
-					                if(item.dataset && sameId) {
-					                    item.remove();
-										return true;
-									}
-					            });
+					            const elem = this.items.get(id);
+					            if(elem.length === 1) {
+					                elem.remove();
+					            }
 					        }
 					    }
 					    break;
@@ -1052,17 +1051,43 @@ class m2d2 {
 						}
 					    break;
 					default: //----------------- Link to Array -------------------
-					    // at, every, filter, find, findIndex, forEach, includes, indexOf, join,
-					    // keys, lastIndexOf, map, reduce, reduceRight, slice, some, values
-						if(typeof Array.prototype[method] == "function") {
-						    // Convert nodes to proxy so we can use short assignment
-							func = function (...args) {
-							    const proxies = [];
-							    Array.from($node.items).forEach(n => {
-							        proxies.push(_this.proxy(n));
-							    });
-								return Array.from(proxies)[method](...args);
-							}
+					    let arrMethod = method;
+					    switch(true) {
+					        case method === "findAll":
+					            arrMethod = "filter"; // Use "filter"
+                            case typeof Array.prototype[method] == "function":
+                                // Convert nodes to proxy so we can use short assignment
+                                // at, every, filter, find, findIndex, forEach, includes, indexOf, join,
+                                // keys, lastIndexOf, map, reduce, reduceRight, slice, some, values
+                                const arrFunc = function (...args) {
+                                    const proxies = [];
+                                    Array.from($node.items).forEach(n => {
+                                        proxies.push(_this.proxy(n));
+                                    });
+                                    return Array.from(proxies)[arrMethod](...args);
+                                }
+                                // Change behaviour of find: //TODO: documentation
+                                if(method === "find") {
+                                    func = function(...args) {
+                                        if(m2d2.utils.isString(args[0])) {
+                                            return this.find(args[0]);
+                                        } else {
+                                            return arrFunc(...args);
+                                        }
+                                    }
+                                } else if(method === "findAll") {  //TODO: documentation
+                                    func = function(...args) {
+                                        if(args.length === 0) {
+                                            return this.findAll();
+                                        } else if(m2d2.utils.isString(args[0])) {
+                                            return this.findAll(args[0]);
+                                        } else {
+                                            return arrFunc(...args);
+                                        }
+                                    }
+                                } else {
+                                    func = arrFunc;
+                                }
 						}
 				}
 				if(func) {
