@@ -3,7 +3,7 @@ body {
     margin: auto;
     border: 1px solid #CCC;
     display: grid;
-    grid-template-columns: 300px auto;
+    grid-template-columns: 3px auto;
     grid-template-areas:
         "header header"
         "links example";
