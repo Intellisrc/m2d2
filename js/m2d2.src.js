@@ -101,7 +101,7 @@ class m2d2 {
 		}
 		if($node._m2d2 === undefined) {
 			$node._m2d2 = true; //flag to prevent it from re-assign methods
-			["parent","sibling","find","findAll","onupdate","show","css","text","html","getData"].forEach(f => {
+			["parent","sibling","find","findAll","onupdate","show","onshow","css","text","html","getData"].forEach(f => {
 				if($node.hasOwnProperty(f)) {
 					console.log("Node already had ["+f+"] property. It might cause unexpected behaviour.")
 					console.log("You may need to update the M2D2 version or report it to: github.com/lepe/m2d2/")
