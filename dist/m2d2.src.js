@@ -488,6 +488,9 @@ class m2d2 {
                                     this.style.display = this.dataset.display || (defaultShow !== "none" ? defaultShow : "block");
                                 }
                             }
+                            if(this.onshow !== undefined && m2d2.utils.isFunction(this.onshow)) { //TODO: document onshow
+                                this.onshow(this);
+                            }
                         }
                     } else {
                         const stored = this.style.display !== "none" ? this.style.display : cssDisplay();
@@ -558,7 +561,7 @@ class m2d2 {
 			object = selector;
 			selector = "body";
 		}
-		if(!(m2d2.utils.isString(selector) || m2d2.utils.isElement(selector))) {
+		if(!(m2d2.utils.isString(selector) || m2d2.utils.isElement(selector) || m2d2.utils.isNode(selector))) {
 			console.error("Selector is not a string or a Node:")
 			console.log(selector);
 			return null;
@@ -915,6 +918,7 @@ class m2d2 {
 			console.log(values);
 			return;
 		}
+		// Fill the template with data:
 		let i = 0;
 		values.forEach(val => {
 		    val = this.plainToObject($node, val);
@@ -923,14 +927,14 @@ class m2d2 {
 			    $node.append($newItem);
 			}
 		});
-		//Cleanup
+		// Cleanup
 		const $temp = $node.find("template");
 		if($temp) { $node.removeChild($temp); }
-		//Set "items" link:
+		// Set "items" link:
 		$node.items = $node.children;
 		this.extendItems($node);
 	}
-	/** Returns a copy of the model to duplicate
+	/** Returns an HTMLElement with the structure without events
 	 * @private
 	 * @param {HTMLElement} $node
 	 * @param {Object, string} [template]
@@ -942,46 +946,91 @@ class m2d2 {
 			return $node._template;
 		} else {
 			let $template;
+			const $htmlTemplate = $node.querySelector("template"); // look into HTML under node
+			if($htmlTemplate) {
+				$template = m2d2.utils.htmlElement($htmlTemplate.innerHTML.trim());
+			} else {
+                switch ($node.tagName) {
+                    case "SELECT":
+                    case "DATALIST":
+                        $template = m2d2.utils.newElement("option");
+                        break;
+                    case "UL":
+                    case "OL":
+                        $template = m2d2.utils.newElement("li");
+                        break;
+                    case "NAV":
+                        $template = m2d2.utils.newElement("a");
+                        break;
+                    case "DL":
+                        $template = m2d2.utils.newElement("dd");
+                        break;
+                    default:
+                        if(template) {
+                            const children = Object.keys(template).length;
+                            if(children) {
+                                if(children > 1) {
+                                    if(template.tagName !== undefined) { //TODO: document (optional top child when using tagName)
+                                        let wrap = {};
+                                        wrap[template.tagName] = template;
+                                        template = wrap;
+                                    } else {
+                                        console.log("Template has more than one top elements. Using the first one. In: ");
+                                        console.log(template);
+                                        console.log("Node: ");
+                                        console.log($node);
+                                    }
+                                }
+                                const key = Object.keys(template)[0];
+                                const val = template[key];
+                                if(m2d2.utils.isValidElement(key)) {
+                                    $template = m2d2.utils.newElement(key);
+                                } else if(val.tagName !== undefined) {
+                                    $template = m2d2.utils.newElement(val.tagName);
+                                } else {
+                                    console.error("Template defined an element which can not be identified: [" + key + "], using <span> in:");
+                                    console.log(template);
+                                    console.log("Node: ");
+                                    console.log($node);
+                                    $template = m2d2.utils.newElement("span");
+                                }
+                            } else {
+                                console.error("Template has no definition and it can not be guessed. Using <span>. Template: ");
+                                console.log(template);
+                                console.log("Node: ");
+                                console.log($node);
+                                $template = m2d2.utils.newElement("span");
+                            }
+                        } else {
+                            // If not template is found, use html as of element
+                            if($node.childElementCount > 0) {
+                                $template = m2d2.utils.htmlElement($node.innerHTML.trim());
+                            }
+                        }
+                        break;
+                }
+            }
 			if (template) {
 				if (m2d2.utils.isPlainObject(template)) {
-					const $base = m2d2.utils.newElement("template");
-					$template = this.doDom($base, template);
+				    const $wrap = m2d2.utils.newEmptyNode();
+				    $wrap.append($template);
+					const $fragment = this.doDom($wrap, template);
+					$template = $fragment.children[0];
 					m2d2.utils.defineProp($node, "__template", template); // This is the original template with events
 				} else if (m2d2.utils.isHtml(template)) {
-					$template = m2d2.utils.htmlElement("<div>" + template + "</div>"); //TODO: this is fragment
-				} else if (m2d2.utils.isSelectorID(template)) { //Only IDs are allowed
-					$template = document.querySelector(template);
+					$template = m2d2.utils.htmlElement(template);
+				} else if (m2d2.utils.isSelectorID(template)) { //Only IDs are allowed //TODO document
+					$template = m2d2.utils.htmlElement(document.querySelector(template).innerHTML);
 				} else { //When its just a tag name
 					$template = m2d2.utils.newElement(template);
 				}
-				if ($template && $template.childElementCount > 0) {
-					$template = $template.firstChild;
-				}
-			} else if($node.find("template")) {	// No template specified, look into HTML under node:
-				$template = m2d2.utils.htmlElement(this.getNode("template", $node).innerHTML);
-			} else {
-				switch ($node.tagName) {
-					case "SELECT":
-					case "DATALIST":
-						$template = m2d2.utils.newElement("option");
-						break;
-					case "UL":
-					case "OL":
-						$template = m2d2.utils.newElement("li");
-						break;
-					case "NAV":
-						$template = m2d2.utils.newElement("a");
-						break;
-					case "DL":
-						$template = m2d2.utils.newElement("dd"); //FIXME: multiple elements not supported
-						break;
-					default:
-						// If not template is found, use html as of element
-						if($node.childElementCount > 0) {
-							$template = $node.firstChild.cloneNode(true);
-						}
-						break;
-				}
+			}
+			if($template.childrenElementCount > 1) {
+			    console.log("Templates only supports a single child. Multiple children were detected, wrapping them with <span>. Template:");
+			    console.log($template);
+			    const $span = m2d2.utils.newElement("span");
+			    $span.append($template);
+			    $template = $span;
 			}
 			if ($template) {
 				m2d2.utils.defineProp($node, "_template", $template); // This is the DOM
