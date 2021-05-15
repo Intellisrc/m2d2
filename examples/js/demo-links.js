@@ -1,6 +1,6 @@
 m2d2.ready($ => {
     const menuLinks = {
-        "Update from input" : "index.html",
+        "Update from input" : "examples.html",
         "Update from input using object" : "object.html",
         "Update from input (multiple targets)" : "multiple.html",
         "Update object" : "index-adv.html",

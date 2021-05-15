@@ -3,7 +3,7 @@ body {
     margin: auto;
     border: 1px solid #CCC;
     display: grid;
-    grid-template-columns: 3px auto;
+    grid-template-columns: 300px auto;
     grid-template-areas:
         "header header"
         "links example";
@@ -21,6 +21,14 @@ header button {
     margin: 0 20px;
     padding: 10px;
     cursor: pointer;
+}
+header button.prev::before {
+    content: '⏪';
+    float: left;
+}
+header button.next::after {
+    content: '⏩';
+    float: right;
 }
 article {
     padding: 10px;
