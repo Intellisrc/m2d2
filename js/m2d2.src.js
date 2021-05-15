@@ -1027,7 +1027,7 @@ class m2d2 {
 					    break;
 					case "selected": // will return the selected item in list
 					    func = function() {
-					        return _this.proxy(this.find("[selected]"));
+					        return _this.proxy(this.find(":scope > " + "[selected]")); //only direct children
 					    }
 					    break;
 					case "first": // returns the first item in list
