@@ -65,7 +65,7 @@ m2d2.load($ => {
                             this.interval = null;
                         } else {
                             console.log("Reconnecting...")
-                            this.connect(onMessage);
+                            this.connect(options, onMessage);
                         }
                     }, 2000);
                 }

@@ -574,6 +574,13 @@ class m2d2 {
 		object = this.plainToObject($node, object); // Be sure it's an object //TODO: documentation : text parameter
 		Object.keys(object).forEach(key => {
 			let value = object[key];
+			if(value === undefined || value === null) {
+			    console.log("Value was not set for key: " + key + ", 'empty' was used in object: ");
+			    console.log(object);
+			    console.log("In node:");
+			    console.log($node);
+			    value = "";
+			}
 			//Look for property first:
 			let isProp = m2d2.utils.hasProp($node, key);
 			let isAttr = m2d2.utils.hasAttr($node, key);
@@ -1290,7 +1297,9 @@ class m2d2 {
 				    //-------------------- Same as in Array --------------------------
 					case "copyWithin": // copy element from index to index FIXME
 					case "fill": // replace N elements in array FIXME
-					case "splice": // add or remove elements
+					case "splice": // add or remove elements FIXME
+					    console.log("Not available yet");
+					    break;
 					case "reverse": // reverse the order
 						func = function(...args) {
 					        if(this.items.length) {
