@@ -43,39 +43,42 @@ class m2d2 {
 	 * @param {function} callback
 	 */
 	static load(callback) {
-		const ext = callback(m2d2.main); //main can be extended here
-		if(m2d2.utils.isObject(ext) && !m2d2.utils.isEmpty(ext)) {
-			Object.keys(ext).forEach(k => {
-				if(m2d2.utils.isValidElement(k)) {
-					if(m2d2.extensions[k] === undefined) {
-						m2d2.extensions[k] = {};
-					}
-					// Check that we are not replacing any existing property:
-					const $node = m2d2.utils.newElement(k);
-					Object.keys(ext[k]).forEach(it => {
-						if(m2d2.utils.hasProp($node, it)) {
-							console.log("Warning: property [" + it + "] already exists " +
-								"in node: [" + k + "] while trying to extend it. " +
-								"Unexpected behaviour may happen.");
-						}
-					});
-					Object.assign(m2d2.extensions[k], ext[k]);
-				} else {
-					if(m2d2.extensions["*"] === undefined) {
-						m2d2.extensions["*"] = {};
-					}
-					const $node = m2d2.utils.newElement("div");
-					Object.keys(ext[k]).forEach(it => {
-						if(m2d2.utils.hasProp($node, it)) {
-							console.log("Warning: property [" + it + "] already exists " +
-								"in Node while trying to extend it. " +
-								"Unexpected behaviour may happen.");
-						}
-					});
-					Object.assign(m2d2.extensions["*"], ext[k]);
-				}
-			});
+	    if(callback !== undefined) {
+            const ext = callback(m2d2.main); //main can be extended here
+            if(m2d2.utils.isObject(ext) && !m2d2.utils.isEmpty(ext)) {
+                Object.keys(ext).forEach(k => {
+                    if(m2d2.utils.isValidElement(k)) {
+                        if(m2d2.extensions[k] === undefined) {
+                            m2d2.extensions[k] = {};
+                        }
+                        // Check that we are not replacing any existing property:
+                        const $node = m2d2.utils.newElement(k);
+                        Object.keys(ext[k]).forEach(it => {
+                            if(m2d2.utils.hasProp($node, it)) {
+                                console.log("Warning: property [" + it + "] already exists " +
+                                    "in node: [" + k + "] while trying to extend it. " +
+                                    "Unexpected behaviour may happen.");
+                            }
+                        });
+                        Object.assign(m2d2.extensions[k], ext[k]);
+                    } else {
+                        if(m2d2.extensions["*"] === undefined) {
+                            m2d2.extensions["*"] = {};
+                        }
+                        const $node = m2d2.utils.newElement("div");
+                        Object.keys(ext[k]).forEach(it => {
+                            if(m2d2.utils.hasProp($node, it)) {
+                                console.log("Warning: property [" + it + "] already exists " +
+                                    "in Node while trying to extend it. " +
+                                    "Unexpected behaviour may happen.");
+                            }
+                        });
+                        Object.assign(m2d2.extensions["*"], ext[k]);
+                    }
+                });
+            }
 		}
+		return m2d2.main; //TODO: documentation : const $ = m2d2.load();
 	}
 	/**
 	 * M2 Will set all extensions to DOM objects //TODO: documentation
@@ -406,13 +409,13 @@ class m2d2 {
 					    value = [];
 					}
 					const isFunc = m2d2.utils.isFunction(value);
-					if(m2d2.utils.isValidElement(key) &&! isFunc) {
-						const $newNode = this.appendElement($node, key);
-						this.renderAndLink($node, $newNode, key, value);
-					} else if(value.tagName !== undefined) {
+					if(value.tagName !== undefined) {
 						const tag = value.tagName;
 						const $newNode = this.appendElement($node, tag);
 						delete(value.tagName);
+						this.renderAndLink($node, $newNode, key, value);
+					} else if(m2d2.utils.isValidElement(key) &&! isFunc) {
+						const $newNode = this.appendElement($node, key);
 						this.renderAndLink($node, $newNode, key, value);
 					} else if(key === "items") { //Items creation
 						const template = object["template"];
@@ -1001,7 +1004,9 @@ class m2d2 {
 					case "copyWithin": // copy element from index to index FIXME
 					case "fill": // replace N elements in array FIXME
 					case "splice": // add or remove elements FIXME
-					    console.log("Not available yet");
+					    func = function() {
+					        console.log("Not available yet: " + method);
+					    }
 					    break;
 					case "reverse": // reverse the order
 						func = function(...args) {
