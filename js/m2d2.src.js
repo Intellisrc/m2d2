@@ -492,12 +492,20 @@ class m2d2 {
 			// When setting values to the node (simplified version):
 			if(m2d2.utils.isHtml(value)) {
 				value = { html : value };
-			} else if(m2d2.utils.hasProp($node, "value")) {
-				value = { value : value };
-			} else if(m2d2.utils.isString(value) || m2d2.utils.isNumeric(value)) {
-				value = { text : value };
 			} else if(m2d2.utils.isArray(value)) {
 			    value = { items : value };
+			} else if(m2d2.utils.hasProp($node, "value")) {
+				// If the parent is <select> set also as text to item:
+				if($node.tagName === "SELECT") {
+				    value = {
+				        value : value,
+				        text  : value
+				    };
+				} else {
+				    value = { value : value };
+				}
+			} else if(m2d2.utils.isString(value) || m2d2.utils.isNumeric(value)) {
+				value = { text : value };
 			}
 		}
 		return value;
