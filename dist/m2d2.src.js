@@ -881,6 +881,11 @@ class m2d2 {
 		    $template = this.getTemplate($node);
 		}
         const $newItem = $template.cloneNode(true);
+	    // Copy templates to new item:
+	    if($template._template !== undefined) {
+	    	$newItem._template = $template._template;
+			$newItem.__template = $template.__template;
+		}
         $newItem.dataset.id = index;
 
         // Add "selected" property

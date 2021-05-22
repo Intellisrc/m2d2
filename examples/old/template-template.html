@@ -1,0 +1,44 @@
+<html>
+<head>
+    <title>Demo using M2D2 : Objects</title>
+    <meta name="HandheldFriendly" content="1">
+    <meta name="viewport" content="width=device-width, maximum-scale=1.0">
+    <meta name="theme-color" content="#333333">
+    <link rel="stylesheet" href="../css/examples.css" type="text/css"/>
+    <script src="../../dist/m2d2.src.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        // When ready...
+        m2d2.ready($ => {
+            $(list, {
+                template: {
+                    elems : {
+                        css : "parent",
+                        template: {
+                            li: {
+                                css : "child",
+                                onclick: function () {
+                                    alert(this.text);
+                                }
+                            }
+                        }
+                    }
+                },
+                items: [
+                    ["a","b"],
+                    ["c","d"]
+                ]
+            });
+        });
+    </script>
+</head>
+<body>
+<article id="main">
+    <h1>Test</h1>
+    <div id="list">
+        <template>
+            <ul class="elems"></ul>
+        </template>
+    </div>
+</article>
+</body>
+</html>
