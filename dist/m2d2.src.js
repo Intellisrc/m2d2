@@ -709,7 +709,6 @@ class m2d2 {
 					if(value.tagName !== undefined) {
 						const tag = value.tagName;
 						const $newNode = this.appendElement($node, tag);
-						delete(value.tagName);
 						this.renderAndLink($node, $newNode, key, value);
 					} else if(m2d2.utils.isValidElement(key) &&! isFunc) {
 						const $newNode = this.appendElement($node, key);
