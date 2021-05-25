@@ -1,0 +1,78 @@
+#m2d2-alert {
+    .m2d2-alert-front {
+        min-width: 400px;
+        min-height: 100px;
+        background-color: $bg_color;
+        border: 1px solid $accent;
+        outline: 2px solid $bg_color;
+        padding: $padding_dbl;
+        box-shadow: 0 0 5px 1px #000;
+        margin-top: -200px;
+        display : flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+
+        &.question::before {
+            color: $blue;
+            font-size: 200%;
+            margin: $padding_dbl;
+        }
+        &.ok::before {
+            color: $green;
+            font-size: 200%;
+            margin: $padding_dbl;
+        }
+        &.input::before {
+            color: $orange;
+            font-size: 200%;
+            margin: $padding_dbl;
+        }
+        &.wait::before {
+            color: white;
+            font-size: 200%;
+            margin: $padding_dbl;
+            display: block;
+        }
+        &.error::before {
+            color: $red;
+            font-size: 200%;
+            margin: $padding_dbl;
+        }
+        &.info::before {
+            color: $yellow;
+            font-size: 200%;
+            margin: $padding_dbl;
+        }
+
+        .m2d2-alert-title {
+            font-size: 200%;
+            text-align: center;
+            line-height: 40px;
+        }
+        .m2d2-alert-text {
+            line-height: 40px;
+            text-align: center;
+            width: 100%;
+        }
+        .m2d2-alert-field {
+            border: 0;
+        }
+        .m2d2-alert-field, .m2d2-alert-field input, {
+            width: 100%;
+        }
+        .m2d2-alert-buttons {
+            padding: $padding_dbl;
+            width : 100%;
+            button {
+                min-width: 100px;
+            }
+            .ok, .yes, .send {
+                float: right;
+            }
+            .no, .cancel {
+                float: left;
+            }
+        }
+    }
+}
