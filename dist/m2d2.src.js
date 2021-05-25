@@ -912,6 +912,7 @@ class m2d2 {
 	 * @param {HTMLElement, Node} $node
 	 * @param {HTMLElement, Node} $newNode
 	 * @returns {HTMLElement|Proxy}
+	 //FIXME: I think `this.doDom` could be removed from here and only "link" events
 	 */
 	getItemWithEvents($node, $newNode) {
 		if($node.__template !== undefined) {
@@ -1146,6 +1147,8 @@ class m2d2 {
                             key = "html";
 						} else if(m2d2.utils.hasAttrOrProp(target[property], "value")) {
 							key = "value";
+						} else if(m2d2.utils.isString(value) && target[property].tagName === "IMG") {
+						    key = "src"; //TODO: document
 						} else if(m2d2.utils.isString(value) || m2d2.utils.isNumeric(value)) {
                             key = "text";
                         }
