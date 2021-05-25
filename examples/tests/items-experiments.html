@@ -9,8 +9,7 @@
     <script type="text/javascript">
         // When ready...
         m2d2.ready($ => {
-            debugger
-            /*
+            // Case: List of objects
             $(ulist, {
                 template : {
                     li : {
@@ -28,8 +27,19 @@
                     }
                 ]
             });
-            */
-            /*
+
+            $(slist, {
+                items : {
+                    op1 : "Option 1",
+                    op2 : "Option 2 (Default)",
+                    op3 : "Option 3"
+                },
+                onload : function() {
+                    this.value = "op2";
+                }
+            });
+
+            // Case : Part of the template in HTML
             $(hlist, {
                 template : {
                     titulo : {
@@ -38,19 +48,14 @@
                         }
                     }
                 },
-                items : [
-                    {
-                        text: "Title 1"
-                    },
-                    {
-                        text: "Title 2"
-                    }
-                ]
-            });*/
+                items : [ "Item 1/2", "Item 2/2" ]
+            });
+
+            // Case: part of the template is in HTML. Then we have a template inside it.
             $(list, {
                 template: {
-                    ul : {  //FIXME: if I set "elems" here it doesn't work
-                        className: "parent",
+                    elems : {
+                        css : "parent",
                         template: {
                             li: {
                                 onclick: function () {
@@ -69,7 +74,9 @@
                     },
                 ]
             });
-            /*$(dlist, {
+
+            // Case:
+            $(dlist, {
                 template : {
                     dt : {
                         onclick : function () {
@@ -83,38 +90,55 @@
                     "Title 2" : "desc2"
                 }
             });
+
             $(multi, {
                 items : [
                     { i : 1, b : 9 },
                     { i : 2, b : 8 },
                     { i : 3 }
                 ]
-            });*/
+            });
         });
     </script>
 </head>
 <body>
 <article id="main">
-    <h1>Test</h1>
-    <!-- single list (normal case) -->
+    <h3>Test : List of objects (normal case)</h3>
     <ul id="ulist"></ul>
-    <!-- template inside template: -->
-    <div id="list">
-        <template>
-            <ul class="elems"></ul>
-        </template>
-    </div>
+    <hr>
+
+    <h3>Test : Select with object as items (not array)</h3>
+    <select id="slist"></select>
+    <hr>
+
+    <h3>Test : Part of template is in HTML. Items are simple array</h3>
     <div id="hlist">
         <template>
-            <h3 class="titulo"></h3>
+            <div class="titulo"></div>
         </template>
     </div>
+    <hr>
+
+    <h3>Test : HTML template and template-inside-template as Object (events should work)</h3>
+    <div id="list">
+        <template>
+            <ul class="elems" title="html"></ul>
+        </template>
+    </div>
+    <hr>
+
+    <h3>Test : DL -> DT -> DD template</h3>
+    <p>INCOMPLETE: This will create separated dl's for each item, not what is expected.</p>
     <dl id="dlist"></dl>
+    <hr>
+
+    <h3>Test : Multiple elements inside template: (Not supported)</h3>
+    <p>INCOMPLETE: It wraps `i` and `b` elements inside the first child: `p`.</p>
     <div id="multi">
         <template>
+            <p>---</p>
             <i></i>
             <b></b>
-            <p>---</p>
         </template>
     </div>
 </article>

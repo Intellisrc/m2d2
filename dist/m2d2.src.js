@@ -882,18 +882,29 @@ class m2d2 {
 		}
         const $newItem = $template.cloneNode(true);
 	    // Copy templates to new item:
-	    if($template._template !== undefined) {
-	    	$newItem._template = $template._template;
-			$newItem.__template = $template.__template;
-		}
+	    this.addTemplatesToItem($template, $newItem);
         $newItem.dataset.id = index;
-
         // Add "selected" property
         this.setUniqueAttrib($newItem, "selected"); //TODO: Document
         // Set values
 		let $newNode = this.doDom($newItem, obj);
 		// Place Events:
 		return this.getItemWithEvents($node, $newNode);
+	}
+
+	/**
+	 * Reassign templates
+	 * @param {HTMLElement, Node} $node
+	 * @param {HTMLElement, Node} $newNode
+	 * @returns {HTMLElement|Proxy}
+	 // TODO: this does not support deep location of templates
+	 */
+	addTemplatesToItem($template, $newNode) {
+	    ["_template","__template"].forEach(key => {
+            if($template[key] !== undefined) {
+                $newNode[key] = $template[key];
+            }
+        });
 	}
 
 	/**
