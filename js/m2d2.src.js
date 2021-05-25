@@ -504,6 +504,8 @@ class m2d2 {
 				} else {
 				    value = { value : value };
 				}
+			} else if(m2d2.utils.isString(value) && $node.tagName === "IMG") {
+			    value = { src : value };
 			} else if(m2d2.utils.isString(value) || m2d2.utils.isNumeric(value)) {
 				value = { text : value };
 			}
