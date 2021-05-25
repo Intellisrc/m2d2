@@ -850,6 +850,8 @@ class m2d2 {
                             key = "html";
 						} else if(m2d2.utils.hasAttrOrProp(target[property], "value")) {
 							key = "value";
+						} else if(m2d2.utils.isString(value) && target[property].tagName === "IMG") {
+						    key = "src"; //TODO: document
 						} else if(m2d2.utils.isString(value) || m2d2.utils.isNumeric(value)) {
                             key = "text";
                         }
