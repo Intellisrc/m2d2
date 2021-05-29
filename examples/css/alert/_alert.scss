@@ -2,10 +2,10 @@
     .m2d2-alert-front {
         min-width: 400px;
         min-height: 100px;
-        background-color: $bg_color;
-        border: 1px solid $accent;
-        outline: 2px solid $bg_color;
-        padding: $padding_dbl;
+        background-color: $background;
+        border: 1px solid $highlight;
+        outline: 2px solid $background;
+        padding: $padding;
         box-shadow: 0 0 5px 1px #000;
         margin-top: -200px;
         display : flex;
@@ -16,33 +16,33 @@
         &.question::before {
             color: $blue;
             font-size: 200%;
-            margin: $padding_dbl;
+            margin: $padding;
         }
         &.ok::before {
             color: $green;
             font-size: 200%;
-            margin: $padding_dbl;
+            margin: $padding;
         }
         &.input::before {
             color: $orange;
             font-size: 200%;
-            margin: $padding_dbl;
+            margin: $padding;
         }
         &.wait::before {
             color: white;
             font-size: 200%;
-            margin: $padding_dbl;
+            margin: $padding;
             display: block;
         }
         &.error::before {
             color: $red;
             font-size: 200%;
-            margin: $padding_dbl;
+            margin: $padding;
         }
         &.info::before {
             color: $yellow;
             font-size: 200%;
-            margin: $padding_dbl;
+            margin: $padding;
         }
 
         .m2d2-alert-title {
@@ -62,7 +62,7 @@
             width: 100%;
         }
         .m2d2-alert-buttons {
-            padding: $padding_dbl;
+            padding: $padding;
             width : 100%;
             button {
                 min-width: 100px;

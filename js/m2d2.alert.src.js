@@ -48,10 +48,13 @@
  *        * The second one is the form data as an object, for example: { button : "send", answer : "Hello" }
  */
 m2d2.load($ => {
-    function close() {
+    function close(afterClose) {
         $("#m2d2-alert .m2d2-alert-front").css.add("vanish");
         setTimeout(() => {
             $("#m2d2-alert").remove();
+            if(afterClose) {
+                afterClose();
+            }
         }, 400); //Animation takes 500, after that will be restored, so we need to remove it before that time.
     }
     function getIconClass(type) {
@@ -120,12 +123,12 @@ m2d2.load($ => {
                             css : "m2d2-alert-title",
                             span : options.title
                         },
-                        submsg : (type => {
+                        submsg : (() => {
                             let props = {
                                tagName : "div",
                                css : "m2d2-alert-text"
                             }
-                            let content = {};
+                            let content;
                             if(options.icon === "input" &&! options.text) {
                                 content = {
                                     fieldset : {
@@ -152,32 +155,37 @@ m2d2.load($ => {
                         })(options.icon),
                         onsubmit : function() {
                             const data = this.getData();
+                            let func = () => {};
                             switch(data.button) {
                                 case "ok":
                                 case "yes":
-                                    options.callback(true, data);
+                                    func = () => { options.callback(true, data) };
                                 break
                                 case "no":
-                                    options.callback(false, data);
+                                    func = () => { options.callback(false, data) };
                                 break
                                 case "cancel":
-                                    options.callback(null, data);
+                                    func = () => { options.callback(null, data) };
                                 break
                                 case "send":
                                     if(Object.keys(data).length === 1) {
-                                        options.callback(data[Object.keys(data)[0]], data);
+                                        func = () => { options.callback(data[Object.keys(data)[0]], data) };
                                     } else if(Object.keys(data).length === 2) {
-                                        options.callback(data[Object.keys(data).find(it => it != "button")], data);
+                                        func = () => { options.callback(data[Object.keys(data).find(it => it !== "button")], data) };
                                     } else { // If we have more than one field, we send all:
-                                        options.callback(data, data);
+                                        func = () => { options.callback(data, data) };
                                     }
                                 break
                                 default: // When setting customized buttons, we send all:
-                                    options.callback(data, data);
+                                    func = () => { options.callback(data, data) };
                                 break
                             }
-                            close();
+                            close(func);
                             return false;
+                        },
+                        onload : function () {
+                            const def = this.find("[autofocus]");
+                            if(def) { def.focus(); }
                         }
                     }
                 }
@@ -198,6 +206,7 @@ m2d2.load($ => {
                     value : key,
                     css : ["color", key],
                     text : _ !== undefined ? _(b) : b,
+                    autofocus : ["ok","yes"].includes(b),
                     formNoValidate : ["cancel"].includes(b),
                     // we append a hidden input with the value of the button clicked:
                     onclick : function() {
