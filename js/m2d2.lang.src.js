@@ -25,7 +25,7 @@
 
     3) In HTML you can set which texts should be translated automatically:
     `<span lang="es">Cancelar</span>`
-    Then, in the next step, the previous text will be translated if it doesn't match the target language.
+    Then, in the next step, it will be translated if it doesn't match the target language.
 
     NOTE: If you use 'lang' in HTML, be sure that the language and the text matches the keys. For example,
     if your default language is English, you should do something like this:
@@ -37,14 +37,28 @@
             es : "Número de Teléfono"
         }
     }
-    If the key is not found it will display it, so you can use it. If you prefer, you can check the resulting
-    key from a text with: $.lang.toKeyword("Some Text").
+    If the key is not found it will display it, so that is one way to know which keyword to use, another way
+    is getting the key from a text with: $.lang.toKeyword("Some Text").
 
-    4) Set / change language (if not set, it will use browser's default language):
+    If your default language is not English, you have 3 options:
+        a) Create the interface in English and execute `$.lang()` on ready. (That will translate the UI)
+        b) Put keywords instead of English words (e.g, `<span lang='en'>user_name_goes_here</span>`) and execute `$.lang()` on ready.
+        c) specify the keyword in the dataset: `<span class="usr" lang='pa' data-kw='username'>ਉਪਭੋਗਤਾ ਨਾਮ</span>` or in javascript:
+               usr : {
+                    dataset : { kw : "username" },
+                    lang : "pa",
+                    text : "ਉਪਭੋਗਤਾ ਨਾਮ"
+               }
+
+    4) To set or change the language (by default it will use browser's default language):
     $.lang("en");
 
     5) Get translation:
     user.title.text = $.dict("user");
+
+    6) You can set your default language (page language) in your html tag: `<html lang='es'>`, that way this extension
+    knows that your HTML content is by default in that language, and decide if we need to translated for the user.
+    If you don't set it, it will use the first element with the attribute "lang".
 
     Recommendation:
     I recommend to set a shortcut for the dictionary (you can set it right after loading this extension):
@@ -63,7 +77,8 @@
  *
  */
 m2d2.load($ => {
-    let language = localStorage.getItem("m2d2.lang") || navigator.language;
+    let manualLang = localStorage.getItem("m2d2.lang") || ""
+    let language = manualLang || navigator.language;
     function Dictionary(lang) {
         const obj = function(keyword, vars) {
             if(keyword === undefined) return "";
@@ -195,4 +210,9 @@ m2d2.load($ => {
     }
 });
 // Translate HTML on ready:
-m2d2.ready($ => $.lang());
+m2d2.ready($ => {
+    const manualLang = localStorage.getItem("m2d2.lang") || ""
+    const htmlLang = $("html").lang || $("body").find("[lang]").lang || "en";
+    const isDifferent = manualLang ? htmlLang !== manualLang : htmlLang !== navigator.language.split("-")[0];
+    if(isDifferent) { $.lang() }
+});
