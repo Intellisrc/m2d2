@@ -23,10 +23,27 @@
     2) Then on initialization (only once), set the dictionary:
     $.dict.set(dictionary);
 
-    3) Set / change language (if not set, it will use browser's default language):
+    3) In HTML you can set which texts should be translated automatically:
+    `<span lang="es">Cancelar</span>`
+    Then, in the next step, the previous text will be translated if it doesn't match the target language.
+
+    NOTE: If you use 'lang' in HTML, be sure that the language and the text matches the keys. For example,
+    if your default language is English, you should do something like this:
+    `<span lang="en">Phone Number</span>`
+    Then, in your dictionary, you should use the keyword:
+    {
+        phone_number : {
+            en : "Phone Number",
+            es : "Número de Teléfono"
+        }
+    }
+    If the key is not found it will display it, so you can use it. If you prefer, you can check the resulting
+    key from a text with: $.lang.toKeyword("Some Text").
+
+    4) Set / change language (if not set, it will use browser's default language):
     $.lang("en");
 
-    4) Get translation:
+    5) Get translation:
     user.title.text = $.dict("user");
 
     Recommendation:
@@ -39,6 +56,10 @@
 
     That way, you can use it like:
     user.title.text = _("user");
+
+    Final Note:
+    When you change the language, it will keep in the local storage (at the browser) your selection, so
+    if you refresh the page it will still use your selected language.
  *
  */
 m2d2.load($ => {
@@ -46,7 +67,7 @@ m2d2.load($ => {
     function Dictionary(lang) {
         const obj = function(keyword, vars) {
             if(keyword === undefined) return "";
-            let msg = this.val(keyword,true);
+            let msg = obj.val(keyword,true);
             if(vars !== undefined) {
                 if(typeof vars == "string"){
                     if(vars != "") {
@@ -62,7 +83,7 @@ m2d2.load($ => {
                 if(typeof vars == "object"){
                     for(var v in vars) {
                         let kwd = vars[v] + ""; //Be sure its string
-                        kwd = this.val(kwd,false);
+                        kwd = obj.val(kwd,false);
                         msg = msg.replace(v,kwd);
                     }
                 }
@@ -115,26 +136,22 @@ m2d2.load($ => {
         };
         return obj;
     };
-    /**
-     * Convert text to keyword
-     */
-    function textToKW(text) {
-        return text.toLowerCase().trim().replace(/ /g,"_").replace(/[^\w]/g,"").replace(/_$/,"");
-    }
 
     // Initialize dictionary
     $.dict = new Dictionary(language);
 
     const langEvents = [];
     $.lang = function(newLang) {
-        $.dict.lang = newLang;
-        localStorage.setItem("m2d2.lang", $.dict.lang);
+        if(newLang) {
+            $.dict.lang = newLang;
+            localStorage.setItem("m2d2.lang", $.dict.lang);
+        }
         $("body").findAll("[lang]").forEach((elem) => {
             let txt = elem.text;
             // When element has content and (optional) title
             if(txt &&! elem.classList.contains("notxt")) {
                 if(elem.dataset.kw == undefined) {
-                    elem.dataset.kw = textToKW(txt);
+                    elem.dataset.kw = $.lang.getKeyword(txt);
                 }
                 elem.text = $.dict(elem.dataset.kw);
                 const titleKw = elem.dataset.kw + "_title";
@@ -145,7 +162,7 @@ m2d2.load($ => {
             // When element only has title:
             } else if(elem.title) {
                 if(elem.dataset.kw == undefined) {
-                    elem.dataset.kw = textToKW(txt);
+                    elem.dataset.kw = $.lang.getKeyword(txt);
                 }
                 let title = $.dict(elem.dataset.kw);
                 if(title) {
@@ -153,7 +170,7 @@ m2d2.load($ => {
                 }
             } else if(elem.value) {
                 if(elem.dataset.kw == undefined) {
-                    elem.dataset.kw = textToKW(txt);
+                    elem.dataset.kw = $.lang.getKeyword(txt);
                 }
                 let value = $.dict(elem.dataset.kw);
                 if(value) {
@@ -165,9 +182,17 @@ m2d2.load($ => {
             callback();
         });
     }
+    /**
+     * Convert text to keyword
+     */
+    $.lang.getKeyword = function(text) {
+        return text.toLowerCase().trim().replace(/ /g,"_").replace(/[^\w]/g,"").replace(/_$/,"");
+    }
     $.lang.onchange = function(callback) {
         if(callback) {
             langEvents.push(callback);
         }
     }
 });
+// Translate HTML on ready:
+m2d2.ready($ => $.lang());
