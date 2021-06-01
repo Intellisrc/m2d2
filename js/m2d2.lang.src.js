@@ -32,6 +32,10 @@
     Recommendation:
     I recommend to set a shortcut for the dictionary (you can set it right after loading this extension):
     const _ = $.dict;
+    Or setting dictionary at the same time:
+    const _ = $.dict.set(dictionary);
+    To declare it as global, you can set it as:
+    const _ = m2d2.load().dict;
 
     That way, you can use it like:
     user.title.text = _("user");
@@ -69,6 +73,7 @@ m2d2.load($ => {
         obj.data = {};
         obj.set = function(dictionary) {
             this.data = dictionary;
+            return this;
         };
         obj.has = function(keyword, lang) {
             return lang === undefined ? this.data[keyword] !== undefined : this.data[keyword][lang] !== undefined;
