@@ -52,6 +52,9 @@
                     }
                 }
             });
+            $.lang.onchange = (lang) => {
+                $(current, lang);
+            };
         });
     </script>
 </head>
@@ -71,6 +74,9 @@
     <div id="change">
         <a href="#" class="en">English</a>
         <a href="#" class="es">Spanish</a>
+    </div>
+    <div>
+        Current language: <span id="current">en</span>
     </div>
 </article>
 </body>

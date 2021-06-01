@@ -60,6 +60,9 @@
     knows that your HTML content is by default in that language, and decide if we need to translated for the user.
     If you don't set it, it will use the first element with the attribute "lang".
 
+    7) You can execute some code when the language is changed by setting an event listener:
+    `$.lang.onchange = (new_lang) => { ... }`
+
     Recommendation:
     I recommend to set a shortcut for the dictionary (you can set it right after loading this extension):
     const _ = $.dict;
@@ -194,7 +197,7 @@ m2d2.load($ => {
             }
         });
         langEvents.forEach(callback => {
-            callback();
+            callback(newLang);
         });
     }
     /**
@@ -203,11 +206,17 @@ m2d2.load($ => {
     $.lang.getKeyword = function(text) {
         return text.toLowerCase().trim().replace(/ /g,"_").replace(/[^\w]/g,"").replace(/_$/,"");
     }
-    $.lang.onchange = function(callback) {
-        if(callback) {
-            langEvents.push(callback);
+    Object.defineProperty($.lang, "onchange", {
+        get() { return this },
+        set(value) {
+            if($.isFunction(value)) {
+                langEvents.push(value);
+            } else {
+                console.log("Unable to set lang.onchange, because it is not a function: ");
+                console.log(value);
+            }
         }
-    }
+    });
 });
 // Translate HTML on ready:
 m2d2.ready($ => {
