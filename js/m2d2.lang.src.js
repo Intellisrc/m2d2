@@ -88,26 +88,26 @@ m2d2.load($ => {
             let msg = obj.val(keyword,true);
             if(vars !== undefined) {
                 if(typeof vars == "string"){
-                    if(vars != "") {
+                    if(vars !== "") {
                         vars = vars.replace(/;$/,"");
-                        var pairs = vars.split(";");
+                        const pairs = vars.split(";");
                         vars = {};
-                        for(var p in pairs){
-                            var part = pairs[p].split(":");
+                        pairs.forEach(p => {
+                            const part = pairs[p].split(":");
                             vars[part[0]] = part[1];
-                        }
+                        });
                     }
                 }
                 if(typeof vars == "object"){
-                    for(var v in vars) {
+                    vars.forEach(v => {
                         let kwd = vars[v] + ""; //Be sure its string
                         kwd = obj.val(kwd,false);
                         msg = msg.replace(v,kwd);
-                    }
+                    })
                 }
             }
             return msg;
-        };
+        }
         obj.lang = lang || "en";
         obj.data = {};
         obj.set = function(dictionary) {
@@ -130,7 +130,7 @@ m2d2.load($ => {
                 return "";
             }
             let translation = keyword;
-            if(report == undefined) {
+            if(report === undefined) {
                 report = false;
             }
             keyword = keyword.toLowerCase();
@@ -153,7 +153,7 @@ m2d2.load($ => {
             return translation;
         };
         return obj;
-    };
+    }
 
     // Initialize dictionary
     $.dict = new Dictionary(language);
@@ -216,7 +216,7 @@ m2d2.load($ => {
                 console.log(value);
             }
         }
-    });
+    })
 });
 // Translate HTML on ready:
 m2d2.ready($ => {
