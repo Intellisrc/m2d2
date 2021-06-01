@@ -278,7 +278,8 @@ class m2d2 {
 			return $node;
 		}
 		object = this.plainToObject($node, object); // Be sure it's an object //TODO: documentation : text parameter
-		Object.keys(object).forEach(key => {
+		// We filter-out some known keys:
+		Object.keys(object).filter(it => ! ["tagName"].includes(it)).forEach(key => {
 			let value = object[key];
 			if(value === undefined || value === null) {
 			    console.log("Value was not set for key: " + key + ", 'empty' was used in object: ");
@@ -410,8 +411,7 @@ class m2d2 {
 					}
 					const isFunc = m2d2.utils.isFunction(value);
 					if(value.tagName !== undefined) {
-						const tag = value.tagName;
-						const $newNode = this.appendElement($node, tag);
+						const $newNode = this.appendElement($node, value.tagName);
 						this.renderAndLink($node, $newNode, key, value);
 					} else if(m2d2.utils.isValidElement(key) &&! isFunc) {
 						const $newNode = this.appendElement($node, key);
@@ -590,7 +590,7 @@ class m2d2 {
         $newItem.dataset.id = index;
         // Add "selected" property
         this.setUniqueAttrib($newItem, "selected"); //TODO: Document
-        // Set values
+        // Set values and links
 		let $newNode = this.doDom($newItem, obj);
 		// Place Events:
 		return this.getItemWithEvents($node, $newNode);

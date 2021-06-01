@@ -205,7 +205,7 @@ m2d2.load($ => {
                     type : "submit",
                     value : key,
                     css : ["color", key],
-                    text : _ !== undefined ? _(b) : b,
+                    text : $.dict !== undefined ? $.dict(b) : b,
                     autofocus : ["ok","yes"].includes(b),
                     formNoValidate : ["cancel"].includes(b),
                     // we append a hidden input with the value of the button clicked:
