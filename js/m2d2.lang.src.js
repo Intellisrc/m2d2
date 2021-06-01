@@ -168,7 +168,7 @@ m2d2.load($ => {
             let txt = elem.text;
             // When element has content and (optional) title
             if(txt &&! elem.classList.contains("notxt")) {
-                if(elem.dataset.kw == undefined) {
+                if(elem.dataset.kw) {
                     elem.dataset.kw = $.lang.getKeyword(txt);
                 }
                 elem.text = $.dict(elem.dataset.kw);
@@ -179,7 +179,7 @@ m2d2.load($ => {
                 }
             // When element only has title:
             } else if(elem.title) {
-                if(elem.dataset.kw == undefined) {
+                if(elem.dataset.kw) {
                     elem.dataset.kw = $.lang.getKeyword(txt);
                 }
                 let title = $.dict(elem.dataset.kw);
@@ -187,7 +187,7 @@ m2d2.load($ => {
                     elem.title = title;
                 }
             } else if(elem.value) {
-                if(elem.dataset.kw == undefined) {
+                if(elem.dataset.kw) {
                     elem.dataset.kw = $.lang.getKeyword(txt);
                 }
                 let value = $.dict(elem.dataset.kw);
