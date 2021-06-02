@@ -20,6 +20,7 @@ m2d2.load($ => {
      * del      : remove data
      * clear    : remove all keys
      * exists   : check if key exists
+     * keys     : get all keys
      * log      : add in array (it will keep "n" number of items in queue)
      *
      * The way to use it is:
@@ -33,17 +34,36 @@ m2d2.load($ => {
      *
      * myval can be : string, number, object, array
      */
-    function Storage(method) {
-        switch(method) {
-            case 'local'  : if(window.localStorage)     this.method = localStorage; break;
-            case 'session': if(window.sessionStorage)   this.method = sessionStorage; break;
+    function Storage(type) {
+        switch(type) {
+            case 'local'  : if(window.localStorage)     this.store = localStorage; break;
+            case 'session': if(window.sessionStorage)   this.store = sessionStorage; break;
         }
-        if(this.method == undefined) this.method = localStorage; //Default
-        this.set = function(key, val) { if(typeof(val) == 'string') val = { '$' : val }; this.method.setItem(key, JSON.stringify(val)); }
-        this.get = function(key) { let val = JSON.parse(this.method.getItem(key)) || {}; if(val["$"] != undefined) val = val["$"]; else if(Object.keys(val).length === 0 && val.constructor === Object) val = null; return val; }
-        this.del = function(key) { this.method.removeItem(key); }
-        this.clear = function() { this.method.clear(); }
-        this.exists = function(key) { return this.method.hasOwnProperty(key); }
+        if(this.store == undefined) this.store = localStorage; //Default
+        this.set = function(key, val) {
+            if(typeof(val) == 'string') {
+                val = { '$' : val };
+                this.store.setItem(key, JSON.stringify(val));
+            }
+        }
+        this.get = function(key) {
+            let val;
+            try {
+                val = JSON.parse(this.store.getItem(key)) || {};
+            } catch(ignore) {
+                val = this.store.getItem(key);
+            }
+            if(val["$"] !== undefined) {
+                val = val["$"];
+            } else if(Object.keys(val).length === 0 && val.constructor === Object) {
+                val = null;
+            }
+            return val;
+        }
+        this.del = function(key) { this.store.removeItem(key); }
+        this.keys = function() { return Object.keys(this.store).sort(); }
+        this.clear = function() { this.store.clear(); }
+        this.exists = function(key) { return this.store.hasOwnProperty(key); }
         this.log = function(key, val, n) {
             if(n == undefined) n = 10;
             const tmp = this.get(key) || [];
