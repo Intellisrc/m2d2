@@ -24,14 +24,14 @@
                 onsubmit : function() {
                     const data = this.getData();
                     if(data.key && data.val) {
-                        $.local.set(data.key, data.val);
+                        $.session.set(data.key, data.val);
                         stored.update();
                     }
                     return false;
                 },
                 clear : {
                     onclick : function() {
-                        $.local.clear();
+                        $.session.clear();
                         stored.update();
                         return false;
                     }
@@ -41,7 +41,7 @@
                 template : {
                     li : {
                         onclick : function() {
-                            const storedVal = $.local.get(this.text);
+                            const storedVal = $.session.get(this.text);
                             console.log(storedVal);
                             item.text = JSON.stringify(storedVal);
                         }
@@ -50,21 +50,20 @@
                 update : function() {
                     keep.key = "";
                     keep.val = "";
+                    item.text = "";
                     stored.items.clear();
-                    $.local.keys().forEach(k => {
+                    $.session.keys().forEach(k => {
                         stored.items.push({ text : k });
                     });
                 },
                 onload : function() {
-                    $.local.set("number", 100);
-                    $.local.set("object", { some : "value" });
-                    $.local.set("array", [ "a", "b", "c" ]);
+                    $.session.set("number", 100);
+                    $.session.set("object", { some : "value" });
+                    $.session.set("array", [ "a", "b", "c" ]);
                     this.update();
                 }
             });
-            $(item, {
-                text : ""
-            });
+            $(item, "");
         });
     </script>
 </head>

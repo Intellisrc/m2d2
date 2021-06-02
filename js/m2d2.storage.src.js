@@ -41,10 +41,10 @@ m2d2.load($ => {
         }
         if(this.store == undefined) this.store = localStorage; //Default
         this.set = function(key, val) {
-            if(typeof(val) == 'string') {
+            if(typeof(val) === 'string') {
                 val = { '$' : val };
-                this.store.setItem(key, JSON.stringify(val));
             }
+            this.store.setItem(key, JSON.stringify(val));
         }
         this.get = function(key) {
             let val;
