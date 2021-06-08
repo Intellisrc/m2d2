@@ -14,7 +14,7 @@ Framework/Library comparison:
 
 |        		 		 	| M2D2 | JQuery | Angular | ReactJS | Vue   |
 | ------------------------- | ---- | ------ | ------- | ------- | ----- |
-| Size  		  			| 16Kb |  88Kb  |  60Kb   | 166Kb   | 181Kb |
+| Size  		  			| 19Kb |  88Kb  |  60Kb   | 166Kb   | 181Kb |
 | Easy to learn   			|  Yes |  Yes   |   No    |   No    |  No   |
 | Clean and standard HTML 	|  Yes |  Yes   |   No    |   Yes   |  No   |
 | Clean Javascript    		|  Yes |  Yes   |   Yes   |   No    |  Yes  |
@@ -72,7 +72,7 @@ With this extension you can handle multiple languages easily.
 
 * XHR
 
-This extension handles almost any kind of HTTP request to a server (eg. GET, POST, PUT, DELETE, etc.)
+This extension handles almost any kind of HTTP request to a server (e.g., GET, POST, PUT, DELETE, etc.)
 
 * WS
 
