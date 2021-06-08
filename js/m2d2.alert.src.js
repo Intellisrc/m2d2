@@ -149,7 +149,7 @@ m2d2.load($ => {
                                     }, options.text)
                                 }
                             } else {
-                                content = { span : options.text }
+                                content = { span : options.text.replace("\n","<br>") }
                             }
                             return Object.assign(props, content);
                         })(options.icon),

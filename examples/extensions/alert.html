@@ -12,9 +12,9 @@
         //On ready..
         m2d2.ready ($ => {
             $.alert("I hope you are ready...", "Ok, let's go!", () => {
-               $.confirm("Are you sure?", "This is important...", (res) => {
+               $.confirm("Are you sure", "This is important because it could change the course of humanity.\nOnly accept if you are ready.", (res) => {
                    $("article", {
-                        h1 : res ? "You accepted!" : "You denied it."
+                        h1 : res ? "We are saved!" : "Wow! that was close!"
                    });
                });
             });
