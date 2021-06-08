@@ -2,6 +2,7 @@
     .m2d2-alert-front {
         min-width: 400px;
         min-height: 100px;
+        max-width: 600px;
         background-color: $background;
         border: 1px solid $highlight;
         outline: 2px solid $background;
@@ -51,7 +52,8 @@
             line-height: 40px;
         }
         .m2d2-alert-text {
-            line-height: 40px;
+            line-height: 20px;
+            padding: $padding;
             text-align: center;
             width: 100%;
         }
