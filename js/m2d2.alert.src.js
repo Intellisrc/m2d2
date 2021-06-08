@@ -86,9 +86,6 @@ m2d2.load($ => {
             if(! $.isFunction(options.callback)) {
                 if(options.callback &&! options.text) {
                     options.text = options.callback;
-                    options.callback = null;
-                    console.log("Callback is missing for: ");
-                    console.log(options);
                 }
                 options.callback = () => {}
             }

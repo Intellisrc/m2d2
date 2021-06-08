@@ -54,7 +54,40 @@ Repositories (synchronized):
 
 or:
 
-* Download (~16Kb): [m2d2.min.js](https://gl.githack.com/lepe/m2d2/raw/master/dist/m2d2.min.js) and set it in the HTML head.
+* Download (~19Kb): [m2d2.min.js](https://gl.githack.com/lepe/m2d2/raw/master/dist/m2d2.min.js) and set it in the HTML head.
+
+## Extensions:
+
+* Alert
+
+This extension makes it easy to display alerts, confirmation, input dialogs and more.
+
+* Storage
+
+This extension provides an easy way to save and restore data into localStorage and sessionStorage.
+
+* Lang
+
+With this extension you can handle multiple languages easily.
+
+* XHR
+
+This extension handles almost any kind of HTTP request to a server (eg. GET, POST, PUT, DELETE, etc.)
+
+* WS
+
+This extension gives you an easy-to-use WebSocket client.
+
+## Bundle Packs:
+
+For your convenience, there are some minimized files included in each release (you can find them under `dist/` directory if you install via `npm` or download them clicking on the file name):
+
+|        		 		 	| Core | Alert  | Storage | Lang    | XHR   |  WS   |  Size |
+| ------------------------- | ---- | ------ | ------- | ------- | ----- | ----- | ----- |
+| [m2d2.min.js](https://gl.githack.com/lepe/m2d2/raw/master/dist/m2d2.min.js)		  		| Yes  | No     |   No    | No      | No    | No    |  19K  |
+| [m2d2.bundle.xhr.min.js](https://gl.githack.com/lepe/m2d2/raw/master/dist/m2d2.bundle.xhr.min.js)	| Yes  | Yes    |   Yes   | Yes     | Yes   | No    |  28K  |
+| [m2d2.bundle.xhr.ws.js](https://gl.githack.com/lepe/m2d2/raw/master/dist/m2d2.bundle.xhr.ws.js)		| Yes  | Yes    |   Yes   | Yes     | No    | Yes   |  27K  |
+| [m2d2.bundle.min.js](https://gl.githack.com/lepe/m2d2/raw/master/dist/m2d2.bundle.min.js)		| Yes  | Yes    |   Yes   | Yes     | Yes   | Yes   |  29K  |
 
 ## What's New in version 2.0:
 
