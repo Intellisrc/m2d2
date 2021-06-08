@@ -89,7 +89,7 @@ For your convenience, there are some minimized files included in each release (y
 | ------------------------- | ---- | ------ | ------- | ------- | ----- | ----- | ----- |
 | [m2d2.min.js](https://gl.githack.com/lepe/m2d2/raw/master/dist/m2d2.min.js)		  		| Yes  | No     |   No    | No      | No    | No    |  19K  |
 | [m2d2.bundle.xhr.min.js](https://gl.githack.com/lepe/m2d2/raw/master/dist/m2d2.bundle.xhr.min.js)	| Yes  | Yes    |   Yes   | Yes     | Yes   | No    |  28K  |
-| [m2d2.bundle.xhr.ws.js](https://gl.githack.com/lepe/m2d2/raw/master/dist/m2d2.bundle.xhr.ws.js)		| Yes  | Yes    |   Yes   | Yes     | No    | Yes   |  27K  |
+| [m2d2.bundle.ws.min.js](https://gl.githack.com/lepe/m2d2/raw/master/dist/m2d2.bundle.ws.min.js)		| Yes  | Yes    |   Yes   | Yes     | No    | Yes   |  27K  |
 | [m2d2.bundle.min.js](https://gl.githack.com/lepe/m2d2/raw/master/dist/m2d2.bundle.min.js)		| Yes  | Yes    |   Yes   | Yes     | Yes   | Yes   |  29K  |
 
 ## What's New in version 2.0:
