@@ -1,4 +1,4 @@
-# M2D2 JS (Model to DOM 2)
+# M2D2.JS 
 
 A class to easily place data in DOM and update them immediately upon change. It has no dependencies. It is similar to Angular, Vue, ReactJS and alike frameworks and shares some similarities with JQuery.
 
