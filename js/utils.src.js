@@ -74,9 +74,18 @@ class Utils {
 	 * @param {object} n
 	 * @returns {boolean}
 	 */
-    isNode(n) {
+    isElement(n) {
         return n instanceof HTMLElement;
     };
+
+	/**
+	 * Return true if object is a Node or DocumentFragment
+	 * @param {object} n
+	 * @returns {boolean}
+	 */
+    isNode(n) {
+    	return (n instanceof Node || n instanceof DocumentFragment);
+	}
 	/**
 	 * Return true if string seems to be an HTML code
 	 * @param {string} s
@@ -107,7 +116,7 @@ class Utils {
 	 * @returns {boolean}
 	 */
     isValidElement(tagName) {
-        const $node = this.newNode(tagName);
+        const $node = this.newElement(tagName);
         return tagName !== "template" && $node.constructor.name !== "HTMLUnknownElement";
     }
 	/**
@@ -148,7 +157,7 @@ class Utils {
 					hasAttr = ($node.type !== undefined && ($node.type === "radio" || $node.type === "checkbox"));
 					break;
 				default:
-					hasAttr = $node.hasAttribute(attr);
+					hasAttr = $node.hasAttribute !== undefined ? $node.hasAttribute(attr) : false;
 			}
 		}
 		return hasAttr;
@@ -228,19 +237,27 @@ class Utils {
 	 * @param {string} html
 	 * @returns {HTMLElement}
 	 */
-	htmlNode(html) {
-		const template = this.newNode("template");
-		template.innerHTML = html.trim();
-		return template.content.firstChild;
+	htmlElement(html) {
+		//return document.createRange().createContextualFragment(html); FIXME
+		const template = this.newElement("template");
+        template.innerHTML = html.trim();
+        return template.content.firstChild;
 	};
 	/**
 	 * Creates a Node with a tag name
 	 * @param {string} tagName
 	 * @returns {HTMLElement}
 	 */
-	newNode(tagName) {
+	newElement(tagName) {
 		return document.createElement(tagName);
 	};
+	/**
+	 * Creates an empty node (DocumentFragment)
+	 * @returns {DocumentFragment}
+	 */
+	newEmptyNode() {
+		return new DocumentFragment()
+	}
 	/**
 	 * Get all methods of class object
 	 * https://stackoverflow.com/a/67260131/196507
@@ -252,4 +269,28 @@ class Utils {
 		const x = Reflect.getPrototypeOf(o);
 		return Reflect.ownKeys(o).filter(it => Reflect.ownKeys(x).indexOf(it) < 0);
 	};
+	/**
+	 * Append all child from one node to another
+	 * @param {HTMLElement} $srcNode
+	 * @param {HTMLElement} $tgtNode
+	 */
+	appendAllChild($srcNode, $tgtNode) {
+		//Update all at once
+		//$node.append(...$outElem.childNodes); //<-- works but it is slower
+		while ($srcNode.firstChild) {
+			$tgtNode.append($srcNode.firstChild);
+		}
+	}
+	/**
+	 * Prepend all child from one node to another
+	 * @param {HTMLElement} $srcNode
+	 * @param {HTMLElement} $tgtNode
+	 */
+	prependAllChild($srcNode, $tgtNode) {
+		//Update all at once
+		//$node.append(...$outElem.childNodes); //<-- works but it is slower
+		while ($srcNode.firstChild) {
+			$tgtNode.prepend($srcNode.firstChild);
+		}
+	}
 }

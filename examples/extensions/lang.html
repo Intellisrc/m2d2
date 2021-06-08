@@ -1,0 +1,82 @@
+<html lang="en">
+<head>
+    <title>Demo using M2D2 : Language Extension</title>
+    <meta name="HandheldFriendly" content="1">
+    <meta name="viewport" content="width=device-width, maximum-scale=1.0">
+    <meta name="theme-color" content="#333333">
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../css/examples.css" type="text/css" />
+    <style>
+        #login { display: block; width: 310px; }
+        label { display: inline-block; width: 100px; }
+        input { width: 200px; }
+        div { padding : 5px; }
+        .right { text-align: right; }
+    </style>
+    <script src="../../dist/m2d2.src.js" type="text/javascript"></script>
+    <script src="../../js/m2d2.lang.src.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        const _ = m2d2.load().dict.set({
+            username : {
+                en : "Username",
+                es : "Usuario"
+            },
+            password : {
+                en : "Password",
+                es : "Contraseña"
+            },
+            login : {
+                en : "Login",
+                es : "Entrar"
+            },
+            notsent : {
+                en : "Sorry, this is just a demo.",
+                es : "Lo sentimos, esta es solo una demonstración."
+            }
+        });
+        //On ready..
+        m2d2.ready ($ => {
+            $(login, {
+                onsubmit : function() {
+                    alert(_("notsent")); // <---- Example on how to use it in JS
+                    return false;
+                }
+            });
+            $(change, {
+                a : {
+                    warn : false,
+                    onclick : function() {
+                        $.lang(this.className);
+                        return false;
+                    }
+                }
+            });
+            $.lang.onchange = (lang) => {
+                $(current, lang);
+            };
+        });
+    </script>
+</head>
+<body>
+<article>
+    <form id="login">
+        <div>
+            <label class="user" lang="en">Username</label><input type="text" />
+        </div>
+        <div>
+            <label class="pass" lang="en">Password</label><input type="password" />
+        </div>
+        <div class="right">
+            <button lang="en">Login</button>
+        </div>
+    </form>
+    <div id="change">
+        <a href="#" class="en">English</a>
+        <a href="#" class="es">Spanish</a>
+    </div>
+    <div>
+        Current language: <span id="current">en</span>
+    </div>
+</article>
+</body>
+</html>

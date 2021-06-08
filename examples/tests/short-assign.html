@@ -1,0 +1,41 @@
+<html>
+<head>
+<title>Demo using M2D2 : Objects</title>
+<meta name="HandheldFriendly" content="1">
+<meta name="viewport" content="width=device-width, maximum-scale=1.0">
+<meta name="theme-color" content="#333333">
+<link rel="stylesheet" href="../css/examples.css" type="text/css" />
+<script src="../../dist/m2d2.src.js" type="text/javascript"></script>
+<script type="text/javascript">
+	// When ready...
+	m2d2.ready($ => {
+		// Simple example using an object
+		$(page, {
+			h1: "M2D2 : Objects example",
+			info: {
+				dt: "Simple is best",
+				dd: "Isn't great to be able to have such freedom, flexibility and simplicity?"
+			},
+			controls: {
+				link : "default value",
+				picture : "https://homepages.cae.wisc.edu/~ece533/images/boat.png"
+			}
+		});
+	});
+</script>
+</head>
+<body>
+	<article id="page">
+		<h1>Title here</h1>
+		<div class="info">
+			<dt></dt>
+			<dd></dd>
+		</div>
+		<div class="controls">
+			<div>Input value: <input id="link" type="text" /></div>
+			<h3>Image:</h3>
+			<img src="" class="picture" />
+		</div>
+	</article>
+</body>
+</html>

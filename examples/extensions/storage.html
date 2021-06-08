@@ -1,0 +1,93 @@
+<html>
+<head>
+    <title>Demo using M2D2 : Storage Extension</title>
+    <meta name="HandheldFriendly" content="1">
+    <meta name="viewport" content="width=device-width, maximum-scale=1.0">
+    <meta name="theme-color" content="#333333">
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../css/examples.css" type="text/css" />
+    <style>
+        form { display: block; width: 310px; }
+        label { display: inline-block; width: 100px; }
+        input { width: 200px; }
+        div { padding : 5px; }
+        .right { text-align: right; }
+        li { padding: 5px; margin: 2px; cursor: pointer; }
+    </style>
+    <script src="../../dist/m2d2.src.js" type="text/javascript"></script>
+    <script src="../../js/m2d2.storage.src.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        m2d2.ready ($ => {
+            const keep = $("#keep", {
+                key : "",
+                val : "",
+                onsubmit : function() {
+                    const data = this.getData();
+                    if(data.key && data.val) {
+                        $.session.set(data.key, data.val);
+                        stored.update();
+                    }
+                    return false;
+                },
+                clear : {
+                    onclick : function() {
+                        $.session.clear();
+                        stored.update();
+                        return false;
+                    }
+                }
+            });
+            $(stored, {
+                template : {
+                    li : {
+                        onclick : function() {
+                            const storedVal = $.session.get(this.text);
+                            console.log(storedVal);
+                            item.text = JSON.stringify(storedVal);
+                        }
+                    }
+                },
+                update : function() {
+                    keep.key = "";
+                    keep.val = "";
+                    item.text = "";
+                    stored.items.clear();
+                    $.session.keys().forEach(k => {
+                        stored.items.push({ text : k });
+                    });
+                },
+                onload : function() {
+                    $.session.set("number", 100);
+                    $.session.set("object", { some : "value" });
+                    $.session.set("array", [ "a", "b", "c" ]);
+                    this.update();
+                }
+            });
+            $(item, "");
+        });
+    </script>
+</head>
+<body>
+<article>
+    <h3>Input:</h3>
+    <form id="keep">
+        <div>
+            <label>Keyword</label><input type="text" name="key" required />
+        </div>
+        <div>
+            <label>Value</label><input type="text" name="val" required />
+        </div>
+        <div class="right">
+            <button class="save" type="submit">Save</button>
+            <button class="clear">Clear</button>
+        </div>
+    </form>
+    <h3>Stored Values:</h3>
+    <p>Click on key to show value:</p>
+    <ul id="stored">
+    </ul>
+    <h3>Value:</h3>
+    <code id="item"></code>
+</article>
+</body>
+</html>

@@ -1,0 +1,95 @@
+#m2d2-alert .m2d2-alert-front {
+    min-width: 400px;
+    min-height: 100px;
+    background-color: #EEE;
+    border: 1px solid #2196f3;
+    outline: 2px solid #EEE;
+    padding: 10px;
+    box-shadow: 0 0 5px 1px #000;
+    margin-top: -200px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+#m2d2-alert .m2d2-alert-front.question::before {
+    color: #54c1e3;
+    font-size: 200%;
+    margin: 10px;
+}
+#m2d2-alert .m2d2-alert-front.ok::before {
+    color: #59bea0;
+    font-size: 200%;
+    margin: 10px;
+}
+#m2d2-alert .m2d2-alert-front.input::before {
+    color: #f3863d;
+    font-size: 200%;
+    margin: 10px;
+}
+#m2d2-alert .m2d2-alert-front.wait::before {
+    color: white;
+    font-size: 200%;
+    margin: 10px;
+    display: block;
+}
+#m2d2-alert .m2d2-alert-front.error::before {
+    color: #f06d65;
+    font-size: 200%;
+    margin: 10px;
+}
+#m2d2-alert .m2d2-alert-front.info::before {
+    color: #f3863d;
+    font-size: 200%;
+    margin: 10px;
+}
+#m2d2-alert .m2d2-alert-front .m2d2-alert-title {
+    font-size: 200%;
+    text-align: center;
+    line-height: 40px;
+}
+#m2d2-alert .m2d2-alert-front .m2d2-alert-text {
+    line-height: 20px;
+    padding: 10px;
+    text-align: center;
+    width: 100%;
+}
+#m2d2-alert .m2d2-alert-front .m2d2-alert-field {
+    border: 0;
+}
+#m2d2-alert .m2d2-alert-front .m2d2-alert-field, #m2d2-alert .m2d2-alert-front .m2d2-alert-field input {
+    width: 100%;
+}
+#m2d2-alert .m2d2-alert-front .m2d2-alert-buttons {
+    padding: 10px;
+    width: 100%;
+}
+#m2d2-alert .m2d2-alert-front .m2d2-alert-buttons button {
+    min-width: 100px;
+}
+#m2d2-alert .m2d2-alert-front .m2d2-alert-buttons .ok, #m2d2-alert .m2d2-alert-front .m2d2-alert-buttons .yes, #m2d2-alert .m2d2-alert-front .m2d2-alert-buttons .send {
+    float: right;
+}
+#m2d2-alert .m2d2-alert-front .m2d2-alert-buttons .no, #m2d2-alert .m2d2-alert-front .m2d2-alert-buttons .cancel {
+    float: left;
+}
+@keyframes popup {
+    0%    { transform: scale(1); }
+    50%   { transform: scale(1.4); }
+    60%   { transform: scale(1.1); }
+    70%   { transform: scale(1.2); }
+    80%   { transform: scale(1); }
+    90%   { transform: scale(1.1); }
+    100%  { transform: scale(1); }
+}
+@keyframes vanish {
+    0%    { transform: scale(1); }
+    20%   { transform: scale(1.4); }
+    100%   { transform: scale(0); }
+}
+.popup {
+    animation: popup 0.7s;
+}
+.vanish {
+    animation: vanish 0.5s;
+}

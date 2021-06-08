@@ -36,6 +36,31 @@ m2d2.load($ => {
                 }
             }
         }
+        /**
+         * Connect and return the websocket object
+         */
+        getSocket(onMessage, onOpen, onClose) {
+            const webSocket = new WebSocket(this.path);
+            webSocket.onopen = onOpen;
+            webSocket.onclose = onClose;
+            webSocket.onmessage = (res) => {
+                if (res.data) {
+                    try {
+                        onMessage(JSON.parse(res.data));
+                    } catch(e) {
+                        webSocket.onerror(e);
+                    }
+                }
+            }
+            webSocket.onerror = (err) => {
+                console.error('Socket encountered error: ', err ? err.message : 'Unknown', 'Closing socket');
+                const wsk = webSocket || this;
+                if(wsk.readyState === 1) {
+                    wsk.close();
+                }
+            }
+            return webSocket;
+        }
         connect(options, onMessage) {
             this.initRequest = options.request || null;
             this.onConnect = options.connected || (() => {});
@@ -48,13 +73,12 @@ m2d2.load($ => {
             this.connected = false;
             this.interval = null;
             //-------- Connect ----------
-            this.webSocket = new WebSocket(this.path);
-            this.webSocket.onopen = (e) => {
+            const onOpen = (e) => {
                 this.connected = true;
                 this.request(this.initRequest);
                 this.onConnect();
             }
-            this.webSocket.onclose = () => {
+            const onClose = (e) => {
                 this.connected = false;
                 this.onDisconnect();
                 if(!this.interval && this.reconnect) {
@@ -64,28 +88,16 @@ m2d2.load($ => {
                             clearInterval(this.interval);
                             this.interval = null;
                         } else {
-                            console.log("Reconnecting...")
-                            this.connect(onMessage);
+                            try {
+                                this.webSocket.close();
+                                console.log("Reconnecting...")
+                                this.webSocket = this.getSocket(onMessage, onOpen, onClose);
+                            } catch(ignore) {}
                         }
                     }, 2000);
                 }
             }
-            this.webSocket.onmessage = (res) => {
-                if (res.data) {
-                    try {
-                        onMessage(JSON.parse(res.data));
-                    } catch(e) {
-                        this.webSocket.onerror(e);
-                    }
-                }
-            }
-            this.webSocket.onerror = (err) => {
-                console.error('Socket encountered error: ', err ? err.message : 'Unknown', 'Closing socket');
-                const wsk = this.webSocket || this;
-                if(wsk.readyState === 1) {
-                    wsk.close();
-                }
-            };
+            this.webSocket = this.getSocket(onMessage, onOpen, onClose);
         }
         disconnect() {
             this.reconnect = false;
