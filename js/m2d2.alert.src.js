@@ -152,7 +152,7 @@ m2d2.load($ => {
                         })(options.icon),
                         onsubmit : function() {
                             const data = this.getData();
-                            let func = () => {};
+                            let func;
                             switch(data.button) {
                                 case "ok":
                                 case "yes":
