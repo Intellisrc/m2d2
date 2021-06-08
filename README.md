@@ -33,11 +33,14 @@ Repositories (synchronized):
 ## Hello World
 
 ```js
-    // When DOM is ready...
-	m2d2.ready($ => {
-		// Place text in #myid :
-		$(myid, "Hello World");
-	});
+// When DOM is ready...
+m2d2.ready($ => {
+    // Place text in #myid :
+    $(myid, "Hello World");
+    
+    // Then, change it into something else:
+    myid.text = "Hola Mundo";
+});
 ```
 
 ## Tutorial:
