@@ -6,10 +6,11 @@
  * $.wait       : Displays a spinner without any button in it.
  * $.alert      : Displays a simple message with "ok" button.
  * $.success    : Same as $.alert, but show a "check" icon.
- * $.failure    : Same as $.failure, but shows a "warning" icon.
+ * $.failure    : Same as $.alert, but shows a "warning" icon.
  * $.confirm    : Displays a confirmation message with "yes" and "no" buttons.
  * $.prompt     : Displays an input prompt with "cancel" and "send" buttons.
  * $.message    : Free form message (all the previous implementations uses this function)
+ * $.closeAll   : Close any message that might be open
  *
  * Example Usage:
  *   - Common uses:
@@ -49,13 +50,23 @@
  */
 m2d2.load($ => {
     function close(afterClose) {
-        $("#m2d2-alert .m2d2-alert-front").css.add("vanish");
-        setTimeout(() => {
-            $("#m2d2-alert").remove();
+        let win = $("#m2d2-alert .m2d2-alert-front");
+        if(win) {
+            win.css.add("vanish");
+            setTimeout(() => {
+                win = $("#m2d2-alert .m2d2-alert-front");
+                if(win) {
+                    $("#m2d2-alert").remove(); // Be sure it exists before trying to remove
+                }
+                if(afterClose) {
+                    afterClose();
+                }
+            }, 400); //Animation takes 500, after that will be restored, so we need to remove it before that time.
+        } else {
             if(afterClose) {
                 afterClose();
             }
-        }, 400); //Animation takes 500, after that will be restored, so we need to remove it before that time.
+        }
     }
     function getIconClass(type) {
         let css = [];
@@ -91,102 +102,104 @@ m2d2.load($ => {
             }
  		    if(! options.text) { options.text = "" }
         }
-        $("body", {
-            m2d2Alert : {
-                tagName : "div",
-                id : "m2d2-alert",
-                back : {
+        close(() => { // Be sure we have no other alert
+            $("body", {
+                m2d2Alert : {
                     tagName : "div",
-                    css : "m2d2-alert-back",
-                    style : {
-                        position : "absolute",
-                        left :0,
-                        right: 0,
-                        top : 0,
-                        bottom : 0,
-                        backgroundColor : "#0005",
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center"
-                    },
-                    front : {
-                        tagName : "form",
-                        css : (options.css || []).concat(["m2d2-alert-front", "popup", options.icon], getIconClass(options.icon)),
+                    id : "m2d2-alert",
+                    back : {
+                        tagName : "div",
+                        css : "m2d2-alert-back",
                         style : {
-                            zIndex : 100
+                            position : "absolute",
+                            left :0,
+                            right: 0,
+                            top : 0,
+                            bottom : 0,
+                            backgroundColor : "#0005",
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center"
                         },
-                        message : {
-                            tagName : "div",
-                            css : "m2d2-alert-title",
-                            span : options.title
-                        },
-                        submsg : (() => {
-                            let props = {
-                               tagName : "div",
-                               css : "m2d2-alert-text"
-                            }
-                            let content;
-                            if(options.icon === "input" &&! options.text) {
-                                content = {
-                                    fieldset : {
-                                        css : "m2d2-alert-field",
-                                        input : {
-                                            type : "text",
-                                            name : "answer",
-                                            onload : function() {
-                                                this.focus();
+                        front : {
+                            tagName : "form",
+                            css : (options.css || []).concat(["m2d2-alert-front", "popup", options.icon], getIconClass(options.icon)),
+                            style : {
+                                zIndex : 100
+                            },
+                            message : {
+                                tagName : "div",
+                                css : "m2d2-alert-title",
+                                span : options.title
+                            },
+                            submsg : (() => {
+                                let props = {
+                                   tagName : "div",
+                                   css : "m2d2-alert-text"
+                                }
+                                let content;
+                                if(options.icon === "input" &&! options.text) {
+                                    content = {
+                                        fieldset : {
+                                            css : "m2d2-alert-field",
+                                            input : {
+                                                type : "text",
+                                                name : "answer",
+                                                onload : function() {
+                                                    this.focus();
+                                                }
                                             }
                                         }
                                     }
-                                }
-                            } else if($.isPlainObject(options.text)) {
-                                content = {
-                                    fieldset : Object.assign({
-                                        css : "m2d2-alert-field"
-                                    }, options.text)
-                                }
-                            } else {
-                                content = { span : options.text.replace("\n","<br>") }
-                            }
-                            return Object.assign(props, content);
-                        })(options.icon),
-                        onsubmit : function() {
-                            const data = this.getData();
-                            let func;
-                            switch(data.button) {
-                                case "ok":
-                                case "yes":
-                                    func = () => { options.callback(true, data) };
-                                break
-                                case "no":
-                                    func = () => { options.callback(false, data) };
-                                break
-                                case "cancel":
-                                    func = () => { options.callback(null, data) };
-                                break
-                                case "send":
-                                    if(Object.keys(data).length === 1) {
-                                        func = () => { options.callback(data[Object.keys(data)[0]], data) };
-                                    } else if(Object.keys(data).length === 2) {
-                                        func = () => { options.callback(data[Object.keys(data).find(it => it !== "button")], data) };
-                                    } else { // If we have more than one field, we send all:
-                                        func = () => { options.callback(data, data) };
+                                } else if($.isPlainObject(options.text)) {
+                                    content = {
+                                        fieldset : Object.assign({
+                                            css : "m2d2-alert-field"
+                                        }, options.text)
                                     }
-                                break
-                                default: // When setting customized buttons, we send all:
-                                    func = () => { options.callback(data, data) };
-                                break
+                                } else {
+                                    content = { span : options.text.replace("\n","<br>") }
+                                }
+                                return Object.assign(props, content);
+                            })(options.icon),
+                            onsubmit : function() {
+                                const data = this.getData();
+                                let func;
+                                switch(data.button) {
+                                    case "ok":
+                                    case "yes":
+                                        func = () => { options.callback(true, data) };
+                                    break
+                                    case "no":
+                                        func = () => { options.callback(false, data) };
+                                    break
+                                    case "cancel":
+                                        func = () => { options.callback(null, data) };
+                                    break
+                                    case "send":
+                                        if(Object.keys(data).length === 1) {
+                                            func = () => { options.callback(data[Object.keys(data)[0]], data) };
+                                        } else if(Object.keys(data).length === 2) {
+                                            func = () => { options.callback(data[Object.keys(data).find(it => it !== "button")], data) };
+                                        } else { // If we have more than one field, we send all:
+                                            func = () => { options.callback(data, data) };
+                                        }
+                                    break
+                                    default: // When setting customized buttons, we send all:
+                                        func = () => { options.callback(data, data) };
+                                    break
+                                }
+                                close(func);
+                                return false;
+                            },
+                            onload : function () {
+                                const def = this.find("[autofocus]");
+                                if(def) { def.focus(); }
                             }
-                            close(func);
-                            return false;
-                        },
-                        onload : function () {
-                            const def = this.find("[autofocus]");
-                            if(def) { def.focus(); }
                         }
                     }
                 }
-            }
+            });
         });
         if(options.buttons.length) {
             const newButtons = {
@@ -250,7 +263,7 @@ m2d2.load($ => {
     $.success = (title, text, callback) => {
         return $.message({
             icon : "ok",
-            title : title + " !",
+            title : title,
             buttons : ["ok"],
             text : callback === undefined ? null : text,
             callback : callback === undefined ? text : callback
@@ -259,7 +272,7 @@ m2d2.load($ => {
     $.failure = (title, text, callback) => {
         return $.message({
             icon : "error",
-            title : title + " !",
+            title : title,
             buttons : ["ok"],
             text : callback === undefined ? null : text,
             callback : callback === undefined ? text : callback
@@ -268,7 +281,7 @@ m2d2.load($ => {
     $.confirm = (title, text, callback) => {
         return $.message({
             icon : "question",
-            title : title + " ?",
+            title : title,
             buttons : ["yes", "no"],
             text : callback === undefined ? null : text,
             callback : callback === undefined ? text : callback
@@ -282,5 +295,8 @@ m2d2.load($ => {
             text : callback === undefined ? null : text,
             callback : callback === undefined ? text : callback
         });
+    }
+    $.closeAll = () => {
+        close();
     }
 });
