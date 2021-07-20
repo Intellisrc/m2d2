@@ -9,6 +9,7 @@ const gulp = require('gulp'),
 const paths = {
 	prefix: 'm2d2',
 	build: 'dist/',
+	build_src: 'dist/src/',
 	js: [
 		'js/utils.src.js',
 		'js/m2d2.src.js'
@@ -74,8 +75,13 @@ gulp.task('ws', gulp.series(['bundle'], function() {
 gulp.task('dev', gulp.series([], function() {
 	return gulp.src(paths.js)
 		.pipe(concat(paths.prefix + (debug ? '.min.js' : '.src.js')))
-		.pipe(gulp.dest(paths.build));
+		.pipe(gulp.dest(paths.build_src));
+}));
+// Extension Source only for development
+gulp.task('dev_ext', gulp.series([], function() {
+	return gulp.src(paths.ext)
+		.pipe(gulp.dest(paths.build_src));
 }));
 
 // Build
-gulp.task('default', gulp.series(debug ? ['dev'] : ['js','ext','bundle','xhr','ws','dev']));
+gulp.task('default', gulp.series(debug ? ['dev'] : ['js','ext','bundle','xhr','ws','dev','dev_ext']));
