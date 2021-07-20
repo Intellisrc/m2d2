@@ -6,10 +6,11 @@
  * $.wait       : Displays a spinner without any button in it.
  * $.alert      : Displays a simple message with "ok" button.
  * $.success    : Same as $.alert, but show a "check" icon.
- * $.failure    : Same as $.failure, but shows a "warning" icon.
+ * $.failure    : Same as $.alert, but shows a "warning" icon.
  * $.confirm    : Displays a confirmation message with "yes" and "no" buttons.
  * $.prompt     : Displays an input prompt with "cancel" and "send" buttons.
  * $.message    : Free form message (all the previous implementations uses this function)
+ * $.closeAll   : Close any message that might be open
  *
  * Example Usage:
  *   - Common uses:
@@ -49,13 +50,19 @@
  */
 m2d2.load($ => {
     function close(afterClose) {
-        $("#m2d2-alert .m2d2-alert-front").css.add("vanish");
-        setTimeout(() => {
-            $("#m2d2-alert").remove();
-            if(afterClose) {
-                afterClose();
-            }
-        }, 400); //Animation takes 500, after that will be restored, so we need to remove it before that time.
+        let win = $("#m2d2-alert .m2d2-alert-front");
+        if(win) {
+            win.css.add("vanish");
+            setTimeout(() => {
+                win = $("#m2d2-alert .m2d2-alert-front");
+                if(win) {
+                    $("#m2d2-alert").remove(); // Be sure it exists before trying to remove
+                }
+                if(afterClose) {
+                    afterClose();
+                }
+            }, 400); //Animation takes 500, after that will be restored, so we need to remove it before that time.
+        }
     }
     function getIconClass(type) {
         let css = [];
@@ -282,5 +289,8 @@ m2d2.load($ => {
             text : callback === undefined ? null : text,
             callback : callback === undefined ? text : callback
         });
+    }
+    $.closeAll = () => {
+        close();
     }
 });

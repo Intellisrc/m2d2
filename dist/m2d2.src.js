@@ -321,8 +321,8 @@ class m2d2 {
 		const f = (selector, object) => {
 			return this.instance.getProxyNode(selector, object);
 		}
-		// Extends Utils:
-		m2d2.utils.getMethods(m2d2.utils).forEach(k => { f[k] = m2d2.utils[k] });
+	    // Extends Utils:
+	    m2d2.utils.getMethods(m2d2.utils).forEach(k => { f[k] = m2d2.utils[k] });
 		return f;
 	})();
 	/**
@@ -568,6 +568,10 @@ class m2d2 {
 			console.error("Selector is not a string or a Node:")
 			console.log(selector);
 			return null;
+		}
+		if(m2d2.utils.isString(selector) &&! document.querySelector(selector)) {
+		    console.log("Selected element doesn't exists: " + selector)
+		    return null;
 		}
 		const $node = this.extDom(selector); // Be sure that $node is an extended DOM object
 		// If there is no object return only extension
@@ -1295,8 +1299,10 @@ class m2d2 {
 	 */
 	getProxyNode(selector, obj) {
 		const $node = this.doDom(selector, obj);
-		this.observe($node);
-		return this.proxy($node);
+		if($node) {
+		    this.observe($node);
+		    return this.proxy($node);
+		}
 	}
 
 	/**
