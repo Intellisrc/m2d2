@@ -50,12 +50,13 @@
  */
 m2d2.load($ => {
     function close(afterClose) {
-        let win = $("#m2d2-alert .m2d2-alert-front");
-        if(win) {
+        let winExists = $.exists("#m2d2-alert .m2d2-alert-front");
+        if(winExists) {
+            let win = $("#m2d2-alert .m2d2-alert-front");
             win.css.add("vanish");
             setTimeout(() => {
-                win = $("#m2d2-alert .m2d2-alert-front");
-                if(win) {
+                let winExists = $.exists("#m2d2-alert .m2d2-alert-front");
+                if(winExists) {
                     $("#m2d2-alert").remove(); // Be sure it exists before trying to remove
                 }
                 if(afterClose) {
@@ -123,7 +124,8 @@ m2d2.load($ => {
                         },
                         front : {
                             tagName : "form",
-                            css : (options.css || []).concat(["m2d2-alert-front", "popup", options.icon], getIconClass(options.icon)),
+                            css : (options.css ? ($.isArray(options.css) ? options.css : [options.css]) : [])
+                                    .concat(["m2d2-alert-front", "popup", options.icon], getIconClass(options.icon)),
                             style : {
                                 zIndex : 100
                             },
@@ -210,7 +212,7 @@ m2d2.load($ => {
             };
             options.buttons.forEach(b => {
                 const key = b.toLowerCase().replace(/[^a-z ]/g,"").replace(" ","_");
-                newButtons.buttons[b] = {
+                newButtons.buttons[key] = {
                     tagName : "button",
                     type : "submit",
                     value : key,

@@ -42,6 +42,7 @@ gulp.task('js', gulp.series([], function() {
             License: <%= pkg.license %>
             Generated on <%= moment().format('YYYY-MM-DD') %>
             Author: A.Lepe (dev@alepe.com)
+            Version: <%= pkg.version %>
         `))
 		.pipe(gulp.dest(paths.build));
 }));
@@ -82,6 +83,12 @@ gulp.task('dev_ext', gulp.series([], function() {
 	return gulp.src(paths.ext)
 		.pipe(gulp.dest(paths.build_src));
 }));
+// Bundle all source for development
+gulp.task('dev_all', gulp.series([], function() {
+	return gulp.src(paths.js.concat([paths.ext]))
+	    .pipe(concat(paths.prefix + ".all.src.js"))
+		.pipe(gulp.dest(paths.build_src));
+}));
 
 // Build
-gulp.task('default', gulp.series(debug ? ['dev'] : ['js','ext','bundle','xhr','ws','dev','dev_ext']));
+gulp.task('default', gulp.series(debug ? ['dev'] : ['js','ext','bundle','xhr','ws','dev','dev_ext','dev_all']));

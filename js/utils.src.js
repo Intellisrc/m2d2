@@ -119,6 +119,12 @@ class Utils {
         const $node = this.newElement(tagName);
         return tagName !== "template" && $node.constructor.name !== "HTMLUnknownElement";
     }
+    /**
+     * Returns true if element exists in DOM based on selector
+     */
+    exists(selector) {
+        return document.querySelector(selector) !== null;
+    }
 	/**
 	 * Get attribute or property
 	 * @param {HTMLElement} $node

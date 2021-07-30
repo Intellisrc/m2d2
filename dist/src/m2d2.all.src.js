@@ -1497,3 +1497,864 @@ class m2d2 {
 		});
 	}
 }
+/**
+ * M2D2 Alerts Extension
+ * @since 2021-05-20
+ *
+ * This extension provides:
+ * $.wait       : Displays a spinner without any button in it.
+ * $.alert      : Displays a simple message with "ok" button.
+ * $.success    : Same as $.alert, but show a "check" icon.
+ * $.failure    : Same as $.alert, but shows a "warning" icon.
+ * $.confirm    : Displays a confirmation message with "yes" and "no" buttons.
+ * $.prompt     : Displays an input prompt with "cancel" and "send" buttons.
+ * $.message    : Free form message (all the previous implementations uses this function)
+ * $.closeAll   : Close any message that might be open
+ *
+ * Example Usage:
+ *   - Common uses:
+ *  $.wait :
+ *      const waitMsg = $.wait("Please wait...");
+ *      setTimeout(() => { waitMsg.close(); }, 2000);
+ *
+ *  $.alert, $.success, $.failure :
+ *      $.alert("Hint of the day", "To exit, click in 'logout' button.", () => { console.log("The alert has been closed.") });
+ *      $.success("Data has been saved!", () => { console.log("The alert has been closed. I didn't specified text, just title.") });
+ *      $.failure("Server error"); //Display just the message
+ *
+ *  $.confirm:
+ *      $.confirm("Are you sure?", "You are about to delete all images!", (res) => { if(res) { console.log("All images are gone!") });
+ *
+ *  $.prompt:
+ *      $.prompt("Please enter your name:", (res) => { console.log("your name is:" + res); });
+ *      $.prompt("Please enter your age:", "No need to lie...", (res) => { console.log("your age is:" + res); });
+ *      $.prompt("Please enter your sex:", {
+ *          select : ["Female","Male","Other"]
+ *      }, (res, raw) => { console.log("your sex is:" + res); });
+ *
+ *  $.message:
+ *      $.message({
+            icon : "times",     // OPTIONAL: you can use : "question", "info", "error", "ok", "input", "wait"
+            css  : "special",   // Set class or classes
+            title : "Title",
+            text  : "Text to use",
+            buttons : ["No way!", "Roger"], // Specify button text and classes which in this case be: "no_way" and "roger"
+            callback : function() {}
+        });
+ *
+ *  Notes:
+ *   - callback gets two arguments:
+ *        * The first one is the simplest return value when possible
+ *        * The second one is the form data as an object, for example: { button : "send", answer : "Hello" }
+ */
+m2d2.load($ => {
+    function close(afterClose) {
+        let winExists = $.exists("#m2d2-alert .m2d2-alert-front");
+        if(winExists) {
+            let win = $("#m2d2-alert .m2d2-alert-front");
+            win.css.add("vanish");
+            setTimeout(() => {
+                let winExists = $.exists("#m2d2-alert .m2d2-alert-front");
+                if(winExists) {
+                    $("#m2d2-alert").remove(); // Be sure it exists before trying to remove
+                }
+                if(afterClose) {
+                    afterClose();
+                }
+            }, 400); //Animation takes 500, after that will be restored, so we need to remove it before that time.
+        } else {
+            if(afterClose) {
+                afterClose();
+            }
+        }
+    }
+    function getIconClass(type) {
+        let css = [];
+        switch(type) {
+            case "question" :
+                css = ["fa", "fa-question-circle"];
+            break
+            case "info" :
+                css = ["fa", "fa-exclamation-circle"];
+            break
+            case "error":
+                css = ["fa", "fa-exclamation-triangle"];
+            break
+            case "ok":
+                css = ["fa", "fa-check"];
+            break
+            case "input":
+                css = ["fa", "fa-edit"];
+            break
+            case "wait":
+                css = ["fa", "fa-cog", "fa-spin"];
+            break
+        }
+        return css
+    }
+    $.message = function(options) {
+        if(options) {
+            if(! $.isFunction(options.callback)) {
+                if(options.callback &&! options.text) {
+                    options.text = options.callback;
+                }
+                options.callback = () => {}
+            }
+ 		    if(! options.text) { options.text = "" }
+        }
+        close(() => { // Be sure we have no other alert
+            $("body", {
+                m2d2Alert : {
+                    tagName : "div",
+                    id : "m2d2-alert",
+                    back : {
+                        tagName : "div",
+                        css : "m2d2-alert-back",
+                        style : {
+                            position : "absolute",
+                            left :0,
+                            right: 0,
+                            top : 0,
+                            bottom : 0,
+                            backgroundColor : "#0005",
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center"
+                        },
+                        front : {
+                            tagName : "form",
+                            css : (options.css ? ($.isArray(options.css) ? options.css : [options.css]) : [])
+                                    .concat(["m2d2-alert-front", "popup", options.icon], getIconClass(options.icon)),
+                            style : {
+                                zIndex : 100
+                            },
+                            message : {
+                                tagName : "div",
+                                css : "m2d2-alert-title",
+                                span : options.title
+                            },
+                            submsg : (() => {
+                                let props = {
+                                   tagName : "div",
+                                   css : "m2d2-alert-text"
+                                }
+                                let content;
+                                if(options.icon === "input" &&! options.text) {
+                                    content = {
+                                        fieldset : {
+                                            css : "m2d2-alert-field",
+                                            input : {
+                                                type : "text",
+                                                name : "answer",
+                                                onload : function() {
+                                                    this.focus();
+                                                }
+                                            }
+                                        }
+                                    }
+                                } else if($.isPlainObject(options.text)) {
+                                    content = {
+                                        fieldset : Object.assign({
+                                            css : "m2d2-alert-field"
+                                        }, options.text)
+                                    }
+                                } else {
+                                    content = { span : options.text.replace("\n","<br>") }
+                                }
+                                return Object.assign(props, content);
+                            })(options.icon),
+                            onsubmit : function() {
+                                const data = this.getData();
+                                let func;
+                                switch(data.button) {
+                                    case "ok":
+                                    case "yes":
+                                        func = () => { options.callback(true, data) };
+                                    break
+                                    case "no":
+                                        func = () => { options.callback(false, data) };
+                                    break
+                                    case "cancel":
+                                        func = () => { options.callback(null, data) };
+                                    break
+                                    case "send":
+                                        if(Object.keys(data).length === 1) {
+                                            func = () => { options.callback(data[Object.keys(data)[0]], data) };
+                                        } else if(Object.keys(data).length === 2) {
+                                            func = () => { options.callback(data[Object.keys(data).find(it => it !== "button")], data) };
+                                        } else { // If we have more than one field, we send all:
+                                            func = () => { options.callback(data, data) };
+                                        }
+                                    break
+                                    default: // When setting customized buttons, we send all:
+                                        func = () => { options.callback(data, data) };
+                                    break
+                                }
+                                close(func);
+                                return false;
+                            },
+                            onload : function () {
+                                const def = this.find("[autofocus]");
+                                if(def) { def.focus(); }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+        if(options.buttons.length) {
+            const newButtons = {
+                buttons : {
+                    tagName : "div",
+                    css : "m2d2-alert-buttons"
+                }
+            };
+            options.buttons.forEach(b => {
+                const key = b.toLowerCase().replace(/[^a-z ]/g,"").replace(" ","_");
+                newButtons.buttons[key] = {
+                    tagName : "button",
+                    type : "submit",
+                    value : key,
+                    css : ["color", key],
+                    text : $.dict !== undefined ? $.dict(b) : b,
+                    autofocus : ["ok","yes"].includes(b),
+                    formNoValidate : ["cancel"].includes(b),
+                    // we append a hidden input with the value of the button clicked:
+                    onclick : function() {
+                        $(this.closest("form"), {
+                            hide : {
+                                tagName : "input",
+                                type : "hidden",
+                                name : "button",
+                                value : this.value
+                            }
+                        });
+                    }
+                }
+            });
+            $("#m2d2-alert .m2d2-alert-front", newButtons);
+        }
+        // Add automatically name to fields in case it is not specified:
+        let i = 1;
+        $("#m2d2-alert .m2d2-alert-front").findAll("input, select, textarea").forEach(elem => {
+            if(elem.name === "") {
+                elem.name = "field_" + i++;
+            }
+        });
+        return { close : close };
+    }
+    $.wait = (title, text, callback) => {
+        return $.message({
+            icon : "wait",
+            title : title,
+            buttons : [],
+            text : callback === undefined ? null : text,
+            callback : callback === undefined ? text : callback
+        });
+    }
+    $.alert = (title, text, callback) => {
+        return $.message({
+            icon : "info",
+            title : title,
+            buttons : ["ok"],
+            text : callback === undefined ? null : text,
+            callback : callback === undefined ? text : callback
+        });
+    }
+    $.success = (title, text, callback) => {
+        return $.message({
+            icon : "ok",
+            title : title,
+            buttons : ["ok"],
+            text : callback === undefined ? null : text,
+            callback : callback === undefined ? text : callback
+        });
+    }
+    $.failure = (title, text, callback) => {
+        return $.message({
+            icon : "error",
+            title : title,
+            buttons : ["ok"],
+            text : callback === undefined ? null : text,
+            callback : callback === undefined ? text : callback
+        });
+    }
+    $.confirm = (title, text, callback) => {
+        return $.message({
+            icon : "question",
+            title : title,
+            buttons : ["yes", "no"],
+            text : callback === undefined ? null : text,
+            callback : callback === undefined ? text : callback
+        });
+    }
+    $.prompt = (title, text, callback) => {
+        return $.message({
+            icon : "input",
+            title : title,
+            buttons : ["cancel","send"],
+            text : callback === undefined ? null : text,
+            callback : callback === undefined ? text : callback
+        });
+    }
+    $.closeAll = () => {
+        close();
+    }
+});
+
+/**
+ * M2D2 Language Extension
+ * @since 2021-06-01
+ *
+ * This extension provides:
+ * $.dict(keyword, [variables])  : To get translations from dictionary
+ * $.lang(lang)                  : Set new language
+ *
+ * Usage:
+ *  1) First you need to specify a dictionary with this format:
+    const dictionary = {
+        save   : {
+            en : "Save",
+            es : "Archivar",
+            'es-MX' : "Guardar"
+        },
+        cancel : {
+            en : "Cancel Now",
+            es : "Cancelar Ahora"
+        }
+    }
+
+    2) Then on initialization (only once), set the dictionary:
+    $.dict.set(dictionary);
+
+    3) In HTML you can set which texts should be translated automatically:
+    `<span lang="es">Cancelar</span>`
+    Then, in the next step, it will be translated if it doesn't match the target language.
+
+    NOTE: If you use 'lang' in HTML, be sure that the language and the text matches the keys. For example,
+    if your default language is English, you should do something like this:
+    `<span lang="en">Phone Number</span>`
+    Then, in your dictionary, you should use the keyword:
+    {
+        phone_number : {
+            en : "Phone Number",
+            es : "Número de Teléfono"
+        }
+    }
+    If the key is not found it will display it, so that is one way to know which keyword to use, another way
+    is getting the key from a text with: $.lang.toKeyword("Some Text").
+
+    If your default language is not English, you have 3 options:
+        a) Create the interface in English and execute `$.lang()` on ready. (That will translate the UI)
+        b) Put keywords instead of English words (e.g, `<span lang='en'>user_name_goes_here</span>`) and execute `$.lang()` on ready.
+        c) specify the keyword in the dataset: `<span class="usr" lang='pa' data-kw='username'>ਉਪਭੋਗਤਾ ਨਾਮ</span>` or in javascript:
+               usr : {
+                    dataset : { kw : "username" },
+                    lang : "pa",
+                    text : "ਉਪਭੋਗਤਾ ਨਾਮ"
+               }
+
+    4) To set or change the language (by default it will use browser's default language):
+    $.lang("en");
+
+    5) Get translation:
+    user.title.text = $.dict("user");
+
+    6) You can set your default language (page language) in your html tag: `<html lang='es'>`, that way this extension
+    knows that your HTML content is by default in that language, and decide if we need to translated for the user.
+    If you don't set it, it will use the first element with the attribute "lang".
+
+    7) You can execute some code when the language is changed by setting an event listener:
+    `$.lang.onchange = (new_lang) => { ... }`
+
+    Recommendation:
+    I recommend to set a shortcut for the dictionary (you can set it right after loading this extension):
+    const _ = $.dict;
+    Or setting dictionary at the same time:
+    const _ = $.dict.set(dictionary);
+    To declare it as global, you can set it as:
+    const _ = m2d2.load().dict;
+
+    That way, you can use it like:
+    user.title.text = _("user");
+
+    Final Note:
+    When you change the language, it will keep in the local storage (at the browser) your selection, so
+    if you refresh the page it will still use your selected language.
+ *
+ */
+m2d2.load($ => {
+    let manualLang = localStorage.getItem("m2d2.lang") || ""
+    let language = manualLang || navigator.language;
+    function Dictionary(lang) {
+        const obj = function(keyword, vars) {
+            if(keyword === undefined) return "";
+            let msg = obj.val(keyword,true);
+            if(vars !== undefined) {
+                if(typeof vars == "string"){
+                    if(vars !== "") {
+                        vars = vars.replace(/;$/,"");
+                        const pairs = vars.split(";");
+                        vars = {};
+                        pairs.forEach(p => {
+                            const part = pairs[p].split(":");
+                            vars[part[0]] = part[1];
+                        });
+                    }
+                }
+                if(typeof vars == "object"){
+                    vars.forEach(v => {
+                        let kwd = vars[v] + ""; //Be sure its string
+                        kwd = obj.val(kwd,false);
+                        msg = msg.replace(v,kwd);
+                    })
+                }
+            }
+            return msg;
+        }
+        obj.lang = lang || "en";
+        obj.data = {};
+        obj.set = function(dictionary) {
+            this.data = dictionary;
+            return this;
+        };
+        obj.has = function(keyword, lang) {
+            return lang === undefined ? this.data[keyword] !== undefined : this.data[keyword][lang] !== undefined;
+        };
+        obj.val = function(keyword, report){
+            if($.isEmpty(obj.data)) {
+                console.error("Dictionary is empty. You need to add a dictionary, for example: `$.dict.set({\n" +
+                    "save : { en : 'Save', es : 'Guardar' },\n" +
+                    "cancel : { en : 'Cancel', es : 'Cancelar' }\n" +
+                "})`");
+                return "";
+            }
+            if(!keyword){
+                console.error("No keyword specified.");
+                return "";
+            }
+            let translation = keyword;
+            if(report === undefined) {
+                report = false;
+            }
+            keyword = keyword.toLowerCase();
+            if(this.has(keyword)) {
+                const baseLang = this.lang.split("-")[0];
+                if(this.has(keyword, this.lang)) {
+                    translation = this.data[keyword][this.lang];
+                } else if(this.has(keyword,baseLang)) {
+                    translation = this.data[keyword][baseLang];
+                } else {
+                    if(report){
+                        console.log("Missing translation for lang ["+this.lang+"]: "+keyword);
+                    }
+                }
+            } else {
+                if(report){
+                    console.log("Missing keyword: "+keyword);
+                }
+            }
+            return translation;
+        };
+        return obj;
+    }
+
+    // Initialize dictionary
+    $.dict = new Dictionary(language);
+
+    const langEvents = [];
+    $.lang = function(newLang) {
+        if(newLang) {
+            $.dict.lang = newLang;
+            localStorage.setItem("m2d2.lang", $.dict.lang);
+        }
+        $("body").findAll("[lang]").forEach((elem) => {
+            let txt = elem.text;
+            // When element has content and (optional) title
+            if(txt &&! elem.classList.contains("notxt")) {
+                if(elem.dataset.kw) {
+                    elem.dataset.kw = $.lang.getKeyword(txt);
+                }
+                elem.text = $.dict(elem.dataset.kw);
+                const titleKw = elem.dataset.kw + "_title";
+                let title = $.dict.has(titleKw) ? $.dict(titleKw) : "";
+                if(title) {
+                    elem.title = title;
+                }
+            // When element only has title:
+            } else if(elem.title) {
+                if(elem.dataset.kw) {
+                    elem.dataset.kw = $.lang.getKeyword(txt);
+                }
+                let title = $.dict(elem.dataset.kw);
+                if(title) {
+                    elem.title = title;
+                }
+            } else if(elem.value) {
+                if(elem.dataset.kw) {
+                    elem.dataset.kw = $.lang.getKeyword(txt);
+                }
+                let value = $.dict(elem.dataset.kw);
+                if(value) {
+                    elem.value = value;
+                }
+            }
+        });
+        langEvents.forEach(callback => {
+            callback(newLang);
+        });
+    }
+    /**
+     * Convert text to keyword
+     */
+    $.lang.getKeyword = function(text) {
+        return text.toLowerCase().trim().replace(/ /g,"_").replace(/[^\w]/g,"").replace(/_$/,"");
+    }
+    Object.defineProperty($.lang, "onchange", {
+        get() { return this },
+        set(value) {
+            if($.isFunction(value)) {
+                langEvents.push(value);
+            } else {
+                console.log("Unable to set lang.onchange, because it is not a function: ");
+                console.log(value);
+            }
+        }
+    })
+});
+// Translate HTML on ready:
+m2d2.ready($ => {
+    const manualLang = localStorage.getItem("m2d2.lang") || ""
+    const htmlLang = $("html").lang || $("body").find("[lang]").lang || "en";
+    const isDifferent = manualLang ? htmlLang !== manualLang : htmlLang !== navigator.language.split("-")[0];
+    if(isDifferent) { $.lang() }
+});
+m2d2.load($ => {
+    /*
+     * M2D2 Storage Extension
+     * @since 2021-06-02
+     *
+     * This extension provides:
+     * $.local : To get/set values in localStorage
+     * $.session : To get/set values in sessionStorage
+     *
+     * Description:
+     * Wrapper for different kinds of storage. One advantage is that objects are stored with type instead of string.
+     *
+     * @author: Alberto Lepe
+     * @since: Jul 9, 2010
+     * @param method: local, session (which means:)
+     *                localStorage, sessionStorage (default)
+     * Methods:
+     * set      : saves the information
+     * get      : retrieve the info.
+     * del      : remove data
+     * clear    : remove all keys
+     * exists   : check if key exists
+     * keys     : get all keys
+     * log      : add in array (it will keep "n" number of items in queue)
+     *
+     * The way to use it is:
+     *
+     * $.local.set("mykey",myval);
+     * console.log(local.get("mykey"));
+     * console.log(local.exists("mykey")); // returns: true
+     * $.local.del("mykey");
+     * $.local.log("mylog", message, 10); // Keep only the last 10
+     * $.local.clear(); // Remove all keys
+     *
+     * myval can be : string, number, object, array
+     */
+    function Storage(type) {
+        switch(type) {
+            case 'local'  : if(window.localStorage)     this.store = localStorage; break;
+            case 'session': if(window.sessionStorage)   this.store = sessionStorage; break;
+        }
+        if(this.store == undefined) this.store = localStorage; //Default
+        this.set = function(key, val) {
+            if(typeof(val) === 'string') {
+                val = { '$' : val };
+            }
+            this.store.setItem(key, JSON.stringify(val));
+        }
+        this.get = function(key) {
+            let val;
+            try {
+                val = JSON.parse(this.store.getItem(key)) || {};
+            } catch(ignore) {
+                val = this.store.getItem(key);
+            }
+            if(val["$"] !== undefined) {
+                val = val["$"];
+            } else if(Object.keys(val).length === 0 && val.constructor === Object) {
+                val = null;
+            }
+            return val;
+        }
+        this.del = function(key) { this.store.removeItem(key); }
+        this.keys = function() { return Object.keys(this.store).sort(); }
+        this.clear = function() { this.store.clear(); }
+        this.exists = function(key) { return this.store.hasOwnProperty(key); }
+        this.log = function(key, val, n) {
+            if(n == undefined) n = 10;
+            const tmp = this.get(key) || [];
+            tmp.push(val);
+            while(tmp.length > n) tmp.shift();
+            this.set(key,tmp);
+        }
+    }
+    $.local = new Storage("local");
+    $.session = new Storage("session");
+});
+m2d2.load($ => {
+    //------------------------ WS --------------------------------
+    /**
+     * @author: A.Lepe
+     * @version: 210425 : Added secure, host and converted to m2d2 extension
+     *           210406 : Retry until reconnect
+     * @since : 2018
+     * WebSocket wrapper
+     *
+     * Usage:
+     const wsc = new ws({
+        request      : { ... }, // Initial Request (optional)
+        connect      : () => {}, // Function to execute when it successfully connects
+        disconnected : () => {}, // Function to execute when it gets disconnected
+        reconnect    : true, // Try to reconnect if it gets disconnected (default: true)
+        secure       : false, // If true, will use wss
+        host         : "localhost", // Server name
+        path         : "", // WebSocket's URL path, for example: ws://server/<path> (default: "")
+        port         : 80, // Port in which the WebSocket server is listening (default: 80, 443)
+   });
+     wsc.connect(response => {
+        // response is the object which the server is sending.
+   });
+     wsc.request({ ... }); // To request something to the server, send it as object.
+     wsc.disconnect(); // Disconnect from server (it will turn off reconnection)
+     *
+     *
+     */
+    class ws {
+        request(msg) {
+            if (msg) {
+                try {
+                    this.webSocket.send(JSON.stringify(msg));
+                } catch(e) {
+                    this.webSocket.onerror(e);
+                }
+            }
+        }
+        /**
+         * Connect and return the websocket object
+         */
+        getSocket(onMessage, onOpen, onClose) {
+            const webSocket = new WebSocket(this.path);
+            webSocket.onopen = onOpen;
+            webSocket.onclose = onClose;
+            webSocket.onmessage = (res) => {
+                if (res.data) {
+                    try {
+                        onMessage(JSON.parse(res.data));
+                    } catch(e) {
+                        webSocket.onerror(e);
+                    }
+                }
+            }
+            webSocket.onerror = (err) => {
+                console.error('Socket encountered error: ', err ? err.message : 'Unknown', 'Closing socket');
+                const wsk = webSocket || this;
+                if(wsk.readyState === 1) {
+                    wsk.close();
+                }
+            }
+            return webSocket;
+        }
+        connect(options, onMessage) {
+            this.initRequest = options.request || null;
+            this.onConnect = options.connected || (() => {});
+            this.onDisconnect = options.disconnected || (() => {});
+            this.reconnect = options.reconnect !== false;
+            this.host = options.host || window.location.hostname;
+            this.secure = options.secure === true;
+            this.port = options.port || (this.secure ? 443 : 80);
+            this.path = "ws" + (this.secure ? "s" : "") + "://" + this.host + ":" + this.port + "/" + (options.path || "");
+            this.connected = false;
+            this.interval = null;
+            //-------- Connect ----------
+            const onOpen = (e) => {
+                this.connected = true;
+                this.request(this.initRequest);
+                this.onConnect();
+            }
+            const onClose = (e) => {
+                this.connected = false;
+                this.onDisconnect();
+                if(!this.interval && this.reconnect) {
+                    this.interval = setInterval(() => {
+                        if(this.connected) {
+                            console.log("Reconnected...")
+                            clearInterval(this.interval);
+                            this.interval = null;
+                        } else {
+                            try {
+                                this.webSocket.close();
+                                console.log("Reconnecting...")
+                                this.webSocket = this.getSocket(onMessage, onOpen, onClose);
+                            } catch(ignore) {}
+                        }
+                    }, 2000);
+                }
+            }
+            this.webSocket = this.getSocket(onMessage, onOpen, onClose);
+        }
+        disconnect() {
+            this.reconnect = false;
+            this.webSocket.close();
+        }
+    }
+    $.ws = new ws();
+});
+m2d2.load($ => {
+    /**
+     * Common XHR method
+     * @version 2020-05-09
+     *
+     * @param method: HTTP method (GET, POST, PUT, DELETE)
+     * @param url: service URL
+     * @param data: Data object to send (in case of POST and PUT)
+     * @param callback: Callback on Success (it will return data)
+     * @param error_callback: Callback on Failure
+     * @param json : Boolean (if set, it will set request content-type as json and in case of GET, it will send it as body instead of query)
+     *
+     * @author A.Lepe (dev@alepe.com)
+     */
+    const XHR = function(method, url, data, callback, error_callback, json) {
+        const request = new XMLHttpRequest();
+        if(json === undefined) { json = false }
+        if(error_callback === undefined) { error_callback = function(e) { console.log(e); } }
+        if(data && Object.entries(data).length === 0) {
+            data = "";
+        }
+        if(data) {
+            if(json) {
+                data = JSON.stringify(data);
+            } else {
+                switch(method.toUpperCase()) {
+                    case "GET":
+                        url += (url.indexOf("?") !== -1 ? "&" : "?") + (Object.keys(data).map(key => key + '=' + data[key]).join('&'));
+                        data = "";
+                        break
+                    default:
+                        data = (Object.keys(data).map(key => key + '=' + data[key]).join('&'));
+                }
+            }
+        }
+        request.open(method, url, true);
+        if(json) {
+            request.setRequestHeader('Content-Type', 'application/json');
+        } else {
+            request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        }
+        request.onerror = function(e) {
+            error_callback({type : "Connection", reason: "Connection Refused"});
+        }
+        request.onload = function() {
+            let data = {};
+            try {
+                data = request.responseText ? JSON.parse(request.responseText) : {
+                    error: {type: "Unknown", reason: "Unknown Error"}
+                };
+            } catch(err) {
+                data.error = { type : "Parse Error", reason : err.message }
+            }
+            if (request.status >= 200 && request.status < 400) {
+                if(callback !== undefined) {
+                    callback(data);
+                }
+            } else {
+                if(error_callback !== undefined) {
+                    if(typeof data.error == "string") {
+                        data.error = { type : "Exception", reason : data.error }
+                    }
+                    error_callback(data.error);
+                }
+            }
+        };
+        request.send(data);
+    };
+    /**
+     * Short method. It also validates arguments and allow omitting some, eg.:
+     * xhr.get(url, data, callback, error_callback, json);
+     * xhr.get(url, callback, error_callback, json);
+     * xhr.get(url, data, callback, json);
+     * xhr.get(url, data, json);
+     * xhr.get(url, callback, json);
+     */
+    const xhr = {};
+    ["get","post","put","delete","connect","options","trace","patch"].forEach(function(method) {
+        xhr[method] = function() {
+            let url, data, callback, error_callback, json;
+            // noinspection FallThroughInSwitchStatementJS
+            switch(arguments.length) {
+                case 5:
+                    if(typeof arguments[4] == "boolean") {
+                        json = arguments[4];
+                    } else {
+                        console.log("Passed JSON argument: " + arguments[4] + " is not boolean.");
+                    }
+                case 4:
+                    if(typeof arguments[3] == "function") {
+                        error_callback = arguments[3];
+                    } else if(arguments.length === 4 && typeof arguments[3] == "boolean") {
+                        // Make error callback optional:
+                        json = arguments[3];
+                    } else {
+                        console.log("Passed argument 4: " + arguments[3] + " is mistaken");
+                    }
+                case 3:
+                    if(typeof arguments[2] == "function") {
+                        if(typeof arguments[1] == "function" && arguments.length < 5) {
+                            error_callback = arguments[2];
+                        } else {
+                            callback = arguments[2];
+                        }
+                    } else if(arguments.length === 3 && typeof arguments[2] == "boolean") {
+                        // Make callback and error callback optional:
+                        json = arguments[2];
+                    } else {
+                        console.log("Passed argument 3: " + arguments[2] + " is mistaken");
+                    }
+                case 2:
+                    if(typeof arguments[1] == "object" || typeof arguments[1] == "string") {
+                        data = arguments[1];
+                    } else if(typeof arguments[1] == "function") {
+                        // Make data optional:
+                        callback = arguments[1];
+                    } else {
+                        console.log("Passed argument 2: " + arguments[1] + " is mistaken");
+                    }
+                case 1:
+                    if(typeof arguments[0] == "string") {
+                        url = arguments[0];
+                    } else if(Array.isArray(arguments[0])) {
+                        url = arguments[0].join("/");
+                    } else {
+                        console.log("Passed URL: "+arguments[0]+" was not a string.");
+                    }
+                    break;
+                default:
+                    console.log("Incorrect number of arguments passed to xhr");
+            }
+            if(data === undefined) { data = {} }
+            /*
+            console.log("URL: " + url);
+            console.log("DATA: " + data);
+            console.log("CALLBACK: " + callback);
+            console.log("ERROR CALLBACK: " + error_callback);
+            console.log("JSON: " + json);
+            */
+            XHR(method.toUpperCase(), url, data, callback, error_callback, json);
+        }
+    });
+    Object.assign($, xhr);
+});
