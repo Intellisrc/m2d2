@@ -469,7 +469,8 @@ class m2d2 {
                         display && notHidden &&
                         rect.top >= 0 && rect.left >= 0 &&
                         rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
-                        rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+                        rect.right <= (window.innerWidth || document.documentElement.clientWidth) &&
+						rect.width > 0 && rect.height > 0
                     );
 				},
 				set(show) {
@@ -542,12 +543,16 @@ class m2d2 {
 			}
 			// Add getData() to form: //TODO: document
 			if($node.tagName === "FORM") {
-				$node.getData = function () {
+				$node.getData = function (includeNotVisible) { //TODO document: includeNotVisible
 					const data = {};
 					const fd = new FormData(this);
+					const include = includeNotVisible || false;
 					for (let pair of fd.entries()) {
 						if(pair[1] !== "") {
-							data[pair[0]] = pair[1];
+							const elem = $node.find("[name="+pair[0]+"]");
+							if(include || elem.type === "hidden" || elem.show) {
+								data[pair[0]] = pair[1];
+							}
 						}
 					}
 					return data;
@@ -905,7 +910,7 @@ class m2d2 {
 
 	/**
 	 * Reassign templates
-	 * @param {HTMLElement, Node} $node
+	 * @param {HTMLElement, Node} $template
 	 * @param {HTMLElement, Node} $newNode
 	 * @returns {HTMLElement|Proxy}
 	 // TODO: this does not support deep location of templates
@@ -1138,7 +1143,7 @@ class m2d2 {
 	    } else {
 	        obj._proxy = obj;
             const handler = {
-                get: (target, property, receiver) => {
+                get: (target, property) => {
                     const t = target[property];
                     switch (true) {
 						case t === null || t === undefined: return null;
@@ -1317,7 +1322,6 @@ class m2d2 {
 	 * @param {NodeList, HTMLCollection} $node
 	 */
 	extendItems($node) {
-	    const _this = this;
 		// We try to add most of the array functions into NodeList and HTMLCollection:
 		// NOTE: Not all will work as expected.
 		// NOTE: function() {} is not the same here as () => {} as "this" is not as expected
@@ -1452,7 +1456,8 @@ class m2d2 {
 					    break;
 					default: //----------------- Link to Array -------------------
 					    let arrMethod = method;
-					    switch(true) {
+						// noinspection FallThroughInSwitchStatementJS
+						switch(true) {
 					        case method === "findAll":
 					            arrMethod = "filter"; // Use "filter"
                             case typeof Array.prototype[method] == "function":
