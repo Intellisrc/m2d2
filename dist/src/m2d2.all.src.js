@@ -548,12 +548,10 @@ class m2d2 {
 					const fd = new FormData(this);
 					const include = includeNotVisible || false;
 					for (let pair of fd.entries()) {
-						if(pair[1] !== "") {
-							const elem = $node.find("[name="+pair[0]+"]");
-							if(include || elem.type === "hidden" || elem.show) {
-								data[pair[0]] = pair[1];
-							}
-						}
+                        const elem = $node.find("[name="+pair[0]+"]");
+                        if(include || elem.type === "hidden" || elem.show) {
+                            data[pair[0]] = pair[1];
+                        }
 					}
 					return data;
 				}
