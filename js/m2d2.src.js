@@ -239,11 +239,11 @@ class m2d2 {
 			}
 			// Add getData() to form: //TODO: document
 			if($node.tagName === "FORM") {
-				$node.getData = function () {
+				$node.getData = function (includeEmpty) {
 					const data = {};
 					const fd = new FormData(this);
 					for (let pair of fd.entries()) {
-						if(pair[1] !== "") {
+						if(includeEmpty || pair[1] !== "") {
 							data[pair[0]] = pair[1];
 						}
 					}
