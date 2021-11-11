@@ -1,6 +1,6 @@
 {
   "name": "m2d2",
-  "version": "2.0.4",
+  "version": "2.0.5",
   "description": "A class to easily place data in DOM and update them immediately upon change. ",
   "main": "dist/m2d2.min.js",
   "scripts": {

@@ -12,7 +12,7 @@
         save   : {
             en : "Save",
             es : "Archivar",
-            'es-MX' : "Guardar"
+            'es-MX' : "Guardar" // More specific translation
         },
         cancel : {
             en : "Cancel Now",
@@ -21,7 +21,25 @@
     }
 
     2) Then on initialization (only once), set the dictionary:
-    $.dict.set(dictionary);
+    // Recommended way:
+    const _ = m2d2.load().dict.set(dictionary);
+    // Or:
+    m2d2.load($ => {
+        $.dict.set(dictionary);
+    });
+
+    // And specify which language you want to use as default:
+    m2d2.ready($ => {
+        $.lang('en');
+
+        // You can set the shortcut here if you want and if you didn't set it before:
+        const _ = $.dict;
+        // Then use it as: (example)
+        $("#myid", {
+            text : _("some_key"),
+            css : "translated"
+        });
+    });
 
     3) In HTML you can set which texts should be translated automatically:
     `<span lang="es">Cancelar</span>`
@@ -41,8 +59,8 @@
     is getting the key from a text with: $.lang.toKeyword("Some Text").
 
     If your default language is not English, you have 3 options:
-        a) Create the interface in English and execute `$.lang()` on ready. (That will translate the UI)
-        b) Put keywords instead of English words (e.g, `<span lang='en'>user_name_goes_here</span>`) and execute `$.lang()` on ready.
+        a) Create the interface in English and execute `$.lang('xx')` on ready (xx = your language code). That will translate the UI
+        b) Put keywords instead of English words (e.g, `<span lang='en'>user_name_goes_here</span>`) and execute `$.lang('xx')` on ready.
         c) specify the keyword in the dataset: `<span class="usr" lang='pa' data-kw='username'>ਉਪਭੋਗਤਾ ਨਾਮ</span>` or in javascript:
                usr : {
                     dataset : { kw : "username" },
@@ -120,8 +138,10 @@ m2d2.load($ => {
         obj.val = function(keyword, report){
             if($.isEmpty(obj.data)) {
                 console.error("Dictionary is empty. You need to add a dictionary, for example: `$.dict.set({\n" +
-                    "save : { en : 'Save', es : 'Guardar' },\n" +
+                    "save   : { en : 'Save', es : 'Guardar' },\n" +
                     "cancel : { en : 'Cancel', es : 'Cancelar' }\n" +
+                    "yes    : { en : 'Yes', es : 'Si' },\n" +
+                    "no     : { en : 'No', es : 'No' }\n" +
                 "})`");
                 return "";
             }
@@ -168,7 +188,7 @@ m2d2.load($ => {
             let txt = elem.text;
             // When element has content and (optional) title
             if(txt &&! elem.classList.contains("notxt")) {
-                if(elem.dataset.kw) {
+                if(elem.dataset.kw === undefined) {
                     elem.dataset.kw = $.lang.getKeyword(txt);
                 }
                 elem.text = $.dict(elem.dataset.kw);
