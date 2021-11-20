@@ -245,7 +245,7 @@ class m2d2 {
 					const fd = new FormData(this);
 					const include = includeNotVisible || false;
 					for (let pair of fd.entries()) {
-                        const elem = $node.find("[name="+pair[0]+"]");
+                        const elem = $node.find("[name='"+pair[0]+"']");
                         if(include || elem.type === "hidden" || elem.show) {
                             data[pair[0]] = pair[1];
                         }
@@ -366,7 +366,7 @@ class m2d2 {
                             let elem = $node.find("#" + key);
                             if(elem && options.indexOf(elem) === -1) { options.push(elem); }
                             //Look for name:
-                            elem = $node.find("[name="+key+"]");
+                            elem = $node.find("[name='"+key+"']");
                             if(elem && options.indexOf(elem) === -1) { options.push(elem); }
                             //Look for class:
                             const elems = Array.from($node.findAll("." + key)).filter(i => options.indexOf(i) < 0)
