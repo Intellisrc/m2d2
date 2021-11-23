@@ -549,8 +549,8 @@ class m2d2 {
 					const include = includeNotVisible || false;
 					for (let pair of fd.entries()) {
                         const elem = $node.find("[name='"+pair[0]+"']");
-                        if(include || elem.type === "hidden" || elem.show) {
-                            data[pair[0]] = pair[1];
+						if(include || elem.type === "hidden" || elem.show) {
+							data[pair[0]] = elem.type === "file" ? elem.files : pair[1];
                         }
 					}
 					return data;
