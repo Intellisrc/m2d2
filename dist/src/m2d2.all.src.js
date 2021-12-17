@@ -1908,7 +1908,7 @@ m2d2.load($ => {
     let manualLang = localStorage.getItem("m2d2.lang") || ""
     let language = manualLang || navigator.language;
     function Dictionary(lang) {
-        const obj = function(keyword, vars) {
+        const obj =                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         function(keyword, vars) {
             if(keyword === undefined) return "";
             let msg = obj.val(keyword,true);
             if(vars !== undefined) {
@@ -2004,20 +2004,37 @@ m2d2.load($ => {
                 if(title) {
                     elem.title = title;
                 }
-            // When element only has title:
+                // When element only has title:
             } else if(elem.title) {
+                let title = ""
                 if(elem.dataset.kw) {
-                    elem.dataset.kw = $.lang.getKeyword(txt);
+                    title = $.dict(elem.dataset.kw);
+                } else {
+                    elem.dataset.kw = $.lang.getKeyword(elem.title);
+                    title = $.dict(elem.dataset.kw);
                 }
-                let title = $.dict(elem.dataset.kw);
                 if(title) {
                     elem.title = title;
                 }
-            } else if(elem.value) {
+            } else if(elem.placeholder) {
+                let placeholder = ""
                 if(elem.dataset.kw) {
-                    elem.dataset.kw = $.lang.getKeyword(txt);
+                    placeholder = $.dict(elem.dataset.kw);
+                } else {
+                    elem.dataset.kw = $.lang.getKeyword(elem.placeholder);
+                    placeholder = $.dict(elem.dataset.kw);
                 }
-                let value = $.dict(elem.dataset.kw);
+                if(placeholder) {
+                    elem.placeholder = placeholder;
+                }
+            } else if(elem.value) {
+                let value = ""
+                if(elem.dataset.kw) {
+                    value = $.dict(elem.dataset.kw);
+                } else {
+                    elem.dataset.kw = $.lang.getKeyword(elem.value);
+                    value = $.dict(elem.dataset.kw);
+                }
                 if(value) {
                     elem.value = value;
                 }
