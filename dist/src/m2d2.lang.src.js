@@ -258,7 +258,8 @@ m2d2.load($ => {
 // Translate HTML on ready:
 m2d2.ready($ => {
     const manualLang = localStorage.getItem("m2d2.lang") || ""
-    const htmlLang = $("html").lang || $("body").find("[lang]").lang || "en";
+    const bodyLang = $("body").find("[lang]");
+    const htmlLang = $("html").lang || (bodyLang ? bodyLang.lang : null) || "en";
     const isDifferent = manualLang ? htmlLang !== manualLang : htmlLang !== navigator.language.split("-")[0];
     if(isDifferent) { $.lang() }
 });

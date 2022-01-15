@@ -18,19 +18,22 @@ const paths = {
 	bundle : [
 	    'dist/m2d2.min.js',
 	    'dist/m2d2.*.min.js',
-	    '!dist/m2d2.bundle.*.js'
+	    '!dist/m2d2.bundle.*.js',
+        'js/export.src.js'
 	],
 	xhr : [
 	    'dist/m2d2.min.js',
 	    'dist/m2d2.*.min.js',
 	    '!dist/m2d2.ws.min.js',
-	    '!dist/m2d2.bundle.*.js'
+	    '!dist/m2d2.bundle.*.js',
+        'js/export.src.js'
 	],
 	ws : [
 	    'dist/m2d2.min.js',
 	    'dist/m2d2.*.min.js',
 	    '!dist/m2d2.xhr.min.js',
-	    '!dist/m2d2.bundle.*.js'
+	    '!dist/m2d2.bundle.*.js',
+        'js/export.src.js'
 	]
 };
 // Core minified
