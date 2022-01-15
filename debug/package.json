@@ -1,0 +1,5 @@
+{
+  "name": "m2d2/debug",
+  "description": "Debug version (not minimized)",
+  "main": "..dist/src/m2d2.all.src.js"
+}

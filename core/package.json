@@ -1,0 +1,5 @@
+{
+  "name": "m2d2/core",
+  "description": "Core only",
+  "main": "..dist/m2d2.min.js"
+}

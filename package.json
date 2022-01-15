@@ -2,7 +2,7 @@
   "name": "m2d2",
   "version": "2.0.8",
   "description": "A class to easily place data in DOM and update them immediately upon change. ",
-  "main": "dist/m2d2.min.js",
+  "main": "dist/m2d2.bundle.min.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -23,7 +23,9 @@
   },
   "homepage": "https://gitlab.com/lepe/m2d2/",
   "files": [
-    "dist/m2d2.*.js"
+    "dist/m2d2.*.js",
+    "ws/*",
+    "xhr/*"
   ],
   "devDependencies": {
     "gulp": "^4.0.2",
