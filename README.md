@@ -49,7 +49,7 @@ m2d2.ready($ => {
 ## Live Demo:
 [Try it Now](https://gl.githack.com/lepe/m2d2/raw/master/examples/examples.html)
 
-[Tests](https://gl.githack.com/lepe/m2d2/raw/master/examples/tests/index.html)
+[Examples](https://gl.githack.com/lepe/m2d2/raw/master/examples/tests/index.html)
 
 ## Install:
 
