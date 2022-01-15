@@ -44,10 +44,11 @@ m2d2.ready($ => {
 ```
 
 ## Tutorial:
-[Learn it Now](https://gl.githack.com/lepe/m2d2/raw/master/examples/tutorial/index.html)
+[Learn it Now](https://gl.githack.com/lepe/m2d2/raw/master/examples/tutorial.html)
 
 ## Live Demo:
-[Try it Now](https://gl.githack.com/lepe/m2d2/raw/master/index.html)
+[Try it Now](https://gl.githack.com/lepe/m2d2/raw/master/examples/examples.html)
+[Tests](https://gl.githack.com/lepe/m2d2/raw/master/examples/tests/index.html)
 
 ## Install:
 
