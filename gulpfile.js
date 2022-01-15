@@ -18,23 +18,21 @@ const paths = {
 	bundle : [
 	    'dist/m2d2.min.js',
 	    'dist/m2d2.*.min.js',
-	    '!dist/m2d2.bundle.*.js',
-        'js/export.src.js'
+	    '!dist/m2d2.bundle.*.js'
 	],
 	xhr : [
 	    'dist/m2d2.min.js',
 	    'dist/m2d2.*.min.js',
 	    '!dist/m2d2.ws.min.js',
-	    '!dist/m2d2.bundle.*.js',
-        'js/export.src.js'
+	    '!dist/m2d2.bundle.*.js'
 	],
 	ws : [
 	    'dist/m2d2.min.js',
 	    'dist/m2d2.*.min.js',
 	    '!dist/m2d2.xhr.min.js',
-	    '!dist/m2d2.bundle.*.js',
-        'js/export.src.js'
-	]
+	    '!dist/m2d2.bundle.*.js'
+	],
+	exp : 'js/export.src.js'
 };
 // Core minified
 gulp.task('js', gulp.series([], function() {
@@ -59,25 +57,38 @@ gulp.task('ext', gulp.series(['js'], function() {
 }));
 // Core + Extensions pack minified
 gulp.task('bundle', gulp.series(['js', 'ext'], function() {
-	return gulp.src(paths.bundle)
+	return gulp.src(paths.bundle.concat(paths.exp))
 		.pipe(concat(paths.prefix + '.bundle.min.js'))
 		.pipe(gulp.dest(paths.build));
 }));
 // Core + Extensions XHR
 gulp.task('xhr', gulp.series(['bundle'], function() {
-	return gulp.src(paths.xhr)
+	return gulp.src(paths.xhr.concat(paths.exp))
 		.pipe(concat(paths.prefix + '.bundle.xhr.min.js'))
 		.pipe(gulp.dest(paths.build));
 }));
 // Core + Extensions WS
 gulp.task('ws', gulp.series(['bundle'], function() {
-	return gulp.src(paths.ws)
+	return gulp.src(paths.ws.concat(paths.exp))
 		.pipe(concat(paths.prefix + '.bundle.ws.min.js'))
+		.pipe(gulp.dest(paths.build));
+}));
+// Core minified + export (the first time 'js' is used a base for bundles, this is for m2d2.min.js)
+gulp.task('jse', gulp.series(['ws'], function() {
+	return gulp.src(paths.js.concat(paths.exp))
+		.pipe(terser())
+		.pipe(concat(paths.prefix + '.min.js'))
+		.pipe(header(`
+            License: <%= pkg.license %>
+            Generated on <%= moment().format('YYYY-MM-DD') %>
+            Author: A.Lepe (dev@alepe.com)
+            Version: <%= pkg.version %>
+        `))
 		.pipe(gulp.dest(paths.build));
 }));
 // Source only for development
 gulp.task('dev', gulp.series([], function() {
-	return gulp.src(paths.js)
+	return gulp.src(paths.js.concat(paths.exp))
 		.pipe(concat(paths.prefix + (debug ? '.min.js' : '.src.js')))
 		.pipe(gulp.dest(paths.build_src));
 }));
@@ -88,10 +99,10 @@ gulp.task('dev_ext', gulp.series([], function() {
 }));
 // Bundle all source for development
 gulp.task('dev_all', gulp.series([], function() {
-	return gulp.src(paths.js.concat([paths.ext]))
+	return gulp.src(paths.js.concat([paths.ext, paths.exp]))
 	    .pipe(concat(paths.prefix + ".all.src.js"))
 		.pipe(gulp.dest(paths.build_src));
 }));
 
 // Build
-gulp.task('default', gulp.series(debug ? ['dev'] : ['js','ext','bundle','xhr','ws','dev','dev_ext','dev_all']));
+gulp.task('default', gulp.series(debug ? ['dev'] : ['js','ext','bundle','xhr','ws','jse','dev','dev_ext','dev_all']));

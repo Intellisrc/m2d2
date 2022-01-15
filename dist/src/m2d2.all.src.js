@@ -2399,3 +2399,4 @@ m2d2.load($ => {
     });
     Object.assign($, xhr);
 });
+export default m2d2

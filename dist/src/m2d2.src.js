@@ -1500,3 +1500,4 @@ class m2d2 {
 		});
 	}
 }
+export default m2d2

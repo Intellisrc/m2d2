@@ -24,8 +24,11 @@
   "homepage": "https://gitlab.com/lepe/m2d2/",
   "files": [
     "dist/m2d2.*.js",
+    "dist/src/*",
     "ws/*",
-    "xhr/*"
+    "xhr/*",
+    "core/*",
+    "debug/*"
   ],
   "devDependencies": {
     "gulp": "^4.0.2",
