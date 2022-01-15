@@ -4,6 +4,7 @@ body {
     border: 1px solid #CCC;
     display: grid;
     grid-template-columns: 300px auto;
+    grid-template-rows: min-content auto;
     grid-template-areas:
         "header header"
         "links example";
@@ -16,6 +17,9 @@ header {
     display: grid;
     grid-template-columns: 50% 50%;
     background: #CCC;
+}
+header h3 {
+    margin: 0;
 }
 header button {
     margin: 0 20px;

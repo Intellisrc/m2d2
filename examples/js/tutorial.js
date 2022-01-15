@@ -8,7 +8,7 @@ const pages = [
         lessons : [
             'We start by using the function: <code>m2d2.ready()</code> which executes your instructions when the page (DOM) is ready.',
             'The dollar sign in the callback function: <code>m2d2.ready($ => { $("#profile"); })</code> is the suggested symbol for M2D2 (and the one used across all examples and documentation). You can use anything you want, for example: <code>m2d2.ready(m => { m("#profile"); })</code>',
-            'Usually you want to use an ID as selector: <code>$("#profile")</code>, but you can use any supported selector, for example: <code>$("body section div:first-child")</code> Although I do not recommend it because your code will perform better and it will be easier to understand if you stick to IDs (more about this later in this examples).',
+            'Usually you want to use an ID as selector: <code>$("#profile")</code>, but you can use any supported selector, for example: <code>$("body section div:first-child")</code> Although I do not recommend it because your code will perform better, and it will be easier to understand if you stick to IDs (more about this later in this tutorial).',
             'You do not need to specify all parents to find an element, for example, instead of: <code>$("#profile", { details : { age : 80 })</code> can be set in a more direct way: <code>$("#profile", { age : 80 });</code>',
         ]
     },
