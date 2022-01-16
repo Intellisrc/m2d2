@@ -22,7 +22,6 @@ Framework/Library comparison:
 | Good for large projects   |  Yes |  No    |   Yes   |   Yes   |  Yes  |
 | Observe object changes    |  Yes |  No    |   Yes   |   Yes   |  Yes  |
 | Large community           |  No  |  Yes   |   Yes   |   Yes   |  Yes  |
-| CDN available             |  No  |  Yes   |   Yes   |   Yes   |  Yes  |
 
 Repositories (synchronized):
 
@@ -49,17 +48,43 @@ m2d2.ready($ => {
 ## Live Demo:
 [Try it Now](https://gl.githack.com/lepe/m2d2/raw/master/examples/examples.html)
 
-[Examples](https://gl.githack.com/lepe/m2d2/raw/master/examples/tests/index.html)
+[Stand-alone examples](https://gl.githack.com/lepe/m2d2/raw/master/examples/tests/index.html)
 
 ## Install:
+
+You can use this library either with Web or NodeJS, Framework7, etc. 
+
+### For the Web
 
 * Using npm:
 
 `npm i m2d2`
 
-or:
+Then you will find the library files under `node_modules/m2d2/dist/` (more about this below).
 
-* Download (~19Kb): [m2d2.min.js](https://gl.githack.com/lepe/m2d2/raw/master/dist/m2d2.min.js) and set it in the HTML head.
+* Direct download:
+
+Core Only (~19Kb): [m2d2.min.js](https://gl.githack.com/lepe/m2d2/raw/master/dist/m2d2.min.js) and set it in the HTML head.
+With all extensions (~29Kb): [m2d2.min.js](https://gl.githack.com/lepe/m2d2/raw/master/dist/m2d2.bundle.min.js) and set it in the HTML head.
+
+* CDN:
+
+Core Only: [m2d2.min.js](https://cdn.jsdelivr.net/npm/m2d2@2.1.0/dist/m2d2.min.js)
+
+With all extensions: [m2d2.bundle.min.js](https://cdn.jsdelivr.net/npm/m2d2@2.1.0/dist/m2d2.bundle.min.js)
+
+### As Module
+
+* Using npm:
+
+`npm i m2d2`
+
+Then you will use it something like:
+
+```js
+import m2d2 from 'm2d2';
+const $ = m2d2.load();
+```
 
 ## Extensions:
 
@@ -67,21 +92,65 @@ or:
 
 This extension makes it easy to display alerts, confirmation, input dialogs and more.
 
+Example:
+```js
+$.confirm("Are you sure?", "This is important", res => {
+    if(res) {
+        // Do something
+    }
+});
+```
+
 * Storage
 
 This extension provides an easy way to save and restore data into localStorage and sessionStorage.
+
+Example:
+```js
+// Store something in the localStorage:
+$.local.set("key", { age: 20 });
+console.log($.local.get("key"));
+```
 
 * Lang
 
 With this extension you can handle multiple languages easily.
 
+Example:
+```js
+$.lang('fr');
+const _ = $.dict;
+console.log(_("yes"));
+```
+
 * XHR
 
 This extension handles almost any kind of HTTP request to a server (e.g., GET, POST, PUT, DELETE, etc.)
 
+Example:
+```js
+$.put("/my/url", { name : "Tony" }, res => {
+    // res = response from server
+});
+```
+
 * WS
 
 This extension gives you an easy-to-use WebSocket client.
+
+Example:
+```js
+$.ws.connect({
+    host    : "example.com",
+    secure  : true,
+    path    : "ws/"
+}, json => {
+    // json is the data received from server
+});
+$.ws.request({
+    user : { id : 1000 }
+});
+```
 
 ## Bundle Packs:
 
