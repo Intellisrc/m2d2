@@ -1,5 +1,5 @@
 {
   "name": "m2d2/xhr",
   "description": "Bundle with XHR",
-  "main": "..dist/m2d2.bundle.xhr.min.js"
+  "main": "../dist/m2d2.bundle.xhr.min.js"
 }

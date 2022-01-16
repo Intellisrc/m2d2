@@ -1,3 +1,11 @@
+/**
+ * Author : A.Lepe (dev@alepe.com) - intellisrc.com
+ * License: MIT
+ * Version: 2.1.0
+ * Updated: 2022-01-16
+ * Content: Extension (Debug)
+ */
+
 m2d2.load($ => {
     //------------------------ WS --------------------------------
     /**

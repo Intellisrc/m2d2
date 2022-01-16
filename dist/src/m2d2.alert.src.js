@@ -1,4 +1,12 @@
 /**
+ * Author : A.Lepe (dev@alepe.com) - intellisrc.com
+ * License: MIT
+ * Version: 2.1.0
+ * Updated: 2022-01-16
+ * Content: Extension (Debug)
+ */
+
+/**
  * M2D2 Alerts Extension
  * @since 2021-05-20
  *

@@ -1,3 +1,20 @@
+/**
+ * Author : A.Lepe (dev@alepe.com) - intellisrc.com
+ * License: MIT
+ * Version: 2.1.0
+ * Updated: 2022-01-16
+ * Content: Full Bundle (Debug)
+ */
+
+;(function(root, factory) {
+  if (typeof define === 'function' && define.amd) {
+    define([], factory);
+  } else if (typeof exports === 'object') {
+    module.exports = factory();
+  } else {
+    root.m2d2 = factory();
+  }
+}(this, function() {
 // ------- Functions -------
 "use strict";
 /**
@@ -2399,4 +2416,5 @@ m2d2.load($ => {
     });
     Object.assign($, xhr);
 });
-export default m2d2
+return m2d2;
+}));
