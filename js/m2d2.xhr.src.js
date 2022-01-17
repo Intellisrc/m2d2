@@ -1,16 +1,31 @@
 m2d2.load($ => {
     /**
-     * Common XHR method
      * @version 2020-05-09
+     * @author A.Lepe (dev@alepe.com)
+     * XHR implementation
      *
+     * This extension provides:
+     * $.get
+     * $.post
+     * $.put
+     * $.delete
+     * $.connect
+     * $.options
+     * $.trace
+     * $.patch
+     *
+     * Documentation :
+     * https://gitlab.com/lepe/m2d2/tree/master/documentation/xhr.md
+     * https://github.com/lepe/m2d2/tree/master/documentation/xhr.md
+     */
+
+     /**
      * @param method: HTTP method (GET, POST, PUT, DELETE)
      * @param url: service URL
      * @param data: Data object to send (in case of POST and PUT)
      * @param callback: Callback on Success (it will return data)
      * @param error_callback: Callback on Failure
      * @param json : Boolean (if set, it will set request content-type as json and in case of GET, it will send it as body instead of query)
-     *
-     * @author A.Lepe (dev@alepe.com)
      */
     const XHR = function(method, url, data, callback, error_callback, json) {
         const request = new XMLHttpRequest();

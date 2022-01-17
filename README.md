@@ -42,13 +42,98 @@ m2d2.ready($ => {
 });
 ```
 
+To better understand how M2D2 works, let's imagine you have this object:
+
+```js
+const user_data = {
+    user_id : 1289943,
+    first_name : "Beth",
+    middle_name : "Eleonor",
+    last_name : "Wilson",
+    age : 35,
+    emails : [
+        "beth900@example.com",
+        "beth.wilson@example.com"
+    ]
+}
+```
+
+Now, we want to place that information in this HTML:
+
+```html
+<div id="user">
+    <div><span>ID:</span><span class="user_id"></span></div>
+    <div><span>First Name:</span><span class="first_name"></span></div>
+    <div><span>Middle Name:</span><span class="middle_name"></span></div>
+    <div><span>Last Name:</span><span class="last_name"></span></div>
+    <div><span>Age:</span><span class="age"></span></div>
+    <div>
+        <span>Emails:</span>
+        <ul class="emails"></ul>
+    </div>
+</div>
+```
+
+This is what you need to code (for example: `user.js`):
+
+```js
+m2d2.ready($ => {
+    const user = $("#user", user_data);
+})
+```
+
+And that's it! ... But what if `user_info` doesn't match our HTML structure?
+
+for example this one:
+
+```html
+<div id="user">
+    <div><span>Name:</span><span class="name"></span></div>
+    <div><span>Email:</span><span class="email"></span></div>
+</div>
+```
+
+```js
+m2d2.ready($ => {
+    // Assuming we don't have empty fields (for simplicity)
+    const user = $("#user", {
+        dataset : { id : user_info.user_id }, // will create `data-id=` attribute in `#user`
+        name  : user_info.first_name + " " + user_info.middle_name[0].toUpperCase() + ". " + user_info.last_name,
+        email : user_info.emails[0]
+    });
+})
+```
+
+... and that's it! ... But what if you need to interact with it (using events) ?
+
+```js
+m2d2.ready($ => {
+    const user = $("#user", {
+        ...
+        email : {
+            text : user_info.emails[0],
+            onclick : function(ev) {
+                window.location.href = "mailto:" + this.text;
+            }
+        }
+    });
+})
+```
+
+... and that's it! ... But what if ... ?
+
+Read the documentation, try the tutorial or the examples:
+
 ## Tutorial:
-[Learn it Now](https://gl.githack.com/lepe/m2d2/raw/master/examples/tutorial.html)
+[Learn it now using jsfiddle](https://gl.githack.com/lepe/m2d2/raw/master/examples/tutorial.html)
 
 ## Live Demo:
-[Try it Now](https://gl.githack.com/lepe/m2d2/raw/master/examples/examples.html)
+[Try it now using jsfiddle](https://gl.githack.com/lepe/m2d2/raw/master/examples/examples.html)
 
-[Stand-alone examples](https://gl.githack.com/lepe/m2d2/raw/master/examples/tests/index.html)
+[Stand-alone html + js examples](https://gl.githack.com/lepe/m2d2/raw/master/examples/tests/index.html)
+
+## Documentation:
+[M2D2 Reference](documentation/m2d2.md)
 
 ## Install:
 
@@ -56,7 +141,7 @@ You can use this library either with Web or NodeJS, Framework7, etc.
 
 ### For the Web
 
-* Using npm:
+* Get M2D2 using npm:
 
 `npm i m2d2`
 
@@ -65,13 +150,22 @@ Then you will find the library files under `node_modules/m2d2/dist/` (more about
 * Direct download:
 
 Core Only (~19Kb): [m2d2.min.js](https://gl.githack.com/lepe/m2d2/raw/master/dist/m2d2.min.js) and set it in the HTML head.
-With all extensions (~29Kb): [m2d2.min.js](https://gl.githack.com/lepe/m2d2/raw/master/dist/m2d2.bundle.min.js) and set it in the HTML head.
+
+With all extensions (~29Kb): [m2d2.bundle.min.js](https://gl.githack.com/lepe/m2d2/raw/master/dist/m2d2.bundle.min.js) and set it in the HTML head.
 
 * CDN:
 
 Core Only: [m2d2.min.js](https://cdn.jsdelivr.net/npm/m2d2@2.1.0/dist/m2d2.min.js)
 
 With all extensions: [m2d2.bundle.min.js](https://cdn.jsdelivr.net/npm/m2d2@2.1.0/dist/m2d2.bundle.min.js)
+
+To use it:
+
+```js
+m2d2.ready($ => {
+    // your code here
+});
+```
 
 ### As Module
 
@@ -88,7 +182,7 @@ const $ = m2d2.load();
 
 ## Extensions:
 
-* Alert
+### Alert
 
 This extension makes it easy to display alerts, confirmation, input dialogs and more.
 
@@ -101,7 +195,11 @@ $.confirm("Are you sure?", "This is important", res => {
 });
 ```
 
-* Storage
+[Try it](https://gl.githack.com/lepe/m2d2/raw/master/examples/extensions/alert.html)
+
+[Documentation](documentation/alert.md)
+
+### Storage
 
 This extension provides an easy way to save and restore data into localStorage and sessionStorage.
 
@@ -112,7 +210,11 @@ $.local.set("key", { age: 20 });
 console.log($.local.get("key"));
 ```
 
-* Lang
+[Try it](https://gl.githack.com/lepe/m2d2/raw/master/examples/extensions/storage.html)
+
+[Documentation](documentation/storage.md)
+
+### Lang
 
 With this extension you can handle multiple languages easily.
 
@@ -123,7 +225,11 @@ const _ = $.dict;
 console.log(_("yes"));
 ```
 
-* XHR
+[Try it](https://gl.githack.com/lepe/m2d2/raw/master/examples/extensions/lang.html)
+
+[Documentation](documentation/lang.md)
+
+### XHR
 
 This extension handles almost any kind of HTTP request to a server (e.g., GET, POST, PUT, DELETE, etc.)
 
@@ -134,7 +240,11 @@ $.put("/my/url", { name : "Tony" }, res => {
 });
 ```
 
-* WS
+[Try it](https://gl.githack.com/lepe/m2d2/raw/master/examples/extensions/xhr.html)
+
+[Documentation](documentation/xhr.md)
+
+### WS
 
 This extension gives you an easy-to-use WebSocket client.
 
@@ -142,15 +252,22 @@ Example:
 ```js
 $.ws.connect({
     host    : "example.com",
-    secure  : true,
-    path    : "ws/"
+    path    : "ws/",
+    secure  : true, // for wss://
+    request : {} // initial request
 }, json => {
     // json is the data received from server
+    if(json.user) { ... }
 });
+// Send a message to server:
 $.ws.request({
     user : { id : 1000 }
 });
 ```
+
+[Try it](https://gl.githack.com/lepe/m2d2/raw/master/examples/extensions/ws.html)
+
+[Documentation](documentation/ws.md)
 
 ## Bundle Packs:
 

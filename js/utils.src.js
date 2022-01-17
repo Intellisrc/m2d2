@@ -1,8 +1,40 @@
 // ------- Functions -------
 "use strict";
 /**
- * Some utils to work with DOM
+ * Functions useful to work with Javascript data and DOM
+ * Used mainly in M2D2 core library but exposed to the
+ * consumer.
  * @Author: A.Lepe <dev@alepe.com>
+ *
+ * This extension provides:
+ * $.isString
+ * $.isBool
+ * $.isNumeric
+ * $.isSelectorID
+ * $.isPlainObject
+ * $.isObject
+ * $.isArray
+ * $.isFunction
+ * $.isElement
+ * $.isNode
+ * $.isHtml
+ * $.isEmpty
+ * $.cleanArray
+ * $.isValidElement
+ * $.exists
+ * $.getAttrOrProp
+ * $.hasAttrOrProp
+ * $.hasAttr
+ * $.hasProp
+ * $.setPropOrAttr
+ * $.setAttr
+ * $.defineProp
+ * $.htmlElement
+ * $.newElement
+ * $.newEmptyNode
+ * $.getMethods
+ * $.appendAllChild
+ * $.prependAllChild
  */
 class Utils {
 	/**

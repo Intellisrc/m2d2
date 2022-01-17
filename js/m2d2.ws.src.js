@@ -7,24 +7,12 @@ m2d2.load($ => {
      * @since : 2018
      * WebSocket wrapper
      *
-     * Usage:
-     const wsc = new ws({
-        request      : { ... }, // Initial Request (optional)
-        connect      : () => {}, // Function to execute when it successfully connects
-        disconnected : () => {}, // Function to execute when it gets disconnected
-        reconnect    : true, // Try to reconnect if it gets disconnected (default: true)
-        secure       : false, // If true, will use wss
-        host         : "localhost", // Server name
-        path         : "", // WebSocket's URL path, for example: ws://server/<path> (default: "")
-        port         : 80, // Port in which the WebSocket server is listening (default: 80, 443)
-   });
-     wsc.connect(response => {
-        // response is the object which the server is sending.
-   });
-     wsc.request({ ... }); // To request something to the server, send it as object.
-     wsc.disconnect(); // Disconnect from server (it will turn off reconnection)
+     * This extension provides:
+     * $.ws
      *
-     *
+     * Documentation :
+     * https://gitlab.com/lepe/m2d2/tree/master/documentation/ws.md
+     * https://github.com/lepe/m2d2/tree/master/documentation/ws.md
      */
     class ws {
         request(msg) {
