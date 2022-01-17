@@ -244,6 +244,27 @@ $.put("/my/url", { name : "Tony" }, res => {
 
 [Documentation](documentation/xhr.md)
 
+### Upload
+
+This extension makes it easy to upload files to a server via XHR (included in XHR bundle).
+
+Example:
+```js
+$("uploadFileButton", {
+    onclick : function(event) {
+        $.upload(event, {
+            upload : "example.com/upload/",
+            field  : "file",
+            onDone : (response, allDone) => {
+                console.log("Uploaded");
+            }
+        });
+    }    
+}
+```
+
+[Documentation](documentation/upload.md)
+
 ### WS
 
 This extension gives you an easy-to-use WebSocket client.
