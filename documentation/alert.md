@@ -17,7 +17,7 @@ This extension provides:
 ## Style Setup:
 
 In order to display the alerts, you need to add (and possibly modify) the [alert.css](../examples/css/alert.css) file.
-We have included the [scss files](../examples/alert/) for your convenience.
+We have included the [scss files](../examples/css/alert/) for your convenience.
 
 ## Example Usage:
 
