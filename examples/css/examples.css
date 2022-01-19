@@ -1,15 +1,21 @@
+html * {
+    box-sizing: border-box;
+    font-size: 16px;
+    font-family: verdana, tahoma, sans-serif;
+}
 body {
     max-width: 1500px;
     margin: auto;
     border: 1px solid #CCC;
     display: grid;
-    grid-template-columns: 300px auto;
-    grid-template-rows: min-content auto;
+    grid-template-columns: 40% auto;
+    grid-template-rows: min-content 20% auto;
     grid-template-areas:
         "header header"
-        "links example";
+        "links example"
+        "footer example";
     grid-gap: 10px;
-    font-size: 16px;
+    height: 100vh;
 }
 header {
     grid-area: header;
@@ -54,8 +60,13 @@ aside li {
     padding: 10px;
     margin: 1px;
 }
-aside li[selected] {
-    background-color: #FF9;
+aside li:hover {
+    background-color: #FFC;
+    cursor: pointer;
+}
+aside li[selected], aside li[selected] a {
+    background-color: #FF6;
+    cursor: default;
 }
 aside a {
     text-decoration: none;
@@ -63,11 +74,22 @@ aside a {
 }
 footer {
     grid-area: footer;
+    border: 1px solid #CCC;
+    border-bottom: 0;
+}
+aside ol,
+footer ol {
+    padding-left: 25px;
+    padding-right: 5px;
 }
 footer li {
     margin: 20px 0;
 }
 h1 {
-    font-family: verdana, tahoma, sans-serif;
     color: #333;
+    margin: 0;
+    padding: 5px;
+    background: #CCC;
+    font-size: 18px;
+    text-align: center;
 }

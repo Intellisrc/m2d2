@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>M2D2 Feature : </title>
+    <meta name="HandheldFriendly" content="1">
+    <meta name="viewport" content="width=device-width, maximum-scale=1.0">
+    <meta name="theme-color" content="#333333">
+    <style>
+        span, input {
+          display: block;
+        }
+    </style>
+    <script src="../../js/utils.src.js" type="text/javascript"></script>
+    <script src="../../js/m2d2.src.js" type="text/javascript"></script>
+    <script>
+        m2d2.ready($ => {
+          const myform = $("#myform", {
+            // Find by Id:
+            main: "Main Title", // <-- this is placed as "text"
+            // Find by classname:
+            sub: "<b>Sub Title</b>", // <-- this is placed as "html"
+            // Find by name:
+            something: "Input Value", // <-- this is placed in "value"
+            // Find by tag name:
+            button: "Button Label"
+          });
+        })
+    </script>
+</head>
+<body>
+<form id="myform">
+    <div id="main">
+        Main Placeholder
+    </div>
+    <span class="sub">Sub placeholder</span>
+    <input type="text" name="something" value="" placeholder="something here" />
+    <button>Send</button>
+</form>
+</body>
+</html>

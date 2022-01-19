@@ -23,16 +23,16 @@ m2d2.ready($ => {
             }
         }
         example.items.clear();
-        lessons.items.clear();
         let found = false;
         buttons.find(".prev").dataset.id = "";
         buttons.find(".prev").disabled = true;
         buttons.find(".next").disabled = true;
         pages.forEach(item => {
             if(item.id === sel.dataset.id) {
-                const copy = Object.assign({}, item);
-                delete copy.id; // Remove ID
-                $("#lesson", copy);
+                $("#lesson", {
+                    title: item.title,
+                    description: item.description
+                });
                 example.items.push({
                     css : "code",
                     src : getCodeURL(item)
@@ -41,7 +41,7 @@ m2d2.ready($ => {
                     css : "view",
                     src : getViewURL(item)
                 });
-                lessons.items.concat(item.lessons);
+                lessons.update(item.lessons);
                 sel.selected = true;
                 found = true;
             } else {
@@ -63,32 +63,41 @@ m2d2.ready($ => {
     }
 
     // Add links
-    const links = [];
-    pages.forEach(item => {
-        links.push({
-            dataset : { id : item.id },
-            a : {
-                text : item.title,
-                href : "#" + item.id,
-            },
-            onclick : function() {
-                this.selected = true;
-                showPage();
-            }
-        });
+    // Declare lessons list:
+    const lessons = $("#lessons", {
+        items : [],
+        update : function(items) {
+            this.items.clear();
+            this.items.concat(items);
+        }
     });
 
-    // Declare lessons list:
-    const lessons = $("#lessons", []);
-
     // Render links:
-    $(nav, {
-        template : { li : { a : {} }},
-        items : links
+    const nav = $("#nav", {
+        template : {
+            li : {
+                a : {},
+                onclick : function() {
+                    this.selected = true;
+                    showPage();
+                }
+            }
+        },
+        onload : function() {
+            pages.forEach(item => {
+                this.items.push({
+                    dataset : { id : item.id },
+                    a : {
+                        text : item.title,
+                        href : "#" + item.id,
+                    },
+                });
+            });
+        }
     });
 
     // Declare example template:
-    $(example, {
+    const example = $("#example", {
         template : {
             script : {
                 async : true
@@ -98,8 +107,8 @@ m2d2.ready($ => {
 
     // Buttons PREV and NEXT:
     const buttons = $("#buttons", {
-        warn : false, // Do not warn
         button : {  // Same for both buttons
+            warn : false, // Do not warn
             onclick : function() {
                 if(this.dataset.id) {
                     window.location.hash = "#" + this.dataset.id;
