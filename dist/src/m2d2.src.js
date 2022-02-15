@@ -1,8 +1,8 @@
 /**
  * Author : A.Lepe (dev@alepe.com) - intellisrc.com
  * License: MIT
- * Version: 2.1.0
- * Updated: 2022-01-16
+ * Version: 2.1.1
+ * Updated: 2022-02-15
  * Content: Core (Debug)
  */
 
@@ -18,8 +18,40 @@
 // ------- Functions -------
 "use strict";
 /**
- * Some utils to work with DOM
+ * Functions useful to work with Javascript data and DOM
+ * Used mainly in M2D2 core library but exposed to the
+ * consumer.
  * @Author: A.Lepe <dev@alepe.com>
+ *
+ * This extension provides:
+ * $.isString
+ * $.isBool
+ * $.isNumeric
+ * $.isSelectorID
+ * $.isPlainObject
+ * $.isObject
+ * $.isArray
+ * $.isFunction
+ * $.isElement
+ * $.isNode
+ * $.isHtml
+ * $.isEmpty
+ * $.cleanArray
+ * $.isValidElement
+ * $.exists
+ * $.getAttrOrProp
+ * $.hasAttrOrProp
+ * $.hasAttr
+ * $.hasProp
+ * $.setPropOrAttr
+ * $.setAttr
+ * $.defineProp
+ * $.htmlElement
+ * $.newElement
+ * $.newEmptyNode
+ * $.getMethods
+ * $.appendAllChild
+ * $.prependAllChild
  */
 class Utils {
 	/**
@@ -814,19 +846,21 @@ class m2d2 {
 	 * @param {*} value
 	 */
     plainToObject($node, value) {
-		if(!m2d2.utils.isPlainObject(value) &&! m2d2.utils.isFunction(value)) {
+		if(!m2d2.utils.isPlainObject(value) &&! m2d2.utils.isFunction(value) &&! (value instanceof HTMLElement)) {
 			// When setting values to the node (simplified version):
 			if(m2d2.utils.isHtml(value)) {
 				value = { html : value };
 			} else if(m2d2.utils.isArray(value)) {
 			    value = { items : value };
-			} else if(m2d2.utils.hasProp($node, "value")) {
+			} else if(m2d2.utils.hasAttrOrProp($node, "value")) {
 				// If the parent is <select> set also as text to item:
 				if($node.tagName === "SELECT") {
 				    value = {
 				        value : value,
 				        text  : value
 				    };
+				} else if($node.tagName === "BUTTON") {
+				    value = { text : value };
 				} else {
 				    value = { value : value };
 				}
@@ -1357,9 +1391,9 @@ class m2d2 {
 				const _this = this;
 				switch (method) {
 				    //-------------------- Same as in Array --------------------------
-					case "copyWithin": // copy element from index to index FIXME
-					case "fill": // replace N elements in array FIXME
-					case "splice": // add or remove elements FIXME
+					case "copyWithin": // copy element from index to index
+					case "fill": // replace N elements in array
+					case "splice": // add or remove elements
 					    func = function() {
 					        console.log("Not available yet: " + method);
 					    }
@@ -1420,12 +1454,16 @@ class m2d2 {
 					    break;
 					case "push": // Add one item at the end:
 						func = function(obj) {
+						    obj = _this.plainToObject(this, obj);
 							if(obj instanceof HTMLElement) {
 								this.append(obj);
 							} else if (m2d2.utils.isPlainObject(obj)) {
 							    const index = this.items.length;
 							    const $child = _this.getItem(this, index, obj);
 							    this.appendChild($child);
+							} else {
+							    console.log("Trying to push an unknown value into a list:");
+							    console.log(obj)
 							}
 						}
 						break;
@@ -1460,12 +1498,16 @@ class m2d2 {
 						break;
 					case "unshift": // Add an item to the beginning
 						func = function(obj) {
+						    obj = _this.plainToObject(this, obj);
 							if(obj instanceof HTMLElement) {
 								this.prepend(obj);
-						} else if (m2d2.utils.isPlainObject(obj)) {
+						    } else if (m2d2.utils.isPlainObject(obj)) {
 							    const index = this.items.length;
 							    const $child = _this.getItem(this, index, obj);
 							    this.prepend($child);
+							} else {
+							    console.log("Trying to unshift an unknown value into a list:");
+							    console.log(obj)
 							}
 						}
 					    break;
@@ -1477,7 +1519,7 @@ class m2d2 {
 					            arrMethod = "filter"; // Use "filter"
                             case typeof Array.prototype[method] == "function":
                                 // Convert nodes to proxy so we can use short assignment
-                                // at, every, filter, find, findIndex, forEach, includes, indexOf, join,
+                                // at, concat, every, filter, find, findIndex, forEach, includes, indexOf, join,
                                 // keys, lastIndexOf, map, reduce, reduceRight, slice, some, values
                                 const arrFunc = function (...args) {
                                     const proxies = [];
@@ -1486,27 +1528,50 @@ class m2d2 {
                                     });
                                     return Array.from(proxies)[arrMethod](...args);
                                 }
-                                // Change behaviour of find: //TODO: documentation
-                                if(method === "find") {
-                                    func = function(...args) {
-                                        if(m2d2.utils.isString(args[0])) {
-                                            return this.find(args[0]);
-                                        } else {
-                                            return arrFunc(...args);
+                                switch(method) {
+                                    // Change behaviour of find: //TODO: documentation
+                                    case "find":
+                                        func = function(...args) {
+                                            if(m2d2.utils.isString(args[0])) {
+                                                return this.find(args[0]);
+                                            } else {
+                                                return arrFunc(...args);
+                                            }
                                         }
-                                    }
-                                } else if(method === "findAll") {  //TODO: documentation
-                                    func = function(...args) {
-                                        if(args.length === 0) {
-                                            return this.findAll();
-                                        } else if(m2d2.utils.isString(args[0])) {
-                                            return this.findAll(args[0]);
-                                        } else {
-                                            return arrFunc(...args);
+                                        break
+                                    case "findAll":  //TODO: documentation
+                                        func = function(...args) {
+                                            if(args.length === 0) {
+                                                return this.findAll();
+                                            } else if(m2d2.utils.isString(args[0])) {
+                                                return this.findAll(args[0]);
+                                            } else {
+                                                return arrFunc(...args);
+                                            }
                                         }
-                                    }
-                                } else {
-                                    func = arrFunc;
+                                        break
+                                    case "concat": //TODO: documentation
+                                        func = function(...args) {
+                                            for(let i = 0; i < args.length; i++) {
+                                                if(m2d2.utils.isArray(args[i])) {
+                                                    for(let j = 0; j < args[i].length; j++) {
+                                                        let obj = args[i][j];
+                                                        if(!(obj instanceof HTMLElement)) {
+                                                            obj = _this.plainToObject(this, args[i][j]);
+                                                            if (m2d2.utils.isPlainObject(obj)) {
+							                                    const index = this.items.length;
+                                                                obj = _this.getItem(this, index, obj);
+                                                            }
+                                                        }
+                                                        this.items.push(obj);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        break
+                                    default:
+                                        func = arrFunc;
+                                        break
                                 }
 						}
 				}

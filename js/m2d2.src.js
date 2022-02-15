@@ -1,6 +1,6 @@
 /**
  * @author: A. Lepe
- * @url : https://gitlab.com/lepe/m2d2/
+ * @url : https://gitlab.com/intellisrc/m2d2/
  * @since: May, 2018
  * @version: 2.0.0
  * @updated: 2021-04-16

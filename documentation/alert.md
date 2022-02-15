@@ -21,13 +21,45 @@ We have included the [scss files](../examples/css/alert/) for your convenience.
 
 ## Example Usage:
 
-$.wait :
+### $.wait :
 ```js
 const waitMsg = $.wait("Please wait...");
-setTimeout(() => { waitMsg.close(); }, 2000);
+setTimeout(() => { 
+    waitMsg.close(); 
+}, 2000);
+```
+**IMPORTANT:**
+
+If you want to open another alert (of any type, like: failure, success, etc),
+specify a callback in `close()` method, for example:
+```js
+const waitMsg = $.wait("Please wait...");
+// By passing a callback, you are sure that the `wait` message was closed properly.
+setTimeout(() => { 
+    waitMsg.close(() => {
+        $.success("We waited 2 seconds!");
+    });
+}, 2000);
 ```
 
-$.alert, $.success, $.failure :
+Using a cancel button inside `$.wait` :
+
+```js
+const waitMsg = $.wait("Please wait...", {
+    div : {
+        css : "m2d2-alert-buttons",
+        button : {
+            text : "Cancel",
+            css  : ["color", "cancel"],
+            onclick : function() {
+                waitMsg.close();
+            }
+        }
+    }
+});
+```
+
+### $.alert, $.success, $.failure :
 ```js
 $.alert("Hint of the day", "To exit, click in 'logout' button.", () => { 
     console.log("The alert has been closed.") 
@@ -38,7 +70,7 @@ $.success("Data has been saved!", () => {
 $.failure("Server error"); //Display just the message
 ```
 
-$.confirm :
+### $.confirm :
 ```js
 $.confirm("Are you sure?", "You are about to delete all images!", (res) => { 
     if(res) { 
@@ -48,7 +80,7 @@ $.confirm("Are you sure?", "You are about to delete all images!", (res) => {
 ```
 
 
-$.prompt :
+### $.prompt :
 ```js
 $.prompt("Please enter your name:", (res) => { 
     console.log("your name is:" + res); 
@@ -61,7 +93,7 @@ $.prompt("Please enter your sex:", {
 }, (res, raw) => { console.log("your sex is:" + res); });
 ```
 
-$.message : (Advanced)
+### $.message : (Advanced)
 ```js
 $.message({
     icon : "times",     // OPTIONAL: you can use : "question", "info", "error", "ok", "input", "wait"

@@ -1,24 +1,39 @@
 /**
  * Author : A.Lepe (dev@alepe.com) - intellisrc.com
  * License: MIT
- * Version: 2.1.0
- * Updated: 2022-01-16
+ * Version: 2.1.1
+ * Updated: 2022-02-15
  * Content: Extension (Debug)
  */
 
 m2d2.load($ => {
     /**
-     * Common XHR method
      * @version 2020-05-09
+     * @author A.Lepe (dev@alepe.com)
+     * XHR implementation
      *
+     * This extension provides:
+     * $.get
+     * $.post
+     * $.put
+     * $.delete
+     * $.connect
+     * $.options
+     * $.trace
+     * $.patch
+     *
+     * Documentation :
+     * https://gitlab.com/lepe/m2d2/tree/master/documentation/xhr.md
+     * https://github.com/lepe/m2d2/tree/master/documentation/xhr.md
+     */
+
+     /**
      * @param method: HTTP method (GET, POST, PUT, DELETE)
      * @param url: service URL
      * @param data: Data object to send (in case of POST and PUT)
      * @param callback: Callback on Success (it will return data)
      * @param error_callback: Callback on Failure
      * @param json : Boolean (if set, it will set request content-type as json and in case of GET, it will send it as body instead of query)
-     *
-     * @author A.Lepe (dev@alepe.com)
      */
     const XHR = function(method, url, data, callback, error_callback, json) {
         const request = new XMLHttpRequest();
@@ -73,6 +88,7 @@ m2d2.load($ => {
             }
         };
         request.send(data);
+        return request;
     };
     /**
      * Short method. It also validates arguments and allow omitting some, eg.:
@@ -145,7 +161,7 @@ m2d2.load($ => {
             console.log("ERROR CALLBACK: " + error_callback);
             console.log("JSON: " + json);
             */
-            XHR(method.toUpperCase(), url, data, callback, error_callback, json);
+            return XHR(method.toUpperCase(), url, data, callback, error_callback, json);
         }
     });
     Object.assign($, xhr);

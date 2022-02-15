@@ -1,4 +1,12 @@
 /**
+ * Author : A.Lepe (dev@alepe.com) - intellisrc.com
+ * License: MIT
+ * Version: 2.1.1
+ * Updated: 2022-02-15
+ * Content: Extension (Debug)
+ */
+
+/**
  *
  * M2D2 Upload Plugin
  * ver. 2021-12-03
@@ -7,8 +15,8 @@
  * $.upload
  *
  * Documentation :
- * https://gitlab.com/intellisrc/m2d2/tree/master/documentation/upload.md
- * https://github.com/intellisrc/m2d2/tree/master/documentation/upload.md
+ * https://gitlab.com/lepe/m2d2/tree/master/documentation/upload.md
+ * https://github.com/lepe/m2d2/tree/master/documentation/upload.md
  */
  m2d2.load($ => {
     $.upload = function(ev, options) {

@@ -12,8 +12,8 @@ m2d2.load($ => {
      * $.session : To get/set values in sessionStorage
      *
      * Documentation:
-     * https://gitlab.com/lepe/m2d2/tree/master/documentation/storage.md
-     * https://github.com/lepe/m2d2/tree/master/documentation/storage.md
+     * https://gitlab.com/intellisrc/m2d2/tree/master/documentation/storage.md
+     * https://github.com/intellisrc/m2d2/tree/master/documentation/storage.md
      *
      */
     function Storage(type) {

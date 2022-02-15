@@ -1,8 +1,8 @@
 /**
  * Author : A.Lepe (dev@alepe.com) - intellisrc.com
  * License: MIT
- * Version: 2.1.0
- * Updated: 2022-01-16
+ * Version: 2.1.1
+ * Updated: 2022-02-15
  * Content: Full Bundle (Debug)
  */
 
@@ -18,8 +18,40 @@
 // ------- Functions -------
 "use strict";
 /**
- * Some utils to work with DOM
+ * Functions useful to work with Javascript data and DOM
+ * Used mainly in M2D2 core library but exposed to the
+ * consumer.
  * @Author: A.Lepe <dev@alepe.com>
+ *
+ * This extension provides:
+ * $.isString
+ * $.isBool
+ * $.isNumeric
+ * $.isSelectorID
+ * $.isPlainObject
+ * $.isObject
+ * $.isArray
+ * $.isFunction
+ * $.isElement
+ * $.isNode
+ * $.isHtml
+ * $.isEmpty
+ * $.cleanArray
+ * $.isValidElement
+ * $.exists
+ * $.getAttrOrProp
+ * $.hasAttrOrProp
+ * $.hasAttr
+ * $.hasProp
+ * $.setPropOrAttr
+ * $.setAttr
+ * $.defineProp
+ * $.htmlElement
+ * $.newElement
+ * $.newEmptyNode
+ * $.getMethods
+ * $.appendAllChild
+ * $.prependAllChild
  */
 class Utils {
 	/**
@@ -814,19 +846,21 @@ class m2d2 {
 	 * @param {*} value
 	 */
     plainToObject($node, value) {
-		if(!m2d2.utils.isPlainObject(value) &&! m2d2.utils.isFunction(value)) {
+		if(!m2d2.utils.isPlainObject(value) &&! m2d2.utils.isFunction(value) &&! (value instanceof HTMLElement)) {
 			// When setting values to the node (simplified version):
 			if(m2d2.utils.isHtml(value)) {
 				value = { html : value };
 			} else if(m2d2.utils.isArray(value)) {
 			    value = { items : value };
-			} else if(m2d2.utils.hasProp($node, "value")) {
+			} else if(m2d2.utils.hasAttrOrProp($node, "value")) {
 				// If the parent is <select> set also as text to item:
 				if($node.tagName === "SELECT") {
 				    value = {
 				        value : value,
 				        text  : value
 				    };
+				} else if($node.tagName === "BUTTON") {
+				    value = { text : value };
 				} else {
 				    value = { value : value };
 				}
@@ -1357,9 +1391,9 @@ class m2d2 {
 				const _this = this;
 				switch (method) {
 				    //-------------------- Same as in Array --------------------------
-					case "copyWithin": // copy element from index to index FIXME
-					case "fill": // replace N elements in array FIXME
-					case "splice": // add or remove elements FIXME
+					case "copyWithin": // copy element from index to index
+					case "fill": // replace N elements in array
+					case "splice": // add or remove elements
 					    func = function() {
 					        console.log("Not available yet: " + method);
 					    }
@@ -1420,12 +1454,16 @@ class m2d2 {
 					    break;
 					case "push": // Add one item at the end:
 						func = function(obj) {
+						    obj = _this.plainToObject(this, obj);
 							if(obj instanceof HTMLElement) {
 								this.append(obj);
 							} else if (m2d2.utils.isPlainObject(obj)) {
 							    const index = this.items.length;
 							    const $child = _this.getItem(this, index, obj);
 							    this.appendChild($child);
+							} else {
+							    console.log("Trying to push an unknown value into a list:");
+							    console.log(obj)
 							}
 						}
 						break;
@@ -1460,12 +1498,16 @@ class m2d2 {
 						break;
 					case "unshift": // Add an item to the beginning
 						func = function(obj) {
+						    obj = _this.plainToObject(this, obj);
 							if(obj instanceof HTMLElement) {
 								this.prepend(obj);
-						} else if (m2d2.utils.isPlainObject(obj)) {
+						    } else if (m2d2.utils.isPlainObject(obj)) {
 							    const index = this.items.length;
 							    const $child = _this.getItem(this, index, obj);
 							    this.prepend($child);
+							} else {
+							    console.log("Trying to unshift an unknown value into a list:");
+							    console.log(obj)
 							}
 						}
 					    break;
@@ -1477,7 +1519,7 @@ class m2d2 {
 					            arrMethod = "filter"; // Use "filter"
                             case typeof Array.prototype[method] == "function":
                                 // Convert nodes to proxy so we can use short assignment
-                                // at, every, filter, find, findIndex, forEach, includes, indexOf, join,
+                                // at, concat, every, filter, find, findIndex, forEach, includes, indexOf, join,
                                 // keys, lastIndexOf, map, reduce, reduceRight, slice, some, values
                                 const arrFunc = function (...args) {
                                     const proxies = [];
@@ -1486,27 +1528,50 @@ class m2d2 {
                                     });
                                     return Array.from(proxies)[arrMethod](...args);
                                 }
-                                // Change behaviour of find: //TODO: documentation
-                                if(method === "find") {
-                                    func = function(...args) {
-                                        if(m2d2.utils.isString(args[0])) {
-                                            return this.find(args[0]);
-                                        } else {
-                                            return arrFunc(...args);
+                                switch(method) {
+                                    // Change behaviour of find: //TODO: documentation
+                                    case "find":
+                                        func = function(...args) {
+                                            if(m2d2.utils.isString(args[0])) {
+                                                return this.find(args[0]);
+                                            } else {
+                                                return arrFunc(...args);
+                                            }
                                         }
-                                    }
-                                } else if(method === "findAll") {  //TODO: documentation
-                                    func = function(...args) {
-                                        if(args.length === 0) {
-                                            return this.findAll();
-                                        } else if(m2d2.utils.isString(args[0])) {
-                                            return this.findAll(args[0]);
-                                        } else {
-                                            return arrFunc(...args);
+                                        break
+                                    case "findAll":  //TODO: documentation
+                                        func = function(...args) {
+                                            if(args.length === 0) {
+                                                return this.findAll();
+                                            } else if(m2d2.utils.isString(args[0])) {
+                                                return this.findAll(args[0]);
+                                            } else {
+                                                return arrFunc(...args);
+                                            }
                                         }
-                                    }
-                                } else {
-                                    func = arrFunc;
+                                        break
+                                    case "concat": //TODO: documentation
+                                        func = function(...args) {
+                                            for(let i = 0; i < args.length; i++) {
+                                                if(m2d2.utils.isArray(args[i])) {
+                                                    for(let j = 0; j < args[i].length; j++) {
+                                                        let obj = args[i][j];
+                                                        if(!(obj instanceof HTMLElement)) {
+                                                            obj = _this.plainToObject(this, args[i][j]);
+                                                            if (m2d2.utils.isPlainObject(obj)) {
+							                                    const index = this.items.length;
+                                                                obj = _this.getItem(this, index, obj);
+                                                            }
+                                                        }
+                                                        this.items.push(obj);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        break
+                                    default:
+                                        func = arrFunc;
+                                        break
                                 }
 						}
 				}
@@ -1521,6 +1586,9 @@ class m2d2 {
  * M2D2 Alerts Extension
  * @since 2021-05-20
  *
+ * A replacement of `alert`,`prompt` and `confirm`. Inspired by `SweetAlert`, with
+ * customizable theme and better M2D2 integration.
+ *
  * This extension provides:
  * $.wait       : Displays a spinner without any button in it.
  * $.alert      : Displays a simple message with "ok" button.
@@ -1530,42 +1598,10 @@ class m2d2 {
  * $.prompt     : Displays an input prompt with "cancel" and "send" buttons.
  * $.message    : Free form message (all the previous implementations uses this function)
  * $.closeAll   : Close any message that might be open
- *
- * Example Usage:
- *   - Common uses:
- *  $.wait :
- *      const waitMsg = $.wait("Please wait...");
- *      setTimeout(() => { waitMsg.close(); }, 2000);
- *
- *  $.alert, $.success, $.failure :
- *      $.alert("Hint of the day", "To exit, click in 'logout' button.", () => { console.log("The alert has been closed.") });
- *      $.success("Data has been saved!", () => { console.log("The alert has been closed. I didn't specified text, just title.") });
- *      $.failure("Server error"); //Display just the message
- *
- *  $.confirm:
- *      $.confirm("Are you sure?", "You are about to delete all images!", (res) => { if(res) { console.log("All images are gone!") });
- *
- *  $.prompt:
- *      $.prompt("Please enter your name:", (res) => { console.log("your name is:" + res); });
- *      $.prompt("Please enter your age:", "No need to lie...", (res) => { console.log("your age is:" + res); });
- *      $.prompt("Please enter your sex:", {
- *          select : ["Female","Male","Other"]
- *      }, (res, raw) => { console.log("your sex is:" + res); });
- *
- *  $.message:
- *      $.message({
-            icon : "times",     // OPTIONAL: you can use : "question", "info", "error", "ok", "input", "wait"
-            css  : "special",   // Set class or classes
-            title : "Title",
-            text  : "Text to use",
-            buttons : ["No way!", "Roger"], // Specify button text and classes which in this case be: "no_way" and "roger"
-            callback : function() {}
-        });
- *
- *  Notes:
- *   - callback gets two arguments:
- *        * The first one is the simplest return value when possible
- *        * The second one is the form data as an object, for example: { button : "send", answer : "Hello" }
+
+ * Documentation :
+ * https://gitlab.com/lepe/m2d2/tree/master/documentation/alert.md
+ * https://github.com/lepe/m2d2/tree/master/documentation/alert.md
  */
 m2d2.load($ => {
     function close(afterClose) {
@@ -1826,100 +1862,15 @@ m2d2.load($ => {
  * M2D2 Language Extension
  * @since 2021-06-01
  *
+ * Add supports for multi-language interfaces
+ *
  * This extension provides:
  * $.dict(keyword, [variables])  : To get translations from dictionary
  * $.lang(lang)                  : Set new language
  *
- * Usage:
- *  1) First you need to specify a dictionary with this format:
-    const dictionary = {
-        save   : {
-            en : "Save",
-            es : "Archivar",
-            'es-MX' : "Guardar" // More specific translation
-        },
-        cancel : {
-            en : "Cancel Now",
-            es : "Cancelar Ahora"
-        }
-    }
-
-    2) Then on initialization (only once), set the dictionary:
-    // Recommended way:
-    const _ = m2d2.load().dict.set(dictionary);
-    // Or:
-    m2d2.load($ => {
-        $.dict.set(dictionary);
-    });
-
-    // And specify which language you want to use as default:
-    m2d2.ready($ => {
-        $.lang('en');
-
-        // You can set the shortcut here if you want and if you didn't set it before:
-        const _ = $.dict;
-        // Then use it as: (example)
-        $("#myid", {
-            text : _("some_key"),
-            css : "translated"
-        });
-    });
-
-    3) In HTML you can set which texts should be translated automatically:
-    `<span lang="es">Cancelar</span>`
-    Then, in the next step, it will be translated if it doesn't match the target language.
-
-    NOTE: If you use 'lang' in HTML, be sure that the language and the text matches the keys. For example,
-    if your default language is English, you should do something like this:
-    `<span lang="en">Phone Number</span>`
-    Then, in your dictionary, you should use the keyword:
-    {
-        phone_number : {
-            en : "Phone Number",
-            es : "Número de Teléfono"
-        }
-    }
-    If the key is not found it will display it, so that is one way to know which keyword to use, another way
-    is getting the key from a text with: $.lang.toKeyword("Some Text").
-
-    If your default language is not English, you have 3 options:
-        a) Create the interface in English and execute `$.lang('xx')` on ready (xx = your language code). That will translate the UI
-        b) Put keywords instead of English words (e.g, `<span lang='en'>user_name_goes_here</span>`) and execute `$.lang('xx')` on ready.
-        c) specify the keyword in the dataset: `<span class="usr" lang='pa' data-kw='username'>ਉਪਭੋਗਤਾ ਨਾਮ</span>` or in javascript:
-               usr : {
-                    dataset : { kw : "username" },
-                    lang : "pa",
-                    text : "ਉਪਭੋਗਤਾ ਨਾਮ"
-               }
-
-    4) To set or change the language (by default it will use browser's default language):
-    $.lang("en");
-
-    5) Get translation:
-    user.title.text = $.dict("user");
-
-    6) You can set your default language (page language) in your html tag: `<html lang='es'>`, that way this extension
-    knows that your HTML content is by default in that language, and decide if we need to translated for the user.
-    If you don't set it, it will use the first element with the attribute "lang".
-
-    7) You can execute some code when the language is changed by setting an event listener:
-    `$.lang.onchange = (new_lang) => { ... }`
-
-    Recommendation:
-    I recommend to set a shortcut for the dictionary (you can set it right after loading this extension):
-    const _ = $.dict;
-    Or setting dictionary at the same time:
-    const _ = $.dict.set(dictionary);
-    To declare it as global, you can set it as:
-    const _ = m2d2.load().dict;
-
-    That way, you can use it like:
-    user.title.text = _("user");
-
-    Final Note:
-    When you change the language, it will keep in the local storage (at the browser) your selection, so
-    if you refresh the page it will still use your selected language.
- *
+ * Documentation :
+ * https://gitlab.com/lepe/m2d2/tree/master/documentation/lang.md
+ * https://github.com/lepe/m2d2/tree/master/documentation/lang.md
  */
 m2d2.load($ => {
     let manualLang = localStorage.getItem("m2d2.lang") || ""
@@ -2090,38 +2041,20 @@ m2d2.ready($ => {
 m2d2.load($ => {
     /*
      * M2D2 Storage Extension
+     * @author: A. Lepe
      * @since 2021-06-02
+     *
+     * Wrapper for different kinds of storage.
+     * One advantage is that objects are stored with type instead of string.
      *
      * This extension provides:
      * $.local : To get/set values in localStorage
      * $.session : To get/set values in sessionStorage
      *
-     * Description:
-     * Wrapper for different kinds of storage. One advantage is that objects are stored with type instead of string.
+     * Documentation:
+     * https://gitlab.com/lepe/m2d2/tree/master/documentation/storage.md
+     * https://github.com/lepe/m2d2/tree/master/documentation/storage.md
      *
-     * @author: Alberto Lepe
-     * @since: Jul 9, 2010
-     * @param method: local, session (which means:)
-     *                localStorage, sessionStorage (default)
-     * Methods:
-     * set      : saves the information
-     * get      : retrieve the info.
-     * del      : remove data
-     * clear    : remove all keys
-     * exists   : check if key exists
-     * keys     : get all keys
-     * log      : add in array (it will keep "n" number of items in queue)
-     *
-     * The way to use it is:
-     *
-     * $.local.set("mykey",myval);
-     * console.log(local.get("mykey"));
-     * console.log(local.exists("mykey")); // returns: true
-     * $.local.del("mykey");
-     * $.local.log("mylog", message, 10); // Keep only the last 10
-     * $.local.clear(); // Remove all keys
-     *
-     * myval can be : string, number, object, array
      */
     function Storage(type) {
         switch(type) {
@@ -2164,6 +2097,191 @@ m2d2.load($ => {
     $.local = new Storage("local");
     $.session = new Storage("session");
 });
+/**
+ *
+ * M2D2 Upload Plugin
+ * ver. 2021-12-03
+ *
+ * This extension provides:
+ * $.upload
+ *
+ * Documentation :
+ * https://gitlab.com/lepe/m2d2/tree/master/documentation/upload.md
+ * https://github.com/lepe/m2d2/tree/master/documentation/upload.md
+ */
+ m2d2.load($ => {
+    $.upload = function(ev, options) {
+      const opts = Object.assign({}, {
+            // upload   : "http://localhost/page",
+            // onSelect : (files, sources) => { ... },
+            // onUpdate : (progress_pct, file, index) => { ... },
+            // onDone   : (response, allDone) => { ... }, // response: contains result from the server (JSON), in (S) will trigger each file.
+            // onError  : (response) => { ... }, // response: object with relevant information. In (S) will trigger independently.
+            // onResponse : (response) => { ... }, // Modify response from server (if needed)
+            accept   : "*/*", // You can limit the file type, for example: "image/*", "image/jpg", etc.
+            parallel : false, // If false, it will send all files in a sequence (S)
+            field    : "file", //Field name
+            multiple : true, // Allow multiple files to be selected to upload,
+            maxFiles : 0, // Maximum number of files to allow to upload. 0 = unlimited
+            maxSizeMb: 0, // Maximum size per file (P) or total (S) to allow
+      }, options);
+      options = null; // Do not use it later:
+      let el = window._protected_reference = document.createElement("INPUT");
+      el.name = opts.field;
+      el.type = "file";
+      if(opts.multiple == true) {
+        el.multiple = "multiple";
+        //el.name += "[]";  //Enable if you are using PHP
+      }
+      if(! opts.upload) {
+        console.log("Upload not specified. Using current page.")
+        opts.upload = "";
+      }
+      if(opts.onDone == undefined)      { opts.onDone = (response, allDone) => { console.log(response) }}
+      if(opts.onError  == undefined)    { opts.onError  = (response) => { console.log("Error : "); console.log(response); }}
+      if(opts.onUpdate == undefined)    { opts.onUpdate = (pct, file, index) => { console.log("Uploading : " + pct + "% " + (opts.oneByOne ? "[ " + file.name + " ]" : "")) } }
+      if(opts.onResponse == undefined)  { opts.onResponse = (res) => { return res } } // Return it without modifying it
+
+      el.addEventListener('change', () => {
+        if (el.files.length) {
+            if(opts.maxFiles === 0 | el.files.length <= opts.maxFiles) {
+                if(opts.onSelect) {
+                    const srcs = [];
+                    let totSize = 0;
+                    Array.from(el.files).forEach(file => {
+                        srcs.push(URL.createObjectURL(file))
+                        totSize += file.size;
+                    });
+                    const mbs = totSize / (1024 * 1024);
+                    if(opts.maxSizeMb && mbs > opts.maxSizeMb) {
+                        opts.onError("Maximum size exceeded: " + Math.ceil(mbs) + "MB > " + opts.maxSizeMb + "MB")
+                        return false;
+                    } else {
+                        opts.onSelect(el.files, srcs);
+                    }
+                }
+                new Promise(resolve => {
+                    if(opts.oneByOne) {
+                        let index = 0;
+                        const fileDone = Array(el.files.length).fill(false);
+                        Array.from(el.files).forEach(file => {
+                            new FileUpload(el.name, [file], index++, opts, (data, files, index) => {
+                                fileDone[index] = true;
+                                const allDone = fileDone.indexOf(false) === -1;
+                                opts.onDone(getResponse(data, files, index), allDone);
+                                if(allDone) {
+                                    resolve();
+                                }
+                            });
+                        });
+                    } else {
+                        new FileUpload(el.name, el.files, 0, opts, (data, files, index) => {
+                            opts.onDone(getResponse(data, files, index), true);
+                            resolve();
+                        });
+                    }
+                }).then(() => { // clear / free reference
+                  el = window._protected_reference = undefined;
+                });
+            } else {
+                opts.onError("Max file limit exceeded. Maximum files: " + opts.maxFiles);
+                return false;
+            }
+        }
+      });
+      el.click(); // open dialog
+    }
+
+    function getResponse(data, files, index) {
+        const response = [];
+        data = data || {};
+        files.forEach(f => {
+            const row = (typeof data == "Array") ? (data.length == files.length ? data[index] : data)
+                                                 : (data[f.name] !== undefined ? data[f.name] : data)
+            response.push({
+                file  : f,
+                data  : row,
+                index : index++,    // in case of 1x1 it will be called only once, otherwise, it will be incremented.
+            });
+        });
+        return response;
+    }
+    /**
+     * Upload file using XHR
+     */
+    function FileUpload(fieldName, files, index, options, callback) {
+      const xhr     = new XMLHttpRequest();
+      files         = Array.from(files);
+
+      xhr.upload.addEventListener("progress", function(e) {
+        if (e.lengthComputable) {
+          if(options.oneByOne) {
+              const percentage = Math.round((e.loaded * 100) / e.total);
+              options.onUpdate(percentage, files[0], index);
+          } else {
+              let sizeAccum = 0;
+              let i = 0;
+              files.some(f => {
+                  sizeAccum += f.size;
+                  const percentage = e.loaded >= sizeAccum ? 100 : 100 - Math.round(((sizeAccum - e.loaded) * 100) / f.size);
+                  //console.log("File: " + f.name + " Size: " + f.size);
+                  //console.log("Loaded: " + e.loaded + " Accum: " + sizeAccum + " Total: " + e.total + " Pct: " + percentage)
+                  options.onUpdate(percentage, f, i++);
+                  return sizeAccum >= e.loaded;
+              });
+          }
+        }
+      }, false);
+
+      xhr.addEventListener("load", function(e) {
+        let data = {};
+        try {
+            data = xhr.responseText ? JSON.parse(xhr.responseText) : {
+                error: {type: "Unknown", reason: "Unknown Error"}
+            };
+        } catch(err) {
+            data.error = { type : "Parse Error", reason : err.message }
+        }
+        if (xhr.status >= 200 && xhr.status < 400) {
+            callback(options.onResponse(data), files, index);
+        } else {
+            if(typeof data.error == "string") {
+                data.error = { type : "Exception", reason : data.error }
+            }
+            options.onError(data.error);
+        }
+      }, false);
+
+      xhr.open("POST", options.upload);
+
+      const loaded = Array(files.length).fill(false);
+      const form    = getFileForm(fieldName, files);
+      let loadIndex = 0;
+      files.forEach(f => {
+          const reader  = new FileReader();
+          reader.onload = function(evt) {
+            loaded[loadIndex++] = true;
+            if(loaded.indexOf(false) === -1) {
+                xhr.send(form);
+            }
+          };
+          reader.readAsBinaryString(f);
+      });
+    }
+    /**
+     * Prepares form
+     */
+    function getFileForm(fieldName, files) {
+        const form    = new FormData();
+
+        files.forEach(file => {
+            form.append(fieldName, file, file.name);
+        });
+
+        return form
+    }
+ });
+
 m2d2.load($ => {
     //------------------------ WS --------------------------------
     /**
@@ -2173,24 +2291,12 @@ m2d2.load($ => {
      * @since : 2018
      * WebSocket wrapper
      *
-     * Usage:
-     const wsc = new ws({
-        request      : { ... }, // Initial Request (optional)
-        connect      : () => {}, // Function to execute when it successfully connects
-        disconnected : () => {}, // Function to execute when it gets disconnected
-        reconnect    : true, // Try to reconnect if it gets disconnected (default: true)
-        secure       : false, // If true, will use wss
-        host         : "localhost", // Server name
-        path         : "", // WebSocket's URL path, for example: ws://server/<path> (default: "")
-        port         : 80, // Port in which the WebSocket server is listening (default: 80, 443)
-   });
-     wsc.connect(response => {
-        // response is the object which the server is sending.
-   });
-     wsc.request({ ... }); // To request something to the server, send it as object.
-     wsc.disconnect(); // Disconnect from server (it will turn off reconnection)
+     * This extension provides:
+     * $.ws
      *
-     *
+     * Documentation :
+     * https://gitlab.com/lepe/m2d2/tree/master/documentation/ws.md
+     * https://github.com/lepe/m2d2/tree/master/documentation/ws.md
      */
     class ws {
         request(msg) {
@@ -2274,17 +2380,32 @@ m2d2.load($ => {
 });
 m2d2.load($ => {
     /**
-     * Common XHR method
      * @version 2020-05-09
+     * @author A.Lepe (dev@alepe.com)
+     * XHR implementation
      *
+     * This extension provides:
+     * $.get
+     * $.post
+     * $.put
+     * $.delete
+     * $.connect
+     * $.options
+     * $.trace
+     * $.patch
+     *
+     * Documentation :
+     * https://gitlab.com/lepe/m2d2/tree/master/documentation/xhr.md
+     * https://github.com/lepe/m2d2/tree/master/documentation/xhr.md
+     */
+
+     /**
      * @param method: HTTP method (GET, POST, PUT, DELETE)
      * @param url: service URL
      * @param data: Data object to send (in case of POST and PUT)
      * @param callback: Callback on Success (it will return data)
      * @param error_callback: Callback on Failure
      * @param json : Boolean (if set, it will set request content-type as json and in case of GET, it will send it as body instead of query)
-     *
-     * @author A.Lepe (dev@alepe.com)
      */
     const XHR = function(method, url, data, callback, error_callback, json) {
         const request = new XMLHttpRequest();
@@ -2339,6 +2460,7 @@ m2d2.load($ => {
             }
         };
         request.send(data);
+        return request;
     };
     /**
      * Short method. It also validates arguments and allow omitting some, eg.:
@@ -2411,7 +2533,7 @@ m2d2.load($ => {
             console.log("ERROR CALLBACK: " + error_callback);
             console.log("JSON: " + json);
             */
-            XHR(method.toUpperCase(), url, data, callback, error_callback, json);
+            return XHR(method.toUpperCase(), url, data, callback, error_callback, json);
         }
     });
     Object.assign($, xhr);

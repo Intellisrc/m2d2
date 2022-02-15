@@ -16,8 +16,8 @@
  * $.closeAll   : Close any message that might be open
 
  * Documentation :
- * https://gitlab.com/lepe/m2d2/tree/master/documentation/alert.md
- * https://github.com/lepe/m2d2/tree/master/documentation/alert.md
+ * https://gitlab.com/intellisrc/m2d2/tree/master/documentation/alert.md
+ * https://github.com/intellisrc/m2d2/tree/master/documentation/alert.md
  */
 m2d2.load($ => {
     function close(afterClose) {

@@ -9,8 +9,8 @@
  * $.lang(lang)                  : Set new language
  *
  * Documentation :
- * https://gitlab.com/lepe/m2d2/tree/master/documentation/lang.md
- * https://github.com/lepe/m2d2/tree/master/documentation/lang.md
+ * https://gitlab.com/intellisrc/m2d2/tree/master/documentation/lang.md
+ * https://github.com/intellisrc/m2d2/tree/master/documentation/lang.md
  */
 m2d2.load($ => {
     let manualLang = localStorage.getItem("m2d2.lang") || ""

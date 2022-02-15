@@ -18,18 +18,28 @@ This extension provides:
 
 All methods support any of these arguments:
 
-```js
-// url is required (but can be empty : send to current URL)
-// data is optional (using URL only)
-// callback is optional (send and forget)
-// error_callback is optional (ignore errors)
-// json is optional (false by default : data as parameter)
+* `url` is required (but can be empty : send to current URL)
+* `data` is optional (using URL only)
+* `callback` is optional (send and forget)
+* `error_callback` is optional (ignore errors)
+* `json` is optional (false by default : data as parameter)
 
+```js
 $.get(url, data, callback, error_callback, json);
 $.get(url, callback, error_callback, json);
 $.get(url, data, callback, json);
 $.get(url, data, json);
 $.get(url, callback, json)
+```
+
+All methods return the `XMLHttpRequest` object,
+so you can cancel any request like this:
+
+```js
+const request = $.get(url, json => {});
+setTimeout(() => {
+    request.abort();
+}, 2000);
 ```
 
 ## Examples:

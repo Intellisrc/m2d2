@@ -1,46 +1,28 @@
 /**
  * Author : A.Lepe (dev@alepe.com) - intellisrc.com
  * License: MIT
- * Version: 2.1.0
- * Updated: 2022-01-16
+ * Version: 2.1.1
+ * Updated: 2022-02-15
  * Content: Extension (Debug)
  */
 
 m2d2.load($ => {
     /*
      * M2D2 Storage Extension
+     * @author: A. Lepe
      * @since 2021-06-02
+     *
+     * Wrapper for different kinds of storage.
+     * One advantage is that objects are stored with type instead of string.
      *
      * This extension provides:
      * $.local : To get/set values in localStorage
      * $.session : To get/set values in sessionStorage
      *
-     * Description:
-     * Wrapper for different kinds of storage. One advantage is that objects are stored with type instead of string.
+     * Documentation:
+     * https://gitlab.com/lepe/m2d2/tree/master/documentation/storage.md
+     * https://github.com/lepe/m2d2/tree/master/documentation/storage.md
      *
-     * @author: Alberto Lepe
-     * @since: Jul 9, 2010
-     * @param method: local, session (which means:)
-     *                localStorage, sessionStorage (default)
-     * Methods:
-     * set      : saves the information
-     * get      : retrieve the info.
-     * del      : remove data
-     * clear    : remove all keys
-     * exists   : check if key exists
-     * keys     : get all keys
-     * log      : add in array (it will keep "n" number of items in queue)
-     *
-     * The way to use it is:
-     *
-     * $.local.set("mykey",myval);
-     * console.log(local.get("mykey"));
-     * console.log(local.exists("mykey")); // returns: true
-     * $.local.del("mykey");
-     * $.local.log("mylog", message, 10); // Keep only the last 10
-     * $.local.clear(); // Remove all keys
-     *
-     * myval can be : string, number, object, array
      */
     function Storage(type) {
         switch(type) {
