@@ -377,9 +377,11 @@ class m2d2 {
 			const node = this.instance.getProxyNode(selector, object);
 			if(node.onready !== undefined && m2d2.utils.isFunction(node.onready)) {
 				node.addEventListener("ready", node.onready, { once : true });
+				// This will be called just after the object has been returned (to be sure it was created)
+				// Without setTimeout "onready" would be the same as "onload".
 				setTimeout(() => {
                     node.dispatchEvent(new CustomEvent('ready'));
-				}, 10);
+				}, 10); //TODO: Document
 			}
 			return node;
 		}
@@ -463,10 +465,10 @@ class m2d2 {
 		}
 		if($node._m2d2 === undefined) {
 			$node._m2d2 = true; //flag to prevent it from re-assign methods
-			["parent","sibling","find","findAll","onupdate","show","onshow","css","text","html","getData"].forEach(f => {
+			["parent","sibling","find","findAll","onupdate","onready","show","onshow","css","text","html","getData"].forEach(f => {
 				if($node.hasOwnProperty(f)) {
 					console.log("Node already had ["+f+"] property. It might cause unexpected behaviour.")
-					console.log("You may need to update the M2D2 version or report it to: github.com/lepe/m2d2/")
+					console.log("You may need to update the M2D2 version or report it to: github.com/intellisrc/m2d2/")
 				}
 			});
 			// Properties:
