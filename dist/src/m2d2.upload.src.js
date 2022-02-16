@@ -15,8 +15,8 @@
  * $.upload
  *
  * Documentation :
- * https://gitlab.com/lepe/m2d2/tree/master/documentation/upload.md
- * https://github.com/lepe/m2d2/tree/master/documentation/upload.md
+ * https://gitlab.com/intellisrc/m2d2/tree/master/documentation/upload.md
+ * https://github.com/intellisrc/m2d2/tree/master/documentation/upload.md
  */
  m2d2.load($ => {
     $.upload = function(ev, options) {

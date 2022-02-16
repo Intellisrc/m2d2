@@ -23,8 +23,8 @@ m2d2.load($ => {
      * $.patch
      *
      * Documentation :
-     * https://gitlab.com/lepe/m2d2/tree/master/documentation/xhr.md
-     * https://github.com/lepe/m2d2/tree/master/documentation/xhr.md
+     * https://gitlab.com/intellisrc/m2d2/tree/master/documentation/xhr.md
+     * https://github.com/intellisrc/m2d2/tree/master/documentation/xhr.md
      */
 
      /**

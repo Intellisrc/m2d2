@@ -352,7 +352,7 @@ class Utils {
 
 /**
  * @author: A. Lepe
- * @url : https://gitlab.com/lepe/m2d2/
+ * @url : https://gitlab.com/intellisrc/m2d2/
  * @since: May, 2018
  * @version: 2.0.0
  * @updated: 2021-04-16
@@ -807,11 +807,12 @@ class m2d2 {
 						}
     				} else if(isFunc) {
 						if(m2d2.updates) {
+						    // By using addEventListener we can assign multiple listeners to a single node //TODO: document
 							if (key === "onupdate") {
-								$node.addEventListener(key, value, true);
+								$node.addEventListener("update", value, true); //TODO: document
 							}
-							$node[key] = value;
 						}
+						$node[key] = value;
 					} else if(key !== "template" && (key !== "warn" && value !== false)) { //We handle templates inside items
 						if(object.warn === undefined || object.warn !== false) { //TODO: document
 							console.error("Not sure what you want to do with key: " + key + " under element: ");
@@ -832,9 +833,7 @@ class m2d2 {
 		    const native = ["BODY","FRAME","IFRAME","IMG","LINK","SCRIPT","STYLE"].indexOf($node.tagName) >= 0;
 		    const inputImage = $node.tagName === "INPUT" && $node.type === "image";
 		    if(! (native || inputImage)) {
-                const loadedEvent = new CustomEvent('onload');
-		        $node.addEventListener("onload", $node.onload, true);
-		        $node.dispatchEvent(loadedEvent);
+                $node.dispatchEvent(new CustomEvent('load'));
 		    }
 		}
 		return $node;
@@ -1224,7 +1223,7 @@ class m2d2 {
                     } else if(property === "onupdate") {
                     	if(m2d2.updates) {
 							if (m2d2.utils.isFunction(value)) {
-								target.addEventListener("onupdate", value, true);
+								target.addEventListener("update", value, true);
 								oldValue = target[property];
 								target[property] = value;
 							} else {
@@ -1248,7 +1247,7 @@ class m2d2 {
 					// This will observe changes on values
 					if(m2d2.updates && target.onupdate !== undefined) {
 					    if(value !== oldValue) {
-                            target.dispatchEvent(new CustomEvent("onupdate", {
+                            target.dispatchEvent(new CustomEvent("update", {
                                 detail: {
                                     type     : typeof value,
                                     property : property,
@@ -1290,7 +1289,7 @@ class m2d2 {
 				if(m.type === "attributes") {
 					const value = m2d2.utils.getAttrOrProp(target, m.attributeName);
 					if(value !== m.oldValue) {
-                        target.dispatchEvent(new CustomEvent("onupdate", {
+                        target.dispatchEvent(new CustomEvent("update", {
                             detail: {
                                 type     : typeof value,
                                 property : m.attributeName,
@@ -1305,7 +1304,7 @@ class m2d2 {
 						const value = m.addedNodes[0].textContent;
 						const oldValue = m.removedNodes[0].textContent;
 						if(value !== oldValue) {
-                            target.dispatchEvent(new CustomEvent("onupdate", {
+                            target.dispatchEvent(new CustomEvent("update", {
                                  detail: {
                                      type     : typeof value,
                                      property : "text",
@@ -1319,7 +1318,7 @@ class m2d2 {
 						const value = m.addedNodes;
 						const oldValue = m.removedNodes;
 						if(value !== oldValue) {
-                            target.dispatchEvent(new CustomEvent("onupdate", {
+                            target.dispatchEvent(new CustomEvent("update", {
                                  detail: {
                                      type     : typeof value,
                                      property : "items",
@@ -1600,8 +1599,8 @@ class m2d2 {
  * $.closeAll   : Close any message that might be open
 
  * Documentation :
- * https://gitlab.com/lepe/m2d2/tree/master/documentation/alert.md
- * https://github.com/lepe/m2d2/tree/master/documentation/alert.md
+ * https://gitlab.com/intellisrc/m2d2/tree/master/documentation/alert.md
+ * https://github.com/intellisrc/m2d2/tree/master/documentation/alert.md
  */
 m2d2.load($ => {
     function close(afterClose) {
@@ -1869,8 +1868,8 @@ m2d2.load($ => {
  * $.lang(lang)                  : Set new language
  *
  * Documentation :
- * https://gitlab.com/lepe/m2d2/tree/master/documentation/lang.md
- * https://github.com/lepe/m2d2/tree/master/documentation/lang.md
+ * https://gitlab.com/intellisrc/m2d2/tree/master/documentation/lang.md
+ * https://github.com/intellisrc/m2d2/tree/master/documentation/lang.md
  */
 m2d2.load($ => {
     let manualLang = localStorage.getItem("m2d2.lang") || ""
@@ -2052,8 +2051,8 @@ m2d2.load($ => {
      * $.session : To get/set values in sessionStorage
      *
      * Documentation:
-     * https://gitlab.com/lepe/m2d2/tree/master/documentation/storage.md
-     * https://github.com/lepe/m2d2/tree/master/documentation/storage.md
+     * https://gitlab.com/intellisrc/m2d2/tree/master/documentation/storage.md
+     * https://github.com/intellisrc/m2d2/tree/master/documentation/storage.md
      *
      */
     function Storage(type) {
@@ -2106,8 +2105,8 @@ m2d2.load($ => {
  * $.upload
  *
  * Documentation :
- * https://gitlab.com/lepe/m2d2/tree/master/documentation/upload.md
- * https://github.com/lepe/m2d2/tree/master/documentation/upload.md
+ * https://gitlab.com/intellisrc/m2d2/tree/master/documentation/upload.md
+ * https://github.com/intellisrc/m2d2/tree/master/documentation/upload.md
  */
  m2d2.load($ => {
     $.upload = function(ev, options) {
@@ -2295,8 +2294,8 @@ m2d2.load($ => {
      * $.ws
      *
      * Documentation :
-     * https://gitlab.com/lepe/m2d2/tree/master/documentation/ws.md
-     * https://github.com/lepe/m2d2/tree/master/documentation/ws.md
+     * https://gitlab.com/intellisrc/m2d2/tree/master/documentation/ws.md
+     * https://github.com/intellisrc/m2d2/tree/master/documentation/ws.md
      */
     class ws {
         request(msg) {
@@ -2395,8 +2394,8 @@ m2d2.load($ => {
      * $.patch
      *
      * Documentation :
-     * https://gitlab.com/lepe/m2d2/tree/master/documentation/xhr.md
-     * https://github.com/lepe/m2d2/tree/master/documentation/xhr.md
+     * https://gitlab.com/intellisrc/m2d2/tree/master/documentation/xhr.md
+     * https://github.com/intellisrc/m2d2/tree/master/documentation/xhr.md
      */
 
      /**

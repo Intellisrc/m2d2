@@ -352,7 +352,7 @@ class Utils {
 
 /**
  * @author: A. Lepe
- * @url : https://gitlab.com/lepe/m2d2/
+ * @url : https://gitlab.com/intellisrc/m2d2/
  * @since: May, 2018
  * @version: 2.0.0
  * @updated: 2021-04-16
@@ -807,11 +807,12 @@ class m2d2 {
 						}
     				} else if(isFunc) {
 						if(m2d2.updates) {
+						    // By using addEventListener we can assign multiple listeners to a single node //TODO: document
 							if (key === "onupdate") {
-								$node.addEventListener(key, value, true);
+								$node.addEventListener("update", value, true); //TODO: document
 							}
-							$node[key] = value;
 						}
+						$node[key] = value;
 					} else if(key !== "template" && (key !== "warn" && value !== false)) { //We handle templates inside items
 						if(object.warn === undefined || object.warn !== false) { //TODO: document
 							console.error("Not sure what you want to do with key: " + key + " under element: ");
@@ -832,9 +833,7 @@ class m2d2 {
 		    const native = ["BODY","FRAME","IFRAME","IMG","LINK","SCRIPT","STYLE"].indexOf($node.tagName) >= 0;
 		    const inputImage = $node.tagName === "INPUT" && $node.type === "image";
 		    if(! (native || inputImage)) {
-                const loadedEvent = new CustomEvent('onload');
-		        $node.addEventListener("onload", $node.onload, true);
-		        $node.dispatchEvent(loadedEvent);
+                $node.dispatchEvent(new CustomEvent('load'));
 		    }
 		}
 		return $node;
@@ -1224,7 +1223,7 @@ class m2d2 {
                     } else if(property === "onupdate") {
                     	if(m2d2.updates) {
 							if (m2d2.utils.isFunction(value)) {
-								target.addEventListener("onupdate", value, true);
+								target.addEventListener("update", value, true);
 								oldValue = target[property];
 								target[property] = value;
 							} else {
@@ -1248,7 +1247,7 @@ class m2d2 {
 					// This will observe changes on values
 					if(m2d2.updates && target.onupdate !== undefined) {
 					    if(value !== oldValue) {
-                            target.dispatchEvent(new CustomEvent("onupdate", {
+                            target.dispatchEvent(new CustomEvent("update", {
                                 detail: {
                                     type     : typeof value,
                                     property : property,
@@ -1290,7 +1289,7 @@ class m2d2 {
 				if(m.type === "attributes") {
 					const value = m2d2.utils.getAttrOrProp(target, m.attributeName);
 					if(value !== m.oldValue) {
-                        target.dispatchEvent(new CustomEvent("onupdate", {
+                        target.dispatchEvent(new CustomEvent("update", {
                             detail: {
                                 type     : typeof value,
                                 property : m.attributeName,
@@ -1305,7 +1304,7 @@ class m2d2 {
 						const value = m.addedNodes[0].textContent;
 						const oldValue = m.removedNodes[0].textContent;
 						if(value !== oldValue) {
-                            target.dispatchEvent(new CustomEvent("onupdate", {
+                            target.dispatchEvent(new CustomEvent("update", {
                                  detail: {
                                      type     : typeof value,
                                      property : "text",
@@ -1319,7 +1318,7 @@ class m2d2 {
 						const value = m.addedNodes;
 						const oldValue = m.removedNodes;
 						if(value !== oldValue) {
-                            target.dispatchEvent(new CustomEvent("onupdate", {
+                            target.dispatchEvent(new CustomEvent("update", {
                                  detail: {
                                      type     : typeof value,
                                      property : "items",
