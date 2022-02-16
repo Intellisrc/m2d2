@@ -22,7 +22,16 @@ class m2d2 {
 	static extensions = {}; // Additional properties for DOM
 	static main = (() => {
 		const f = (selector, object) => {
-			return this.instance.getProxyNode(selector, object);
+			const node = this.instance.getProxyNode(selector, object);
+			if(node.onready !== undefined && m2d2.utils.isFunction(node.onready)) {
+				node.addEventListener("ready", node.onready, { once : true });
+				// This will be called just after the object has been returned (to be sure it was created)
+				// Without setTimeout "onready" would be the same as "onload".
+				setTimeout(() => {
+                    node.dispatchEvent(new CustomEvent('ready'));
+				}, 10); //TODO: Document
+			}
+			return node;
 		}
 	    // Extends Utils:
 	    m2d2.utils.getMethods(m2d2.utils).forEach(k => { f[k] = m2d2.utils[k] });
@@ -481,6 +490,7 @@ class m2d2 {
 		    const native = ["BODY","FRAME","IFRAME","IMG","LINK","SCRIPT","STYLE"].indexOf($node.tagName) >= 0;
 		    const inputImage = $node.tagName === "INPUT" && $node.type === "image";
 		    if(! (native || inputImage)) {
+				$node.addEventListener("load", $node.onload, { once : true });
                 $node.dispatchEvent(new CustomEvent('load'));
 		    }
 		}

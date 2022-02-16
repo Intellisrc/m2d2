@@ -2,7 +2,7 @@
  * Author : A.Lepe (dev@alepe.com) - intellisrc.com
  * License: MIT
  * Version: 2.1.1
- * Updated: 2022-02-15
+ * Updated: 2022-02-16
  * Content: Full Bundle (Debug)
  */
 
@@ -364,8 +364,8 @@ class m2d2 {
     'use strict';
 	_storedEvents = [];
 	static storedEventsTimeout = 50; //ms to group same events
-	static short = true; //Enable short assignation (false = better performance) TODO: document
-	static updates = true; //Enable "onupdate" (false = better performance) TODO: document
+	static short = true; //Enable short assignation (false = better performance) TODO: document (use Proxy like: obj.a = "text")
+	static updates = true; //Enable "onupdate" (false = better performance) TODO: document (use MutationObserver)
 	static utils = new Utils();
 
 	constructor() {}
@@ -374,7 +374,14 @@ class m2d2 {
 	static extensions = {}; // Additional properties for DOM
 	static main = (() => {
 		const f = (selector, object) => {
-			return this.instance.getProxyNode(selector, object);
+			const node = this.instance.getProxyNode(selector, object);
+			if(node.onready !== undefined && m2d2.utils.isFunction(node.onready)) {
+				node.addEventListener("ready", node.onready, { once : true });
+				setTimeout(() => {
+                    node.dispatchEvent(new CustomEvent('ready'));
+				}, 10);
+			}
+			return node;
 		}
 	    // Extends Utils:
 	    m2d2.utils.getMethods(m2d2.utils).forEach(k => { f[k] = m2d2.utils[k] });
@@ -833,6 +840,7 @@ class m2d2 {
 		    const native = ["BODY","FRAME","IFRAME","IMG","LINK","SCRIPT","STYLE"].indexOf($node.tagName) >= 0;
 		    const inputImage = $node.tagName === "INPUT" && $node.type === "image";
 		    if(! (native || inputImage)) {
+				$node.addEventListener("load", $node.onload, { once : true });
                 $node.dispatchEvent(new CustomEvent('load'));
 		    }
 		}
