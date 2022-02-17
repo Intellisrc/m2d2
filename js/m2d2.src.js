@@ -116,7 +116,7 @@ class m2d2 {
 		}
 		if($node._m2d2 === undefined) {
 			$node._m2d2 = true; //flag to prevent it from re-assign methods
-			["parent","sibling","find","findAll","onupdate","onready","show","onshow","css","text","html","getData"].forEach(f => {
+			["parent","sibling","find","findAll","onupdate","onready","show","onshow","inView","css","text","html","getData"].forEach(f => {
 				if($node.hasOwnProperty(f)) {
 					console.log("Node already had ["+f+"] property. It might cause unexpected behaviour.")
 					console.log("You may need to update the M2D2 version or report it to: github.com/intellisrc/m2d2/")
@@ -175,16 +175,7 @@ class m2d2 {
 			// TEST: 16
 			Object.defineProperty($node, "show", {
 				get() { //TODO: document
-                    const rect = this.getBoundingClientRect();
-                    const display = this.style.display !== "none";
-                    const notHidden = this.style.visibility !== "hidden";
-                    return (
-                        display && notHidden &&
-                        rect.top >= 0 && rect.left >= 0 &&
-                        rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
-                        rect.right <= (window.innerWidth || document.documentElement.clientWidth) &&
-						rect.width > 0 && rect.height > 0
-                    );
+				    return m2d2.utils.isVisible(this);
 				},
 				set(show) {
                     const cssDisplay = () => {
@@ -236,6 +227,9 @@ class m2d2 {
 			}
 			// Functions:
 			Object.assign($node, {
+			    inView: () => { //TODO: document
+			        return m2d2.utils.inView($node);
+			    },
 				parent: () => { //TODO: test
 					return this.extDom($node.parentElement);
 				},
