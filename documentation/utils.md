@@ -17,6 +17,8 @@ This extension provides:
 * $.isNode
 * $.isHtml
 * $.isEmpty
+* $.isVisible
+* $.inView
 * $.cleanArray
 * $.isValidElement
 * $.exists
