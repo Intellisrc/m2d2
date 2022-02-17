@@ -8,11 +8,11 @@ m2d2.ready($ => {
         "Timer" : "timer.html",
         "Logging screen" : "log.html",
         "Movie list - Async" : "list-async.html",
-        "Item list" : "list.html",
+        "Item list" : "list-async.html",
         "Item list (sort)" : "list-sort.html",
-        "Item list (advanced)" : "list-alt.html",
         "Phone book - Async" : "async.html",
-        "Form validation" : "form.html"
+        "Form validation" : "form.html",
+        "Performance test" : "performance.html",
     }
     $(function() {
         const links = [];

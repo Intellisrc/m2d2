@@ -57,7 +57,6 @@ aside {
 }
 aside li {
     background-color: #EEE;
-    padding: 10px;
     margin: 1px;
     list-style: none;
 }
@@ -70,6 +69,8 @@ aside li[selected], aside li[selected] a {
     cursor: default;
 }
 aside a {
+    display: block;
+    padding: 10px;
     text-decoration: none;
     color: #333;
 }

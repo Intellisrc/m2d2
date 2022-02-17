@@ -376,7 +376,7 @@ class m2d2 {
 		const f = (selector, object) => {
 			const node = this.instance.getProxyNode(selector, object);
 			// TEST: 13
-			if(node.onready !== undefined && m2d2.utils.isFunction(node.onready)) {
+			if(node && node.onready && m2d2.utils.isFunction(node.onready)) {
 				node.addEventListener("ready", node.onready, { once : true });
 				// This will be called just after the object has been returned (to be sure it was created)
 				// Without setTimeout "onready" would be the same as "onload".
