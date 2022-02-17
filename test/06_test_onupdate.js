@@ -1,4 +1,4 @@
-/*QUnit.test('Testing pushing changes', function (assert) {
+QUnit.test('Testing pushing changes', function (assert) {
   $(root, `
     <section id="user">
         <form>
@@ -25,7 +25,7 @@
    user.nickname.onchange(); // Required in this example
    //-------
    assert.equal(document.querySelector("#profile .nickname").text, "dummy");
-});*/
+});
 
 QUnit.test('Testing pulling changes', function (assert) {
   $(root, `
@@ -41,11 +41,12 @@ QUnit.test('Testing pulling changes', function (assert) {
    //-------
    const user = $("#user", {
         nickname : "",
-        /*onupdate : (ev) => {
-            console.log("Prop: " + ev.detail.property + "; New: " + ev.detail.newValue);
-            assert.equal(ev.detail.property, "value");
-            assert.equal(ev.detail.newValue, "dummy");
-        }*/
+        onupdate : (ev) => {
+            if(ev.detail.property === "value") {
+                console.log("Prop: " + ev.detail.property + "; New: " + ev.detail.newValue);
+                assert.equal(ev.detail.newValue, "dummy");
+            }
+        }
    });
    const profile = $("#profile", {
         nickname : [user.nickname, "value"]

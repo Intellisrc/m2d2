@@ -4,7 +4,7 @@
  */
 
 QUnit.test('Do not duplicate on update', function (assert) {
-    // NOTE: show property depends on viewport, in tests, its always hidden.
+    // NOTE: show property depends on viewport, in tests, it is always hidden.
     let shown = false;
     const objs = $(root, {
         show : false,
@@ -18,8 +18,7 @@ QUnit.test('Do not duplicate on update', function (assert) {
         // This will also test the minimum functionality in 'onupdate'
         onupdate : function(ev) {
             console.log("Updated : " + JSON.stringify(ev));
-            console.log("**** FIXME (16) ****");
-            //FIXME: assert.equal(ev.property, "show");
+            assert.ok(["show", "style", "items"].indexOf(ev.detail.property) >= 0);
         },
         onshow : function() {
             console.log("Shown");
