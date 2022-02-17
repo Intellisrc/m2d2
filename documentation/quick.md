@@ -1,7 +1,7 @@
 # Quick Start
 
 ---
-(Read time: 3min)
+(Read time: 5min)
 
 Any project (UI) is conformed of several parts. For example, if your system has a `profile` section, it will likely
 be formed of `username`, `fullname`, `email`, etc.
@@ -41,7 +41,14 @@ m2d2.ready($ => {
 });
 ```
 The advantage of this option is that you can work with the design and the logic separately. It doesn't matter which
-elements or structure you have under `#user` as long as they have either the classnames or the ids that represent your data.
+elements or structure you have under `#user` as long as they have either the class-names or the ids that represent your data.
+
+NOTE: M2D2 will automatically try to guess the property *assigned*, for example:<br>
+`user.email = "john@example.com"`
+is the same as: <br>
+`user.email.text = "john@example.com`. <br>
+However, if you want to read the property, you have to use the full annotation: `user.email.text` (as without it
+you will be getting the `Node`).
 
 ### 2. Structure in M2D2
 
@@ -154,10 +161,122 @@ m2d2.ready($ => {
    });
 });
 ```
+NOTE: `$.get` is from [XHR Extension](xhr.md).
 
 In this example, we get a list of users and display each one in a specific way. Part of the structure is fixed in HTML,
 and the other part is dynamic using M2D2 templates.
 
+## Observing object changes
+
+In many cases you need to update some other part of your UI whenever there is a change in one part of it. In such cases
+you can control the changes either in the object which triggered the event (source), or in the affected object (destination). 
+Let's see both cases:
+
+```html
+<section id="user">
+    <form>
+        <input type="text" name="nickname" value="" />
+    </form>
+</section>
+<section id="profile">
+    <span class="nickname"></span>
+</section>
+```
+
+Task: If the object `user` is modified, you will update the `profile` object.
+
+### a. control in source
+
+This is they way you will do it if you use `JQuery`. This works by pushing your changes into all the affected parts.
+The advantage is that it is easier to understand, but when many parts are affected, it becomes more difficult to 
+keep track of all parts involved. 
+
+```js
+// user.js
+m2d2.ready($ => {
+    const profile = $("#profile"); // import `profile`
+    
+    const user = $("#user", {
+        nickname : {
+            // this is the event which triggers the change:
+            oninput : function(ev) {
+                // changes are "pushed" into `profile`
+                profile.nickname.text = this.value;
+            }
+        }
+    });
+});
+```
+
+```js
+// profile.js
+m2d2.ready($ => {
+    const profile = $("#profile", {
+        nickname : $.local.get("user") 
+    });
+});
+```
+Note:  `$.local` is an [extension to use LocalStorage](storage.md)
+
+### b. control in destination
+
+This is the way `Angular`, `React`, `Vue` and similar works. Instead of pushing the changes, they are "pulled" (or more
+correctly, observed and then applied). The advantage is that all changes related to a single object are done in one place,
+so if something is not rendered correctly, it is easier to find out.
+
+```js
+// user.js
+m2d2.ready($ => {
+    const user = $("#user", {
+        nickname : ""
+    });
+});
+```
+
+```js
+// profile.js
+m2d2.ready($ => {
+    const user = $("#user"); // import `user`
+    
+    const profile = $("#profile", {
+        nickname : [ user.nickname, 'value' ]
+    });
+});
+```
+
+Whenever `user.nickname.value` changes, `profile.nickname.text` will be updated. 
+In order this "magic" to work, you need to assign an array with its first element, a `Node` and the second
+element a `string` (property to observe). You can assign it to any other property as well:
+
+```js
+...
+    const profile = $("#profile", {
+        nickname : {
+            title : [ user.nickname, 'value' ]
+        }
+    });
+...
+```
+
+Finally, another way to observe an object change without having to assign it, is:
+
+```js
+// observe.js (for example, in another file)
+const user = $("#user"); // import `user`
+
+// You can assign multiple `onupdate` callbacks to the same node.
+user.nickname.onupdate = (ev) => {
+    // ev.detail is an object with the changes summary
+    if(ev.detail.property === 'value') {
+        console.log("Old value: " + ev.detail.oldValue);
+        console.log("New value: " + ev.detail.newValue);
+        $.alert("Nickname was updated");
+    }
+}
+```
+NOTE: `$.alert` is from [Alert Extension](alert.md).
+
+---
 This will likely help you to start. For more details:
 
 * [A complete project example and tutorial](project.md)

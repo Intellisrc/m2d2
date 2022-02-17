@@ -8,16 +8,16 @@
 	<style type="text/css">
 		code { background: #EEE; padding: 10px; display: block; white-space: pre; }
 	</style>
-<script src="../dist/src/m2d2.all.src.js" type="text/javascript"></script>
+<script src="../../dist/src/m2d2.all.src.js" type="text/javascript"></script>
 <!-- Import Demo menu: -->
-<script src="js/demo-links.js" type="text/javascript"></script>
+<script src="../js/demo-links.js" type="text/javascript"></script>
 <!--- --->
 <script type="text/javascript">
 	//On page ready...
 	let user, title1, title2;
 	m2d2.ready($ => {
 		// Most simple example using a String as data
-		user = $(".user", {
+		user = $("#root .user", {
 			form : {
 				method : "POST",
 				onsubmit : function() { return false; },
@@ -35,8 +35,12 @@
 			}
 		});
 		// Prepare recipients: (initialized with textContent)
-		title1 = $("h1");
-		title2 = $("h2");
+		title1 = $("#root h1");
+		title2 = $("#root h2");
+		title3 = $("#root h3", {
+			text : [ user.name, 'value' ]
+		});
+		title4 = $("#root h4", [ user.name, 'value' ]);
 
 		// Instead of "Pushing" changes, you can "Pull" changes this way
 		// which is useful to keep code logically separated
@@ -48,16 +52,18 @@
 		}
 		user.name.onupdate = (ev) => {
 			if(ev.detail.property === "value") {
-				title2.text = user.name.value;
+				title2.text = ev.detail.newValue; // You can also use the value from the event
 			}
 		}
 	});
 </script>
 </head>
 <body>
-<article>
+<article id="root">
 	<h1>Title</h1>
 	<h2>Title</h2>
+	<h3>Title</h3>
+	<h4>Title</h4>
 	<div class="user">
 		<form>
 			<label for="name">Name : </label><input id="name" type="text" value="" />
@@ -76,6 +82,8 @@
 		different from using:<br>
 		<code>user.name.oninput</code> event, in which the title and subtitle won't be updated when the
 		button is clicked.</p>
+	<p>You can assign a value of : <code>[Node, string]</code> to create a link, which upon change will update
+	the specified property</p>
 </article>
 </body>
 </html>

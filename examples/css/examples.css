@@ -59,6 +59,7 @@ aside li {
     background-color: #EEE;
     padding: 10px;
     margin: 1px;
+    list-style: none;
 }
 aside li:hover {
     background-color: #FFC;

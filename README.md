@@ -127,7 +127,7 @@ m2d2.ready($ => {
 Read the documentation, try the tutorial or the examples:
 
 ### Quick Start:
-[3 minute reading](documentation/quick.md)
+[5 minute reading](documentation/quick.md)
 
 ### Project Example:
 [30 minute reading](documentation/project.md)
@@ -333,6 +333,16 @@ import m2d2 from 'm2d2/xhr'     // You get m2d2.bundle.xhr.min.js
 This library was almost completely rewritten in v2.0. The main difference is that in 1.x, the M2D2 object was mainly a Proxy object which upon change, updated the DOM. However the main issue was that if you changed the DOM directly, there was no way to update the M2D2 object automatically, and thus could have side effects. In 2.x, the M2D2 object is a Node/HTMLElement wrapped around a Proxy and extended, which means that you can safely change the DOM directly without having side effects. Because now the M2D2 object is a DOM element, you have access to everything through vanilla javascript (like classList, appendChild, style, etc), which greatly simplified things.
 
 Other big difference with v2.0 is that you can split your code across several small files in a very easy way (very useful if you use tools like 'gulp' to concatenate and minify your code).
+
+# Developing
+
+To modify or contribute to this code, start by cloning this repository.
+
+Then execute: `npm install`
+
+To compile, execute: `gulp`
+
+To run all tests, execute: `npm test`
 
 ## Acknowledgments:
 
