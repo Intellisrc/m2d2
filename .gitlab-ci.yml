@@ -1,0 +1,9 @@
+image: node:latest
+
+before_script:
+  - npm install
+
+test:
+  stage: test
+  script:
+    - karma start karma.conf.js
