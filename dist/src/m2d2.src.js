@@ -2,7 +2,7 @@
  * Author : A.Lepe (dev@alepe.com) - intellisrc.com
  * License: MIT
  * Version: 2.1.1
- * Updated: 2022-02-18
+ * Updated: 2022-02-20
  * Content: Core (Debug)
  */
 
@@ -391,7 +391,13 @@ class Utils {
  */
 class m2d2 {
     'use strict';
-	_storedEvents = [];
+	_stored = {
+		events : [],
+		datasetNodes : [],
+		datasets : [],
+		styleNodes : [],
+		styles : []
+	}
 	static storedEventsTimeout = 50; //ms to group same events
 	static short = true; //Enable short assignation (false = better performance) TODO: document (use Proxy like: obj.a = "text")
 	static updates = true; //Enable "onupdate" (false = better performance) TODO: document (use MutationObserver)
@@ -413,6 +419,11 @@ class m2d2 {
                     node.dispatchEvent(new CustomEvent('ready'));
 				}, 10); //TODO: Document
 			}
+			// Store references to datasets (used later in onpudate dataset, style):
+			["dataset","style"].forEach(i => {
+				this.instance._stored[i + "s"].push(node[i]);
+				this.instance._stored[i + "Nodes"].push(node);
+			})
 			return node;
 		}
 	    // Extends Utils:
@@ -735,7 +746,9 @@ class m2d2 {
 					case "style": //TODO: test
 					case "dataset": //TODO: as it is already a DOM, we don't need it maybe?
 						if(m2d2.utils.isPlainObject(value)) {
-							Object.assign($node[key], value);
+							Object.keys(value).forEach(k => {
+								$node[key][k] = this.updateValue($node[key], k, value[k]);
+							});
 						} else {
 							error = true;
 						}
@@ -756,7 +769,7 @@ class m2d2 {
 					console.log("Into Node:");
 					console.log($node);
 				}
-				// Look for elements:
+			// Look for elements:
 			} else {
 			    const options = [];
 			    try {
@@ -901,7 +914,10 @@ class m2d2 {
      * @returns {boolean}
      */
     isUpdateLink(value) {
-        return value.length === 2 && m2d2.utils.isNode(value[0]) && m2d2.utils.isString(value[1]);
+		const acceptedType = m2d2.utils.isNode(value[0]) ||
+			value[0] instanceof DOMStringMap ||
+			value[0] instanceof CSSStyleDeclaration
+        return value.length === 2 && acceptedType && m2d2.utils.isString(value[1]);
     }
 
     /**
@@ -1235,21 +1251,6 @@ class m2d2 {
         }
 	}
 
-	/**
-	 * If selector is a Node, will return that node,
-	 * otherwise will look inside root
-	 * @private
-	 * @param {string, HTMLElement, Node} selector
-	 * @param {HTMLElement, Node} $root
-	 * @returns {HTMLElement, Node}
-	 */
-    getNode(selector, $root) {
-        if ($root === undefined) {
-            $root = document;
-        }
-        return m2d2.utils.isNode(selector) ? selector : $root.querySelector(selector);
-    }
-
     /**
      * Handle [ Node, string ] values (inline onupdate)
      * @private
@@ -1258,23 +1259,95 @@ class m2d2 {
 	 * @param {*} value
      */
     updateValue($node, key, value) {
-        // TEST: 06
+		// TEST: 06
         if(this.isUpdateLink(value)) {
+			const _this = this;
             const obj  = value[0];
             const prop = value[1];
-            value = obj[prop];
-            if(m2d2.updates) {
-                obj.onupdate = (ev) => {
-                    if(ev.detail && ev.detail.property === prop) {
-                        if(! m2d2.utils.isObject($node[key])) {
-                            $node[key] = ev.detail.newValue;
-                        }
-                    }
-                }
-            }
-        }
-        return value;
-    }
+			value = obj[prop];
+			if(obj instanceof CSSStyleDeclaration && this._stored.styles.includes(obj)) {
+				const parent = this._stored.styleNodes[this._stored.styles.indexOf(obj)];
+				if(m2d2.updates) {
+					parent.onupdate = function (ev) {
+						if (ev.detail && ev.detail.property === "style" && ev.detail.newValue.startsWith(prop + ":")) {
+							_this.setShortValue($node, key, this.style[prop]);
+						}
+					}
+				}
+			} else if(obj instanceof DOMStringMap && this._stored.datasets.includes(obj)) {
+				const parent = this._stored.datasetNodes[this._stored.datasets.indexOf(obj)];
+				if(m2d2.updates) {
+					parent.onupdate = (ev) => {
+						if (ev.detail && ev.detail.property === "data-" + prop) {
+							_this.setShortValue($node, key, ev.detail.newValue);
+						}
+					}
+				}
+			} else {
+				if(m2d2.updates) {
+					obj.onupdate = (ev) => {
+						if (ev.detail && ev.detail.property === prop) {
+							if (!m2d2.utils.isObject($node[key])) {
+								_this.setShortValue($node, key, ev.detail.newValue);
+							}
+						}
+					}
+				}
+			}
+		}
+		return value;
+	}
+
+	/**
+	 * Place a value either in a property or in a node (short)
+	 * @param $node {Node}
+	 * @param key {string}
+	 * @param value {*}
+	 */
+	setShortValue($node, key, value) {
+		if(m2d2.utils.isNode($node[key])) {
+			if(m2d2.short) {
+				const o = this.plainToObject($node[key], value);
+				const k = m2d2.utils.isPlainObject(o) && Object.keys(o).length >= 1 ? Object.keys(o)[0] : null;
+				if (k) {
+					$node[key][k] = value;
+				}
+			} else {
+				console.log("Short is disabled. Trying to set a value ("+value+") in a node:")
+				console.log($node[key]);
+				console.log("Either turn on 'short' functionality, or be sure you specify the property, like: 'node.text'")
+			}
+		} else {
+			$node[key] = value
+		}
+	}
+
+	/**
+	 * Place a value either in a property or in a node (short)
+	 * @param $node {Node}
+	 * @param key {string}
+	 * @param sample {*} Sample value (to automatically guess property)
+	 * @returns {*} current value
+	 */
+	getShortValue($node, key, sample) {
+		let value = null;
+		if(m2d2.utils.isNode($node[key])) {
+			if(m2d2.short) {
+				const o = this.plainToObject($node[key], sample || "");
+				const k = m2d2.utils.isPlainObject(o) && Object.keys(o).length >= 1 ? Object.keys(o)[0] : null;
+				if (k) {
+					value = $node[key][k];
+				}
+			} else {
+				console.log("Short is disabled. Trying to get a value from node:")
+				console.log($node[key]);
+				console.log("Either turn on 'short' functionality, or be sure you specify the property, like: 'node.text'")
+			}
+		} else {
+			value = $node[key];
+		}
+		return value;
+	}
 
 	/**
 	 * Basic Proxy to enable assign values to elements
@@ -1306,12 +1379,8 @@ class m2d2 {
                 set: (target, property, value) => {
                     let oldValue = "";
                     if(m2d2.utils.isElement(target[property])) {
-                        const obj = this.plainToObject(target[property], value);
-                        const key = m2d2.utils.isPlainObject(obj) && Object.keys(obj).length >= 1 ? Object.keys(obj)[0] : null;
-                        if(key) {
-                            oldValue = target[property][key];
-                            target[property][key] = value;
-                        }
+						oldValue = this.getShortValue(target, property, value);
+						this.setShortValue(target, property, value);
                     } else if(property === "onupdate") {
                     	if(m2d2.updates) {
 							if (m2d2.utils.isFunction(value)) {
@@ -1371,11 +1440,11 @@ class m2d2 {
 			// Forms will link elements which can not be set as proxy so we
 			// add a link named `"$" + key` but this have the side effect to
 			// generate two triggers (one for the element and one for the Proxy).
-			if(this._storedEvents.indexOf(m) >= 0) { return } else {
-				this._storedEvents.push(m);
+			if(this._stored.events.indexOf(m) >= 0) { return } else {
+				this._stored.events.push(m);
 				setTimeout(() => {
-					const i = this._storedEvents.indexOf(m);
-					if(i >= 0) { this._storedEvents.splice(i, 1); }
+					const i = this._stored.events.indexOf(m);
+					if(i >= 0) { this._stored.events.splice(i, 1); }
 				}, m2d2.storedEventsTimeout); //TODO: this will prevent repeated events to be triggered in less than 50ms : document
 			}
 			// Check for onupdate //TODO: document
@@ -1396,7 +1465,7 @@ class m2d2 {
 				    const $child = m.addedNodes[0] || m.removedNodes[0];
 					if($child.nodeName === "#text") {
 						const value = m.addedNodes[0].textContent;
-						const oldValue = m.removedNodes[0].textContent;
+						const oldValue = m.removedNodes.length ? m.removedNodes[0].textContent : null;
 						if(value !== oldValue) {
                             target.dispatchEvent(new CustomEvent("update", {
                                  detail: {

@@ -23,10 +23,10 @@
 				onsubmit : function() { return false; },
 			},
 			name: {
-				//onupdate : function(ev) { ... } // Its also possible to "Push" changes
-				autofocus: true,
+				//onupdate : function(ev) { console.log(ev.details); } // Its also possible to "Push" changes
 				value: "Default title",
-				size: 50
+				size: 50,
+				onload: function (ev) { this.focus(); }
 			},
 			button : {
 				onclick : () => {
@@ -82,8 +82,8 @@
 		different from using:<br>
 		<code>user.name.oninput</code> event, in which the title and subtitle won't be updated when the
 		button is clicked.</p>
-	<p>You can assign a value of : <code>[Node, string]</code> to create a link, which upon change will update
-	the specified property</p>
+	<p>You can assign a value of : <code>[object, string]</code> to create a link, which upon change will update
+	the specified property (supported object types: Node, HTMLElement, DOMStringMap (dataset), CSSStyleDeclaration (style))</p>
 </article>
 </body>
 </html>

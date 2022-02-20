@@ -1,0 +1,98 @@
+<html>
+<head>
+<title>Demo using M2D2 : Dataset and Styles by reference </title>
+<meta name="HandheldFriendly" content="1">
+<meta name="viewport" content="width=device-width, maximum-scale=1.0">
+<meta name="theme-color" content="#333333">
+<link rel="stylesheet" href="../css/examples.css" type="text/css" />
+<style>
+	span {
+		display: inline-block;
+		width: 200px;
+	}
+</style>
+<script src="../../dist/src/m2d2.all.src.js" type="text/javascript"></script>
+<!-- Import Demo menu: -->
+<script src="../js/demo-links.js" type="text/javascript"></script>
+<!--- 						--->
+<script type="text/javascript">
+	m2d2.ready($ => {
+		// Set them, so you can use reference
+		const test = $("#test", {
+			text : "Initial Text",
+			dataset : {
+				id : 0
+			},
+			style : {
+				color : "blue"
+			}
+		});
+		const form = $("#form", {
+			dataset : {
+				initial : test.text
+			},
+			tt : {
+				value : test.text,
+				oninput : function (ev) {
+					test.text = this.value
+				}
+			},
+			dv : {
+				value : test.dataset.id,
+				oninput : function (ev) {
+					test.dataset.id = this.value;
+				}
+			},
+			tv : {
+				value : test.style.color,
+				oninput : function (ev) {
+					test.style.color = this.value;
+				}
+			}
+		});
+		const values = $("#values", {
+			dataset : {
+				local : [test.dataset, "id"],
+				label : [test, "text"],
+				color : [test.style, "color"]
+			},
+			dt : [test, "text"],
+			ds : [test.dataset, "id"],
+			sc : { // You can also specify it using 'text' or any other property:
+				text : [test.style, "color"]
+			}
+		});
+	});
+</script>
+</head>
+<body>
+<article id="root">
+	<h1 id="test"></h1>
+	<hr>
+	<form id="form">
+		<div>
+			<span>Text</span><input type="text" name="tt" value="" />
+		</div>
+		<div>
+			<span>Dataset ID-Value</span><input type="text" name="dv" value="" placeholder="eg. 100" />
+		</div>
+		<div>
+			<span>Color Value</span><input type="text" name="tv" value="" placeholder="eg. red" />
+		</div>
+	</form>
+	<hr>
+	<div id="values">
+		<div><span>Text</span><b class="dt"></b></div>
+		<div><span>Dataset</span><b class="ds"></b></div>
+		<div><span>Style</span><b class="sc"></b></div>
+	</div>
+	<h3>Lesson:</h3>
+	<p>When you type inside the text input elements, you are updating one element ('#test'). Instead of updating
+		all other parts that needs to be updated (under '#values'), those are updated by reference.<br>
+	<p>What it is important to mention, is that you can observe changes also on the objects 'dataset' and 'style' of
+		M2D2 elements.</p>
+	<p>You can assign a value of : <code>[object, string]</code> to create a link, which upon change will update
+		the specified property (supported object types: Node, HTMLElement, DOMStringMap (dataset), CSSStyleDeclaration (style))</p>
+</article>
+</body>
+</html>

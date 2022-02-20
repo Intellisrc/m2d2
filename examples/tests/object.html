@@ -27,9 +27,11 @@
 			},
 			controls: {
 				link : {
-					autofocus : true,
 					onkeyup: function (event) {
 						page.info.a = this.value;
+					},
+					onload : function (ev) {
+						this.focus();
 					}
 				}
 			}

@@ -49,10 +49,12 @@
         const shared = $("#shared"); // import
 
         $("#input", {
-            autofocus: true,
             onkeyup: function () {
                 title.text = this.value;
                 shared.text = "Text from input.js";
+            },
+            onload : function () {
+                this.focus();
             }
         });
     });

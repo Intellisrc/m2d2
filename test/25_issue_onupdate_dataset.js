@@ -10,24 +10,58 @@ QUnit.test('onupdate on dataset (not nodes)', function (assert) {
     </section>
   `);
    //-------
+   const done = assert.async()
    const user = $("#user", {
         dataset : {
             id : 1000
-        },
-        onupdate : (ev) => {
-            if(ev.detail.property === "value") {
-                console.log("Prop: " + ev.detail.property + "; New: " + ev.detail.newValue);
-                assert.equal(ev.detail.newValue, "dummy");
-            }
         }
    });
    const profile = $("#profile", {
-        user_id : [user.dataset, "id"]
+       title : [user.dataset, "id"],
+       user_id : { text : [user.dataset, "id"] },
+       onready : function () {
+           //-------
+           assert.equal(profile.title, "2000");
+           assert.equal(profile.user_id.text, "2000");
+           assert.equal(document.querySelector("#profile .user_id").text, "2000");
+           done();
+       }
    });
+
    // change it
    user.dataset.id = 2000;
-   //-------
-   assert.equal(document.querySelector("#profile .user_id").text, "2000");
+})
+
+QUnit.test('onupdate on style (not nodes)', function (assert) {
+    $(root, `
+    <section id="user">
+        <form>
+            <input type="text" name="nickname" value="" />
+        </form>
+    </section>
+    <section id="profile">
+        <span class="color"></span>
+    </section>
+  `);
+    //-------
+    const done = assert.async()
+    const user = $("#user", {
+        style : {
+            color: "red"
+        }
+    });
+    const profile = $("#profile", {
+        color : {
+            text : [user.style, "color"]
+        },
+        onready : function () {
+            assert.equal(document.querySelector("#profile .color").text, "blue");
+            done();
+        }
+    });
+    // change it
+    user.style.color = "blue"
+    //-------
 })
 
 QUnit.test('onupdate on plain objects', function (assert) {
