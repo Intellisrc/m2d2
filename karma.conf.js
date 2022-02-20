@@ -13,10 +13,13 @@ module.exports = function(config) {
     //port: 9876,  // karma web server port
     colors: true,
     logLevel: config.LOG_INFO,
-    //browsers: ['Chrome'],
-    browsers: ['ChromeHeadless'],
-    singleRun: true, // Karma captures browsers, runs the tests and exits
-    autoWatch: false,
+
+    browsers: ['Chrome'],
+    autoWatch: true,
+
+    //browsers: ['ChromeHeadless'],
+    //singleRun: true, // Karma captures browsers, runs the tests and exits
+    //autoWatch: false,
 
     // client configuration
     // showUI: true needs the clearContext: false option to display correctly in non-debug mode.

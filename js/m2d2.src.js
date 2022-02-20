@@ -281,7 +281,10 @@ class m2d2 {
 		// When no selector is specified, set "body"
 		if(m2d2.utils.isObject(selector) && object === undefined) {
 			object = selector;
-			selector = "body";
+			selector = m2d2.utils.newEmptyNode(); //TODO: document
+			if(object.warn === undefined) {
+			    object.warn = false;
+			}
 		}
 		if(!(m2d2.utils.isString(selector) || m2d2.utils.isElement(selector) || m2d2.utils.isNode(selector))) {
 			console.error("Selector is not a string or a Node:")
@@ -512,6 +515,15 @@ class m2d2 {
 	}
 
     /**
+     * Identify if value is an update link (inline onupdate)
+	 * @param {*} value
+     * @returns {boolean}
+     */
+    isUpdateLink(value) {
+        return value.length === 2 && m2d2.utils.isNode(value[0]) && m2d2.utils.isString(value[1]);
+    }
+
+    /**
 	 * Convert plain value into object if needed
 	 * @param {HTMLElement, Node} $node
 	 * @param {*} value
@@ -521,7 +533,7 @@ class m2d2 {
 			// When setting values to the node (simplified version):
 			if(m2d2.utils.isHtml(value)) {
 				value = { html : value };
-		    } else if(value.length === 2 && m2d2.utils.isElement(value[0]) && m2d2.utils.isString(value[1])) {
+		    } else if(this.isUpdateLink(value)) {
 		        let tmpVal = this.plainToObject($node, value[0][value[1]]);
 		        if(m2d2.utils.isPlainObject(tmpVal)) {
 		            const newValue = {};
@@ -865,19 +877,16 @@ class m2d2 {
 	 * @param {*} value
      */
     updateValue($node, key, value) {
-        //Look for updates
-        if(value.length === 2) {
-            // TEST: 06
-            if(m2d2.utils.isElement(value[0]) && m2d2.utils.isString(value[1])) {
-                const node = value[0];
-                const prop = value[1];
-                value = node[prop];
-                if(m2d2.updates) {
-                    node.onupdate = (ev) => {
-                        if(ev.detail && ev.detail.property === prop) {
-                            if(! m2d2.utils.isElement($node[key])) {
-                                $node[key] = ev.detail.newValue;
-                            }
+        // TEST: 06
+        if(this.isUpdateLink(value)) {
+            const obj  = value[0];
+            const prop = value[1];
+            value = obj[prop];
+            if(m2d2.updates) {
+                obj.onupdate = (ev) => {
+                    if(ev.detail && ev.detail.property === prop) {
+                        if(! m2d2.utils.isObject($node[key])) {
+                            $node[key] = ev.detail.newValue;
                         }
                     }
                 }
