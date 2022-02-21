@@ -1,17 +1,16 @@
-image: node:alpine3.14
+image: shivjm/node-chromium-alpine:node17-chromium93
 
 before_script:
-  - apk add chromium
   - npm install
 
 build:
   stage: build
   script:
-    - npm install gulp gulp-concat gulp-header-comment gulp-rename gulp-terser gulp-umd
-    - gulp
+    - npm install -g gulp gulp-concat gulp-header-comment gulp-rename gulp-terser gulp-umd
+    - /usr/local/bin/gulp
 
 test:
   stage: test
   script:
     - npm install -g karma-cli karma-chrome-launcher karma-qunit qunit
-    - karma start karma.conf.js
+    - /usr/local/bin/karma start karma.conf.js
