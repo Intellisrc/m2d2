@@ -127,7 +127,7 @@ class m2d2 {
 		}
 		if($node._m2d2 === undefined) {
 			$node._m2d2 = true; //flag to prevent it from re-assign methods
-			["parent","sibling","find","findAll","onupdate","onready","show","onshow","inView","css","text","html","getData"].forEach(f => {
+			["parent","sibling","next","prev","find","findAll","onupdate","onready","show","onshow","inView","css","text","html","getData","index"].forEach(f => {
 				if($node.hasOwnProperty(f)) {
 					console.log("Node already had ["+f+"] property. It might cause unexpected behaviour.")
 					console.log("You may need to update the M2D2 version or report it to: github.com/intellisrc/m2d2/")
@@ -241,6 +241,15 @@ class m2d2 {
 			    inView: () => { //TODO: document
 			        return m2d2.utils.inView($node);
 			    },
+				index: () => { //TEST: 07
+				    return Array.from($node.parentNode.children).indexOf($node);
+				},
+				next: () => { //TEST: 07
+				    return $node.nextElementSibling;
+				},
+				prev: () => { //TEST: 07
+                    return $node.previousElementSibling;
+				},
 				parent: () => { //TODO: test
 					return this.extDom($node.parentElement);
 				},
@@ -255,7 +264,7 @@ class m2d2 {
 					const nodeList = it === undefined ? Array.from($node.children) : $node.querySelectorAll(it);
 					nodeList.forEach(n => { this.extDom(n) });
 					return nodeList;
-				}
+				},
 			}, extend);
 			// Let attributes know about changes in values //TODO: test
 			if(["INPUT", "TEXTAREA", "SELECT"].indexOf($node.tagName) >= 0 && m2d2.utils.hasAttrOrProp($node, "value")) {
