@@ -2,9 +2,15 @@ image: node:latest
 
 before_script:
   - npm install
-  - npm install -g karma-cli karma-chrome-launcher karma-qunit qunit
+
+build:
+  stage: build
+  script:
+    - npm install gulp gulp-concat gulp-header-comment gulp-rename gulp-terser gulp-umd
+    - gulp
 
 test:
   stage: test
   script:
+    - npm install -g karma-cli karma-chrome-launcher karma-qunit qunit
     - karma start karma.conf.js
