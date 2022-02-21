@@ -25,6 +25,13 @@ QUnit.test('Items test', function (assert) {
    assert.equal(list.items.last().link.text, "Link " + 100)
    assert.equal(list.items.first().index(), 0)
    assert.equal(list.items.last().index(), 99)
+
+   // Issue #42:
+   let i = 0;
+   list.items.forEach(item => {
+        i++
+   });
+   assert.equal(i, 100);
    //---- No selection test:
    assert.equal(list.items.selected(), null);
 });

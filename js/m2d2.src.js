@@ -40,8 +40,10 @@ class m2d2 {
 			}
 			// Store references to datasets (used later in onpudate dataset, style):
 			["dataset","style"].forEach(i => {
-				this.instance._stored[i + "s"].push(node[i]);
-				this.instance._stored[i + "Nodes"].push(node);
+			    if(node && node[i]) {
+				    this.instance._stored[i + "s"].push(node[i]);
+				    this.instance._stored[i + "Nodes"].push(node);
+				}
 			})
 			return node;
 		}
@@ -155,7 +157,7 @@ class m2d2 {
 					}
 				}
 			});
-			// TEST: 13,27,...
+			// TEST: 43,13,27,...
 			Object.defineProperty($node, "html", {
 				get() { return this.innerHTML; },
 				set(value) { this.innerHTML = value;  }

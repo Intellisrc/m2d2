@@ -16,6 +16,6 @@ QUnit.test('items.concat and items.push do not work with strings', function (ass
    });
    //-------
    assert.equal(list.items.length, 15);
-   assert.equal(list.items.first().link.text, "Link " + 1);
-   assert.equal(list.items.last().link.text, "five");
+   assert.equal(list.items.first().text, "Link " + 1);
+   assert.equal(list.items.last().text, "five");
 });
