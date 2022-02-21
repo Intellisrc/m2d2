@@ -1,6 +1,7 @@
-image: node:latest
+image: node:alpine3.14
 
 before_script:
+  - apk add chromium
   - npm install
 
 build:
