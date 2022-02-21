@@ -2,7 +2,7 @@
  * Author : A.Lepe (dev@alepe.com) - intellisrc.com
  * License: MIT
  * Version: 2.1.1
- * Updated: 2022-02-20
+ * Updated: 2022-02-21
  * Content: Core (Debug)
  */
 
@@ -1176,6 +1176,8 @@ class m2d2 {
                                     $template = m2d2.utils.newElement(key);
                                 } else if(val.tagName !== undefined) {
                                     $template = m2d2.utils.newElement(val.tagName);
+									template[val.tagName] = val;
+									delete(template[key]);
                                 } else {
                                     console.error("Template defined an element which can not be identified: [" + key + "], using <span> in:");
                                     console.log(template);
@@ -1184,7 +1186,7 @@ class m2d2 {
                                     $template = m2d2.utils.newElement("span");
                                 }
                             } else {
-                                console.error("Template has no definition and it can not be guessed. Using <span>. Template: ");
+                                console.error("Template has no definition, and it can not be guessed. Using <span>. Template: ");
                                 console.log(template);
                                 console.log("Node: ");
                                 console.log($node);

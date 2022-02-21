@@ -38,10 +38,6 @@ QUnit.test("Automatic select property or child", assert => {
             check : { disabled : true, checked : false }
         }
     });
-    console.log("**** FIXME (03) ****")
-    // Must be automatic:
-    //assert.equal(r.wrap.title.tagName, "H1");
-    //assert.equal(r.wrap.title.text, "Hello");
     assert.equal(r.wrap.$title.tagName, "H1");
     assert.equal(r.wrap.$title.text, "Hello");
     assert.equal(r.wrap.link.href, "http://example.com/");

@@ -795,6 +795,8 @@ class m2d2 {
                                     $template = m2d2.utils.newElement(key);
                                 } else if(val.tagName !== undefined) {
                                     $template = m2d2.utils.newElement(val.tagName);
+									template[val.tagName] = val;
+									delete(template[key]);
                                 } else {
                                     console.error("Template defined an element which can not be identified: [" + key + "], using <span> in:");
                                     console.log(template);
@@ -803,7 +805,7 @@ class m2d2 {
                                     $template = m2d2.utils.newElement("span");
                                 }
                             } else {
-                                console.error("Template has no definition and it can not be guessed. Using <span>. Template: ");
+                                console.error("Template has no definition, and it can not be guessed. Using <span>. Template: ");
                                 console.log(template);
                                 console.log("Node: ");
                                 console.log($node);
