@@ -168,40 +168,43 @@ and the other part is dynamic using M2D2 templates.
 
 ## Observing object changes
 
-In many cases you need to update some other part of your UI whenever there is a change in one part of it. In such cases
-you can control the changes either in the object which triggered the event (source), or in the affected object (destination). 
+In many cases an object may depend on other object values. For example, if you have a `basic` account type, and you add
+extra features to it (pro version). In that case, the `pro` version depends on the `basic` version. In order to update
+the `pro` information, you can either "push" the `basic` changes into the `pro` object, or you can pull the `basic` 
+changes from the `pro` object.
+
 Let's see both cases:
 
 ```html
-<section id="user">
-    <form>
-        <input type="text" name="nickname" value="" />
-    </form>
+<section id="basic">
+    <span>Nickname: </span>
+    <input type="text" name="nickname" value="" />
 </section>
-<section id="profile">
-    <span class="nickname"></span>
+<section id="pro">
+    <div class="nickname"></div>
+    <div>Number of Licenses: <span class="licenses">0</span></div>
 </section>
 ```
 
-Task: If the object `user` is modified, you will update the `profile` object.
+Task: If the object `basic` is modified, you will update the `pro` object.
 
-### a. control in source
+### Pushing changes from `basic` into `pro`: 
 
 This is they way you will do it if you use `JQuery`. This works by pushing your changes into all the affected parts.
-The advantage is that it is easier to understand, but when many parts are affected, it becomes more difficult to 
-keep track of all parts involved. 
+The advantage is that it is easier to understand, but the complex a project becomes, the harder is to track changes.
+Another disadvantage is that dependencies are reversed, it means, that `basic` needs to know about `pro`.
 
 ```js
-// user.js
+// basic.js
 m2d2.ready($ => {
-    const profile = $("#profile"); // import `profile`
+    const pro = $("#pro"); // import `pro`
     
-    const user = $("#user", {
+    const basic = $("#basic", {
         nickname : {
             // this is the event which triggers the change:
             oninput : function(ev) {
-                // changes are "pushed" into `profile`
-                profile.nickname.text = this.value;
+                // changes are "pushed" into `pro`
+                pro.nickname.text = this.value;
             }
         }
     });
@@ -209,53 +212,78 @@ m2d2.ready($ => {
 ```
 
 ```js
-// profile.js
+// pro.js
 m2d2.ready($ => {
-    const profile = $("#profile", {
-        nickname : $.local.get("user") 
+    const pro = $("#pro", {
+        nickname : $.local.get("user.nickname"), // <-- default value from LocalStorage (just an example)
+        licenses : 1
     });
 });
 ```
 Note:  `$.local` is an [extension to use LocalStorage](storage.md)
 
-### b. control in destination
+### Pulling `basic` changes from `pro`:
 
 This is the way `Angular`, `React`, `Vue` and similar works. Instead of pushing the changes, they are "pulled" (or more
-correctly, observed and then applied). The advantage is that all changes related to a single object are done in one place,
-so if something is not rendered correctly, it is easier to find out.
+correctly, observed and then applied), I call it "linked reference". The advantage is that all changes related to a 
+single object are done in one place, so if something is not rendered correctly, it is easier to find out. 
+
+In our example, it is more natural that `pro` requires `basic`, and that `basic` no need to know about `pro` existence:
 
 ```js
-// user.js
+// basic.js
 m2d2.ready($ => {
-    const user = $("#user", {
+    const basic = $("#basic", {
         nickname : ""
     });
 });
 ```
 
 ```js
-// profile.js
+// pro.js
 m2d2.ready($ => {
-    const user = $("#user"); // import `user`
+    const basic = $("#basic"); // import `basic`
     
-    const profile = $("#profile", {
-        nickname : [ user.nickname, 'value' ]
+    const pro = $("#pro", {
+        nickname : [ basic.nickname, 'value' ], // <-- we are using 'value' here as basic.nickname is an `input` element.
+        licenses : 1
     });
 });
 ```
 
-Whenever `user.nickname.value` changes, `profile.nickname.text` will be updated. 
+Whenever `basic.nickname.value` changes, `pro.nickname.text` will be updated. 
 In order this "magic" to work, you need to assign an array with its first element, a `Node` and the second
-element a `string` (property to observe). You can assign it to any other property as well:
+element a `string` (property to observe). 
+
+You can use this "linked reference" to modify and observe dataset and style changes as well, or use a callback function
+to update the value before is updated, for example
+(more on this in [the documentation](m2d2.md#linked-references)):
 
 ```js
-...
-    const profile = $("#profile", {
-        nickname : {
-            title : [ user.nickname, 'value' ]
+m2d2.ready($ => {
+    const user = $("#user", {
+        dataset : {
+            uid : 100
+        },
+        style : { 
+            color : "blue"
+        },
+        channel : {
+            text : "user100"
         }
     });
-...
+    
+    const profile = $("#profile", {
+        user_id : [ user.dataset, "uid" ],
+        a : {
+            text : "User Channel",
+            style : {
+                backgroundColor : [ user.style, "color" ]
+            },
+            href : [ user.channel, "text" , txt => { return "/channels/users/" + txt } ]
+        }
+    });
+});
 ```
 
 Finally, another way to observe an object change without having to assign it, is:

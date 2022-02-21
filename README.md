@@ -1,5 +1,9 @@
-# M2D2.JS 
+# M2D2
 
+[![MIT Licence](https://badges.frapsoft.com/os/mit/mit.svg?v=103)](https://opensource.org/licenses/mit-license.php)
+[![Open Source Love](https://badges.frapsoft.com/os/v2/open-source.svg?v=103)](https://github.com/ellerbrock/open-source-badges/)
+[![npm version](https://badge.fury.io/js/m2d2.svg)](https://www.npmjs.com/package/m2d2)
+[![npm downloads](https://img.shields.io/npm/dt/m2d2?color=C52)](https://www.npmjs.com/package/m2d2)
 ---
 A class to easily place data in DOM and update them immediately upon change. It has no dependencies. It is similar to Angular, Vue, ReactJS and alike frameworks and shares some similarities with JQuery.
 

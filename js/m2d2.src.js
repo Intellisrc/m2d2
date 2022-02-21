@@ -40,8 +40,10 @@ class m2d2 {
 			}
 			// Store references to datasets (used later in onpudate dataset, style):
 			["dataset","style"].forEach(i => {
-				this.instance._stored[i + "s"].push(node[i]);
-				this.instance._stored[i + "Nodes"].push(node);
+			    if(node && node[i]) {
+				    this.instance._stored[i + "s"].push(node[i]);
+				    this.instance._stored[i + "Nodes"].push(node);
+				}
 			})
 			return node;
 		}
@@ -127,7 +129,7 @@ class m2d2 {
 		}
 		if($node._m2d2 === undefined) {
 			$node._m2d2 = true; //flag to prevent it from re-assign methods
-			["parent","sibling","find","findAll","onupdate","onready","show","onshow","inView","css","text","html","getData"].forEach(f => {
+			["parent","sibling","next","prev","find","findAll","onupdate","onready","show","onshow","inView","css","text","html","getData","index"].forEach(f => {
 				if($node.hasOwnProperty(f)) {
 					console.log("Node already had ["+f+"] property. It might cause unexpected behaviour.")
 					console.log("You may need to update the M2D2 version or report it to: github.com/intellisrc/m2d2/")
@@ -155,7 +157,7 @@ class m2d2 {
 					}
 				}
 			});
-			// TEST: 13,27,...
+			// TEST: 43,13,27,...
 			Object.defineProperty($node, "html", {
 				get() { return this.innerHTML; },
 				set(value) { this.innerHTML = value;  }
@@ -241,6 +243,15 @@ class m2d2 {
 			    inView: () => { //TODO: document
 			        return m2d2.utils.inView($node);
 			    },
+				index: () => { //TEST: 07
+				    return Array.from($node.parentNode.children).indexOf($node);
+				},
+				next: () => { //TEST: 07
+				    return $node.nextElementSibling;
+				},
+				prev: () => { //TEST: 07
+                    return $node.previousElementSibling;
+				},
 				parent: () => { //TODO: test
 					return this.extDom($node.parentElement);
 				},
@@ -255,7 +266,7 @@ class m2d2 {
 					const nodeList = it === undefined ? Array.from($node.children) : $node.querySelectorAll(it);
 					nodeList.forEach(n => { this.extDom(n) });
 					return nodeList;
-				}
+				},
 			}, extend);
 			// Let attributes know about changes in values //TODO: test
 			if(["INPUT", "TEXTAREA", "SELECT"].indexOf($node.tagName) >= 0 && m2d2.utils.hasAttrOrProp($node, "value")) {
@@ -533,10 +544,21 @@ class m2d2 {
      * @returns {boolean}
      */
     isUpdateLink(value) {
-		const acceptedType = m2d2.utils.isNode(value[0]) ||
-			value[0] instanceof DOMStringMap ||
-			value[0] instanceof CSSStyleDeclaration
-        return value.length === 2 && acceptedType && m2d2.utils.isString(value[1]);
+        let isLink = false
+        if(m2d2.utils.isArray(value) && (value.length === 2 || value.length === 3)) {
+            const twoArgs = value.length === 2;
+            // First element in array must be Node || DomStringMap (dataset) || CSSStyleDeclaration (style)
+            const acceptedType = m2d2.utils.isNode(value[0]) ||
+                value[0] instanceof DOMStringMap ||
+                value[0] instanceof CSSStyleDeclaration
+            // Second must be 'string' and Third can be a 'function'
+            const otherTypes = twoArgs ? m2d2.utils.isString(value[1]) :
+                          m2d2.utils.isString(value[1]) && m2d2.utils.isFunction(value[2]);
+            // If only two args are in array, add an empty function:
+            isLink = acceptedType && otherTypes;
+            if(isLink && twoArgs) { value.push(v => { return v; }) } //TODO: Document function
+        }
+        return isLink
     }
 
     /**
@@ -550,7 +572,10 @@ class m2d2 {
 			if(m2d2.utils.isHtml(value)) {
 				value = { html : value };
 		    } else if(this.isUpdateLink(value)) {
-		        let tmpVal = this.plainToObject($node, value[0][value[1]]);
+                const obj  = value[0];
+                const prop = value[1];
+                const callback = value[2];
+		        let tmpVal = this.plainToObject($node, callback(obj[prop]));
 		        if(m2d2.utils.isPlainObject(tmpVal)) {
 		            const newValue = {};
 		            Object.keys(tmpVal).forEach(k => {
@@ -885,13 +910,14 @@ class m2d2 {
 			const _this = this;
             const obj  = value[0];
             const prop = value[1];
+            const callback = value[2];
 			value = obj[prop];
 			if(obj instanceof CSSStyleDeclaration && this._stored.styles.includes(obj)) {
 				const parent = this._stored.styleNodes[this._stored.styles.indexOf(obj)];
 				if(m2d2.updates) {
 					parent.onupdate = function (ev) {
 						if (ev.detail && ev.detail.property === "style" && ev.detail.newValue.startsWith(prop + ":")) {
-							_this.setShortValue($node, key, this.style[prop]);
+							_this.setShortValue($node, key, callback(this.style[prop]));
 						}
 					}
 				}
@@ -900,7 +926,7 @@ class m2d2 {
 				if(m2d2.updates) {
 					parent.onupdate = (ev) => {
 						if (ev.detail && ev.detail.property === "data-" + prop) {
-							_this.setShortValue($node, key, ev.detail.newValue);
+							_this.setShortValue($node, key, callback(ev.detail.newValue));
 						}
 					}
 				}
@@ -909,7 +935,7 @@ class m2d2 {
 					obj.onupdate = (ev) => {
 						if (ev.detail && ev.detail.property === prop) {
 							if (!m2d2.utils.isObject($node[key])) {
-								_this.setShortValue($node, key, ev.detail.newValue);
+								_this.setShortValue($node, key, callback(ev.detail.newValue));
 							}
 						}
 					}
