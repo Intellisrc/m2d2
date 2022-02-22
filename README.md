@@ -133,6 +133,9 @@ Read the documentation, try the tutorial or the examples:
 ### Quick Start:
 [5 minute reading](documentation/quick.md)
 
+### General Recommendations
+[Best practices when using M2D2](documentation/recommendations.md)
+
 ### Project Example:
 [30 minute reading](documentation/project.md)
 

@@ -243,9 +243,6 @@ class m2d2 {
 			    inView: () => { //TODO: document
 			        return m2d2.utils.inView($node);
 			    },
-				index: () => { //TEST: 07
-				    return Array.from($node.parentNode.children).indexOf($node);
-				},
 				next: () => { //TEST: 07
 				    return $node.nextElementSibling;
 				},
@@ -268,6 +265,12 @@ class m2d2 {
 					return nodeList;
 				},
 			}, extend);
+			// Some elements like <OPTION> already have index
+			if($node.index === undefined) {
+				$node.index = () => { //TEST: 07
+					return Array.from($node.parentNode.children).indexOf($node);
+				}
+			}
 			// Let attributes know about changes in values //TODO: test
 			if(["INPUT", "TEXTAREA", "SELECT"].indexOf($node.tagName) >= 0 && m2d2.utils.hasAttrOrProp($node, "value")) {
 				$node.oninput = function() { this.setAttribute("value", this.value )}

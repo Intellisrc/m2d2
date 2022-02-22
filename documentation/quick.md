@@ -307,6 +307,7 @@ NOTE: `$.alert` is from [Alert Extension](alert.md).
 ---
 This will likely help you to start. For more details:
 
+* [General Recommendations and practices when using M2D2](recommendations.md)
 * [A complete project example and tutorial](project.md)
 * [Full documentation](m2d2.md)
 * [Tutorial using jsfiddle](https://gl.githack.com/intellisrc/m2d2/raw/master/examples/tutorial.html)
