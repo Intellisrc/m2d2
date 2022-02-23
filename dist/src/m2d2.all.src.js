@@ -2,7 +2,7 @@
  * Author : A.Lepe (dev@alepe.com) - intellisrc.com
  * License: MIT
  * Version: 2.1.1
- * Updated: 2022-02-22
+ * Updated: 2022-02-23
  * Content: Full Bundle (Debug)
  */
 
@@ -1870,7 +1870,7 @@ m2d2.load($ => {
                             justifyContent: "center",
                             alignItems: "center"
                         },
-                        front : {
+                        front : Object.assign({
                             tagName : "form",
                             css : (options.css ? ($.isArray(options.css) ? options.css : [options.css]) : [])
                                     .concat(["m2d2-alert-front", "popup", options.icon], getIconClass(options.icon)),
@@ -1946,43 +1946,46 @@ m2d2.load($ => {
                                 const def = this.find("[autofocus]");
                                 if(def) { def.focus(); }
                             }
-                        }
+                        }, function (ob) {
+                            let newButtons = {};
+                            if(ob.length) {
+                                newButtons = {
+                                    buttons : {
+                                        tagName : "div",
+                                        css : "m2d2-alert-buttons"
+                                    }
+                                };
+                                ob.forEach(b => {
+                                    const key = b.toLowerCase().replace(/[^a-z ]/g,"").replace(" ","_");
+                                    newButtons.buttons[key] = {
+                                        tagName : "button",
+                                        type : "submit",
+                                        value : key,
+                                        css : ["color", key],
+                                        text : $.dict !== undefined ? $.dict(b) : b,
+                                        autofocus : ["ok","yes"].includes(b),
+                                        formNoValidate : ["cancel"].includes(b),
+                                        // we append a hidden input with the value of the button clicked:
+                                        onclick : function() {
+                                            $(this.closest("form"), {
+                                                hide : {
+                                                    tagName : "input",
+                                                    type : "hidden",
+                                                    name : "button",
+                                                    value : this.value
+                                                }
+                                            });
+                                        }
+                                    }
+                                });
+                            }
+                            return newButtons;
+                        }(options.buttons)
+                        )
                     }
                 }
             });
         });
-        if(options.buttons.length) {
-            const newButtons = {
-                buttons : {
-                    tagName : "div",
-                    css : "m2d2-alert-buttons"
-                }
-            };
-            options.buttons.forEach(b => {
-                const key = b.toLowerCase().replace(/[^a-z ]/g,"").replace(" ","_");
-                newButtons.buttons[key] = {
-                    tagName : "button",
-                    type : "submit",
-                    value : key,
-                    css : ["color", key],
-                    text : $.dict !== undefined ? $.dict(b) : b,
-                    autofocus : ["ok","yes"].includes(b),
-                    formNoValidate : ["cancel"].includes(b),
-                    // we append a hidden input with the value of the button clicked:
-                    onclick : function() {
-                        $(this.closest("form"), {
-                            hide : {
-                                tagName : "input",
-                                type : "hidden",
-                                name : "button",
-                                value : this.value
-                            }
-                        });
-                    }
-                }
-            });
-            $("#m2d2-alert .m2d2-alert-front", newButtons);
-        }
         // Add automatically name to fields in case it is not specified:
         let i = 1;
         $("#m2d2-alert .m2d2-alert-front").findAll("input, select, textarea").forEach(elem => {
