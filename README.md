@@ -115,7 +115,7 @@ m2d2.ready($ => {
 ```js
 m2d2.ready($ => {
     const user = $("#user", {
-        ...
+        /* ... */
         email : {
             text : user_info.emails[0],
             onclick : function(ev) {
@@ -279,7 +279,7 @@ $("uploadFileButton", {
             }
         });
     }    
-}
+});
 ```
 
 [Learn about it](documentation/upload.md)
@@ -298,7 +298,7 @@ $.ws.connect({
     request : {} // initial request
 }, json => {
     // json is the data received from server
-    if(json.user) { ... }
+    if(json.user) { /* ... */ }
 });
 // Send a message to server:
 $.ws.request({

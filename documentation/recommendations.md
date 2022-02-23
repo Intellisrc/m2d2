@@ -95,6 +95,10 @@ m2d2.ready($ => {
 
 ```
 
+One more advantage of splitting your code, is that you can easily reuse parts 
+in another project. For example, if you have `login.js`, it is likely that you
+could use it elsewhere making your development faster.
+
 ## 3. Always use `const`
 
 In Javascript IDs (or elements with id) can be accessed directly, so you can call `office.text` without having to import it
