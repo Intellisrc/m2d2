@@ -12,6 +12,13 @@
 [Tutorial](#tutorial) |
 [Examples](#live-demo)
 ---
+Extensions: [Alerts](documentation/alert.md) |
+[Language](documentation/lang.md) |
+[Storage](documentation/storage.md) |
+[XHR](documentation/xhr.md) |
+[Upload](documentation/upload.md) |
+[WebSocket](documentation/ws.md)
+---
 A class to easily place data in DOM and update them immediately upon change. It has no dependencies. It is similar to Angular, Vue, ReactJS and alike frameworks and shares some similarities with JQuery.
 
 The main goal of this framework is to keep the HTML and JS pure and clean, without having to either setup rules in the HTML (like in Angular), use HTML templates inside Javascript like in React, or use mixed templates like Vue. 
