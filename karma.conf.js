@@ -16,8 +16,20 @@ module.exports = function(config) {
 
     //browsers: ['Chrome'],
     //autoWatch: true,
-
-    browsers: ['ChromeHeadless'],
+    
+    browsers: ['headlessChrome'],
+      customLaunchers : {
+      headlessChrome: {
+        base: "ChromeHeadless",
+        flags: [
+          "--no-sandbox",
+          "--no-proxy-server",
+          "--disable-web-security",
+          "--disable-gpu",
+          "--js-flags=--max-old-space-size=8196", 
+        ]
+      }
+    },    
     singleRun: true, // Karma captures browsers, runs the tests and exits
     autoWatch: false,
 
