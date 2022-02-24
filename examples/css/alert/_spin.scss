@@ -1,0 +1,12 @@
+@keyframes spin {
+  0% {
+    transform: rotate(0deg)
+  }
+  to {
+    transform: rotate(1turn)
+  }
+}
+.material-icons.spin,
+.fa.fa-spin::before {
+  animation: spin 2s linear infinite;
+}

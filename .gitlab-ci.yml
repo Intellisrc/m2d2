@@ -1,0 +1,17 @@
+build:
+  stage: build
+  image: node:alpine3.14
+  script:
+    - npm install
+    - npm install -g gulp gulp-concat gulp-header-comment gulp-rename gulp-terser gulp-umd
+    - /usr/local/bin/gulp
+
+test:
+  stage: test
+  image: shivjm/node-chromium-alpine:node17-chromium93
+  variables:
+    CHROME_BIN: "/usr/bin/chromium-browser"
+  script:
+    - npm install    
+    - npm install -g karma-cli karma-chrome-launcher karma-qunit qunit
+    - /usr/local/bin/karma start karma.conf.js

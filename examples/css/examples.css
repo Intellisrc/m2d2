@@ -1,7 +1,6 @@
 html * {
     box-sizing: border-box;
-    font-size: 16px;
-    font-family: verdana, tahoma, sans-serif;
+    font-family: Noto, verdana, tahoma, sans-serif;
 }
 body {
     max-width: 1500px;
@@ -16,6 +15,7 @@ body {
         "footer example";
     grid-gap: 10px;
     height: 100vh;
+    font-size: 16px;
 }
 header {
     grid-area: header;
@@ -57,8 +57,8 @@ aside {
 }
 aside li {
     background-color: #EEE;
-    padding: 10px;
     margin: 1px;
+    list-style: none;
 }
 aside li:hover {
     background-color: #FFC;
@@ -69,6 +69,8 @@ aside li[selected], aside li[selected] a {
     cursor: default;
 }
 aside a {
+    display: block;
+    padding: 10px;
     text-decoration: none;
     color: #333;
 }

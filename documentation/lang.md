@@ -75,7 +75,7 @@ If the key is not found it will display it instead of the text.
 That is one way to know which keyword to use, another way
 is getting the key from a text with: 
 ```js
-$.lang.toKeyword("Some Text").
+$.lang.toKeyword("Some Text");
 ```
 Also look at the `console` for any warning.
 
@@ -124,7 +124,7 @@ If you don't set it, it will use the first element with the attribute `lang`.
 
 8) You can execute some code when the language is changed by setting an event listener:
 ```js
-$.lang.onchange = (new_lang) => { ... }
+$.lang.onchange = (new_lang) => { /* ... */ }
 ```
 
 ### Finally:

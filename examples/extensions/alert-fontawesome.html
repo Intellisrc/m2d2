@@ -1,0 +1,45 @@
+<html>
+<head>
+    <title>Demo using M2D2 : Alerts Extension : Font Awesome</title>
+    <meta name="HandheldFriendly" content="1">
+    <meta name="viewport" content="width=device-width, maximum-scale=1.0">
+    <meta name="theme-color" content="#333333">
+    <link rel="stylesheet" href="../css/examples.css" type="text/css" />
+    <link rel="stylesheet" href="../css/alert.css" type="text/css" />
+    <link rel="stylesheet" href="../css/fa/all.min.css" type="text/css" />
+    <script src="../../dist/src/m2d2.src.js" type="text/javascript"></script>
+    <script src="../../js/m2d2.alert.src.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        //On ready..
+        m2d2.ready ($ => {
+            // Specify "fa" to enable the use of FontAwesome Icons
+            $.messageIcons = "fa";
+            $.wait("Please wait...");
+                setTimeout(() => {
+                    $.alert("I hope you are ready...", "Ok, let's go!", () => {
+                        $.confirm("Are you sure?", "This is important because it could change the course of humanity.\nOnly accept if you are ready.", (res) => {
+                            if(res) {
+                                $.success("We are saved!");
+                            } else {
+                                $.failure("I hope nothing happens...")
+                            }
+                            $("article", {
+                                p : {
+                                    span : "By the way, you can fully customize these alerts. Take a look at ",
+                                    a : {
+                                        text : "alert.css",
+                                        href : "../css/alert.css"
+                                    }
+                                }
+                            });
+                        });
+                    });
+                }, 2000)
+        });
+    </script>
+</head>
+<body>
+<article>
+</article>
+</body>
+</html>

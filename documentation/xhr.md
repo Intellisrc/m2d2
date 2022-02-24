@@ -18,18 +18,28 @@ This extension provides:
 
 All methods support any of these arguments:
 
-```js
-// url is required (but can be empty : send to current URL)
-// data is optional (using URL only)
-// callback is optional (send and forget)
-// error_callback is optional (ignore errors)
-// json is optional (false by default : data as parameter)
+* `url` is required (but can be empty : send to current URL)
+* `data` is optional (using URL only)
+* `callback` is optional (send and forget)
+* `error_callback` is optional (ignore errors)
+* `json` is optional (false by default : data as parameter)
 
+```js
 $.get(url, data, callback, error_callback, json);
 $.get(url, callback, error_callback, json);
 $.get(url, data, callback, json);
 $.get(url, data, json);
 $.get(url, callback, json)
+```
+
+All methods return the `XMLHttpRequest` object,
+so you can cancel any request like this:
+
+```js
+const request = $.get(url, json => {});
+setTimeout(() => {
+    request.abort();
+}, 2000);
 ```
 
 ## Examples:
@@ -49,3 +59,17 @@ $.put("/api/v1.0/user/markus/", {
 });
 ```
 
+### Aborting connections:
+
+When you assign the request to a variable, it will return the `XMLHttpRequest` object. Aborting it is as simple as:
+
+```js
+// Aborting after 5 seconds:
+let timeout;
+const request = $.get("/slow/server", res => {
+    clearTimeout(timeout);
+});
+timeout = setTimeout(() =>{
+    request.abort();
+}, 5000);
+```

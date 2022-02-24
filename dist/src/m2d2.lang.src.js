@@ -1,8 +1,8 @@
 /**
  * Author : A.Lepe (dev@alepe.com) - intellisrc.com
  * License: MIT
- * Version: 2.1.0
- * Updated: 2022-01-16
+ * Version: 2.1.1
+ * Updated: 2022-02-24
  * Content: Extension (Debug)
  */
 
@@ -10,100 +10,15 @@
  * M2D2 Language Extension
  * @since 2021-06-01
  *
+ * Add supports for multi-language interfaces
+ *
  * This extension provides:
  * $.dict(keyword, [variables])  : To get translations from dictionary
  * $.lang(lang)                  : Set new language
  *
- * Usage:
- *  1) First you need to specify a dictionary with this format:
-    const dictionary = {
-        save   : {
-            en : "Save",
-            es : "Archivar",
-            'es-MX' : "Guardar" // More specific translation
-        },
-        cancel : {
-            en : "Cancel Now",
-            es : "Cancelar Ahora"
-        }
-    }
-
-    2) Then on initialization (only once), set the dictionary:
-    // Recommended way:
-    const _ = m2d2.load().dict.set(dictionary);
-    // Or:
-    m2d2.load($ => {
-        $.dict.set(dictionary);
-    });
-
-    // And specify which language you want to use as default:
-    m2d2.ready($ => {
-        $.lang('en');
-
-        // You can set the shortcut here if you want and if you didn't set it before:
-        const _ = $.dict;
-        // Then use it as: (example)
-        $("#myid", {
-            text : _("some_key"),
-            css : "translated"
-        });
-    });
-
-    3) In HTML you can set which texts should be translated automatically:
-    `<span lang="es">Cancelar</span>`
-    Then, in the next step, it will be translated if it doesn't match the target language.
-
-    NOTE: If you use 'lang' in HTML, be sure that the language and the text matches the keys. For example,
-    if your default language is English, you should do something like this:
-    `<span lang="en">Phone Number</span>`
-    Then, in your dictionary, you should use the keyword:
-    {
-        phone_number : {
-            en : "Phone Number",
-            es : "Número de Teléfono"
-        }
-    }
-    If the key is not found it will display it, so that is one way to know which keyword to use, another way
-    is getting the key from a text with: $.lang.toKeyword("Some Text").
-
-    If your default language is not English, you have 3 options:
-        a) Create the interface in English and execute `$.lang('xx')` on ready (xx = your language code). That will translate the UI
-        b) Put keywords instead of English words (e.g, `<span lang='en'>user_name_goes_here</span>`) and execute `$.lang('xx')` on ready.
-        c) specify the keyword in the dataset: `<span class="usr" lang='pa' data-kw='username'>ਉਪਭੋਗਤਾ ਨਾਮ</span>` or in javascript:
-               usr : {
-                    dataset : { kw : "username" },
-                    lang : "pa",
-                    text : "ਉਪਭੋਗਤਾ ਨਾਮ"
-               }
-
-    4) To set or change the language (by default it will use browser's default language):
-    $.lang("en");
-
-    5) Get translation:
-    user.title.text = $.dict("user");
-
-    6) You can set your default language (page language) in your html tag: `<html lang='es'>`, that way this extension
-    knows that your HTML content is by default in that language, and decide if we need to translated for the user.
-    If you don't set it, it will use the first element with the attribute "lang".
-
-    7) You can execute some code when the language is changed by setting an event listener:
-    `$.lang.onchange = (new_lang) => { ... }`
-
-    Recommendation:
-    I recommend to set a shortcut for the dictionary (you can set it right after loading this extension):
-    const _ = $.dict;
-    Or setting dictionary at the same time:
-    const _ = $.dict.set(dictionary);
-    To declare it as global, you can set it as:
-    const _ = m2d2.load().dict;
-
-    That way, you can use it like:
-    user.title.text = _("user");
-
-    Final Note:
-    When you change the language, it will keep in the local storage (at the browser) your selection, so
-    if you refresh the page it will still use your selected language.
- *
+ * Documentation :
+ * https://gitlab.com/intellisrc/m2d2/tree/master/documentation/lang.md
+ * https://github.com/intellisrc/m2d2/tree/master/documentation/lang.md
  */
 m2d2.load($ => {
     let manualLang = localStorage.getItem("m2d2.lang") || ""

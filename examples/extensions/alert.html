@@ -1,23 +1,58 @@
 <html>
 <head>
-    <title>Demo using M2D2 : Alerts Extension</title>
+    <title>Demo using M2D2 : Alerts Extension : Font no required</title>
     <meta name="HandheldFriendly" content="1">
     <meta name="viewport" content="width=device-width, maximum-scale=1.0">
     <meta name="theme-color" content="#333333">
     <link rel="stylesheet" href="../css/examples.css" type="text/css" />
     <link rel="stylesheet" href="../css/alert.css" type="text/css" />
-    <script src="../../dist/m2d2.src.js" type="text/javascript"></script>
+    <script src="../../dist/src/m2d2.src.js" type="text/javascript"></script>
     <script src="../../js/m2d2.alert.src.js" type="text/javascript"></script>
+    <style>
+        #m2d2-alert .m2d2-alert-front .icon { height: 66px; }
+        #m2d2-alert .m2d2-alert-front.question .icon::before {
+            content: "\2753"
+        }
+        #m2d2-alert .m2d2-alert-front.ok .icon::before {
+            content: "\2705"
+        }
+        #m2d2-alert .m2d2-alert-front.input .icon::before {
+            content: "\270F"
+        }
+        #m2d2-alert .m2d2-alert-front.wait .icon::before {
+            content: "\2688"
+        }
+        #m2d2-alert .m2d2-alert-front.error .icon::before {
+            content: "\26D4"
+        }
+        #m2d2-alert .m2d2-alert-front.info .icon::before {
+            content: "\1F6C8"
+        }
+    </style>
     <script type="text/javascript">
         //On ready..
         m2d2.ready ($ => {
-            $.alert("I hope you are ready...", "Ok, let's go!", () => {
-               $.confirm("Are you sure", "This is important because it could change the course of humanity.\nOnly accept if you are ready.", (res) => {
-                   $("article", {
-                        h1 : res ? "We are saved!" : "Wow! that was close!"
-                   });
-               });
-            });
+            $.wait("Please wait...");
+                setTimeout(() => {
+                    $.alert("I hope you are ready...", "Ok, let's go!", () => {
+                        $.confirm("Are you sure?", "This is important because it could change the course of humanity.\nOnly accept if you are ready.", (res) => {
+                            if(res) {
+                                $.success("We are saved!");
+                            } else {
+                                $.failure("I hope nothing happens...")
+                            }
+                            $("article", {
+                                p : {
+                                    span : "By the way, you can fully customize these alerts. Take a look at ",
+                                    a : {
+                                        text : "alert.css",
+                                        href : "../css/alert.css"
+                                    }
+                                }
+                            });
+                        });
+                    });
+                }, 2000)
         });
     </script>
 </head>

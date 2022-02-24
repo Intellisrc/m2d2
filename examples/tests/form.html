@@ -9,7 +9,6 @@
 .reservation {
 	font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
 	font-size: 0.8em;
-	width: 30em;
     margin: auto;
 	padding: 1em;
 }
@@ -74,7 +73,7 @@ cite {
 let form;
 //On page ready...
 m2d2.ready($ => {
-	form = $(".reservation", {
+	const form = $(".reservation", {
         action : "http://example.com/post_here",
         method : "POST",
 		name : { // M2D2 will automatically knows that you mean "name='name'" and not [name]
@@ -198,6 +197,33 @@ m2d2.ready($ => {
 </script>
 </head>
 <body>
+<article>
+    <h1>Form M2D2 Demo</h1>
+    <p>
+        This example, shows how M2D2 can be used easily to create, populate and validate forms:<br>
+        Fields with blue border are required (do not enter real information).<br>
+        The submit button will be enabled when all required fields has been completed.
+    </p>
+    <form class="reservation">
+        <p><label>Name	<input name="name"></label></p>
+        <p><label>Phone <input name="phone"></label></p>
+        <p><label>Email <input name="email"></label></p>
+        <p><label>Language <input name="lang"></label></p>
 
+        <fieldset class="taxi"><legend>Which taxi do you require?</legend></fieldset>
+        <fieldset class="extras"><legend>Extras</legend></fieldset>
+
+        <p><label>Pickup Date <input name="date"></label></p>
+        <p><label>Pickup Time <input name="time"></label></p>
+        <p><label>Pickup Place <select name="pickup"></select></label></p>
+        <p><label>Dropoff Place
+            <input name="dropoff"></label>
+            <datalist id="destinations"></datalist>
+        </p>
+
+        <p><label>Special Instructions <br><textarea name="comment"></textarea></label></p>
+        <p><button>Submit Booking</button></p>
+    </form>
+</article>
 </body>
 </html>

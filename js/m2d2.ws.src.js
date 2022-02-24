@@ -11,8 +11,8 @@ m2d2.load($ => {
      * $.ws
      *
      * Documentation :
-     * https://gitlab.com/lepe/m2d2/tree/master/documentation/ws.md
-     * https://github.com/lepe/m2d2/tree/master/documentation/ws.md
+     * https://gitlab.com/intellisrc/m2d2/tree/master/documentation/ws.md
+     * https://github.com/intellisrc/m2d2/tree/master/documentation/ws.md
      */
     class ws {
         request(msg) {

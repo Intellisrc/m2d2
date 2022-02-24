@@ -1,6 +1,6 @@
 /**
  * @author: A. Lepe
- * @url : https://gitlab.com/lepe/m2d2/
+ * @url : https://gitlab.com/intellisrc/m2d2/
  * @since: May, 2018
  * @version: 2.0.0
  * @updated: 2021-04-16
@@ -10,10 +10,16 @@
  */
 class m2d2 {
     'use strict';
-	_storedEvents = [];
+	_stored = {
+		events : [],
+		datasetNodes : [],
+		datasets : [],
+		styleNodes : [],
+		styles : []
+	}
 	static storedEventsTimeout = 50; //ms to group same events
-	static short = true; //Enable short assignation (false = better performance) TODO: document
-	static updates = true; //Enable "onupdate" (false = better performance) TODO: document
+	static short = true; //Enable short assignation (false = better performance) TODO: document (use Proxy like: obj.a = "text")
+	static updates = true; //Enable "onupdate" (false = better performance) TODO: document (use MutationObserver)
 	static utils = new Utils();
 
 	constructor() {}
@@ -22,7 +28,24 @@ class m2d2 {
 	static extensions = {}; // Additional properties for DOM
 	static main = (() => {
 		const f = (selector, object) => {
-			return this.instance.getProxyNode(selector, object);
+			const node = this.instance.getProxyNode(selector, object);
+			// TEST: 13
+			if(node && node.onready && m2d2.utils.isFunction(node.onready)) {
+				node.addEventListener("ready", node.onready, { once : true });
+				// This will be called just after the object has been returned (to be sure it was created)
+				// Without setTimeout "onready" would be the same as "onload".
+				setTimeout(() => {
+                    node.dispatchEvent(new CustomEvent('ready'));
+				}, 10); //TODO: Document
+			}
+			// Store references to datasets (used later in onpudate dataset, style):
+			["dataset","style"].forEach(i => {
+			    if(node && node[i]) {
+				    this.instance._stored[i + "s"].push(node[i]);
+				    this.instance._stored[i + "Nodes"].push(node);
+				}
+			})
+			return node;
 		}
 	    // Extends Utils:
 	    m2d2.utils.getMethods(m2d2.utils).forEach(k => { f[k] = m2d2.utils[k] });
@@ -41,6 +64,7 @@ class m2d2 {
 	/**
 	 * Execute something on load. It will search for extensions.
 	 * @param {function} callback
+	 * TEST: 00
 	 */
 	static load(callback) {
 	    if(callback !== undefined) {
@@ -81,10 +105,11 @@ class m2d2 {
 		return m2d2.main; //TODO: documentation : const $ = m2d2.load();
 	}
 	/**
-	 * M2 Will set all extensions to DOM objects //TODO: documentation
+	 * M2D2 Will set all extensions to DOM objects //TODO: documentation
 	 * @param {string, HTMLElement} selector
 	 * @param {HTMLElement, Node} [$root]
 	 * @returns {HTMLElement}
+	 * TEST: 01
 	 */
 	extDom(selector, $root) {
 		if(! selector) {  // Do not proceed if selector is null, empty or undefined
@@ -104,13 +129,14 @@ class m2d2 {
 		}
 		if($node._m2d2 === undefined) {
 			$node._m2d2 = true; //flag to prevent it from re-assign methods
-			["parent","sibling","find","findAll","onupdate","show","onshow","css","text","html","getData"].forEach(f => {
+			["parent","sibling","next","prev","find","findAll","onupdate","onready","show","onshow","inView","css","text","html","getData","index"].forEach(f => {
 				if($node.hasOwnProperty(f)) {
 					console.log("Node already had ["+f+"] property. It might cause unexpected behaviour.")
-					console.log("You may need to update the M2D2 version or report it to: github.com/lepe/m2d2/")
+					console.log("You may need to update the M2D2 version or report it to: github.com/intellisrc/m2d2/")
 				}
 			});
 			// Properties:
+			// TEST: 01, ...
 			Object.defineProperty($node, "text", {
 				get() { return this.childNodes.length ? this.innerText : this.textContent; },
 				set(value) {
@@ -131,10 +157,12 @@ class m2d2 {
 					}
 				}
 			});
+			// TEST: 43,13,27,...
 			Object.defineProperty($node, "html", {
 				get() { return this.innerHTML; },
 				set(value) { this.innerHTML = value;  }
 			});
+			// TEST: 02
 			Object.defineProperty($node, "css", {   //TODO: document new behaviour
 				get() {
 				    return this.classList;
@@ -157,18 +185,10 @@ class m2d2 {
 				    }
 				}
 			});
+			// TEST: 16
 			Object.defineProperty($node, "show", {
 				get() { //TODO: document
-                    const rect = this.getBoundingClientRect();
-                    const display = this.style.display !== "none";
-                    const notHidden = this.style.visibility !== "hidden";
-                    return (
-                        display && notHidden &&
-                        rect.top >= 0 && rect.left >= 0 &&
-                        rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
-                        rect.right <= (window.innerWidth || document.documentElement.clientWidth) &&
-						rect.width > 0 && rect.height > 0
-                    );
+				    return m2d2.utils.isVisible(this);
 				},
 				set(show) {
                     const cssDisplay = () => {
@@ -195,6 +215,7 @@ class m2d2 {
                                     this.style.display = this.dataset.display || (defaultShow !== "none" ? defaultShow : "block");
                                 }
                             }
+                            // TEST: 16
                             if(this.onshow !== undefined && m2d2.utils.isFunction(this.onshow)) { //TODO: document onshow
                                 this.onshow(this);
                             }
@@ -209,6 +230,7 @@ class m2d2 {
 				}
 			});
 			//TODO: document how to extend
+			//TODO: test
 			let extend = {};
 			if(m2d2.extensions["*"] !== undefined) {
 				Object.assign(extend, m2d2.extensions["*"]);
@@ -218,23 +240,38 @@ class m2d2 {
 			}
 			// Functions:
 			Object.assign($node, {
-				parent: () => {
+			    inView: () => { //TODO: document
+			        return m2d2.utils.inView($node);
+			    },
+				next: () => { //TEST: 07
+				    return $node.nextElementSibling;
+				},
+				prev: () => { //TEST: 07
+                    return $node.previousElementSibling;
+				},
+				parent: () => { //TODO: test
 					return this.extDom($node.parentElement);
 				},
-				sibling: (sel) => {
+				sibling: (sel) => { //TODO: test
 					return $node.parentElement.find(sel);
 				},
-				find: (it) => {
+				find: (it) => { // Test: 04
 					const node = $node.querySelector(it)
 					return node ? this.extDom(node) : null;
 				},
-				findAll: (it) => {
+				findAll: (it) => { //TEST: 05
 					const nodeList = it === undefined ? Array.from($node.children) : $node.querySelectorAll(it);
 					nodeList.forEach(n => { this.extDom(n) });
 					return nodeList;
-				}
+				},
 			}, extend);
-			// Let attributes know about changes in values
+			// Some elements like <OPTION> already have index
+			if($node.index === undefined) {
+				$node.index = () => { //TEST: 07
+					return Array.from($node.parentNode.children).indexOf($node);
+				}
+			}
+			// Let attributes know about changes in values //TODO: test
 			if(["INPUT", "TEXTAREA", "SELECT"].indexOf($node.tagName) >= 0 && m2d2.utils.hasAttrOrProp($node, "value")) {
 				$node.oninput = function() { this.setAttribute("value", this.value )}
 			}
@@ -263,12 +300,16 @@ class m2d2 {
 	 * @param {string, HTMLElement, Node} selector
 	 * @param {Object} object
 	 * @returns {HTMLElement, Proxy}
+	 * TEST: 03,...
 	 */
 	doDom(selector, object) {
 		// When no selector is specified, set "body"
 		if(m2d2.utils.isObject(selector) && object === undefined) {
 			object = selector;
-			selector = "body";
+			selector = m2d2.utils.newEmptyNode(); //TODO: document
+			if(object.warn === undefined) {
+			    object.warn = false;
+			}
 		}
 		if(!(m2d2.utils.isString(selector) || m2d2.utils.isElement(selector) || m2d2.utils.isNode(selector))) {
 			console.error("Selector is not a string or a Node:")
@@ -284,17 +325,21 @@ class m2d2 {
 		if(object === undefined) { //TODO: documentation: extending nodes
 			return $node;
 		}
-		object = this.plainToObject($node, object); // Be sure it's an object //TODO: documentation : text parameter
+		object = this.plainToObject($node, object); // Be sure it's an object
+
+		// TEST: 03
 		// We filter-out some known keys:
 		Object.keys(object).filter(it => ! ["tagName"].includes(it)).forEach(key => {
-			let value = object[key];
-			if(value === undefined || value === null) {
+			let origValue = object[key];
+			if(origValue === undefined || origValue === null) {
 			    console.log("Value was not set for key: " + key + ", 'empty' was used in object: ");
 			    console.log(object);
 			    console.log("In node:");
 			    console.log($node);
-			    value = "";
-			}
+			    origValue = "";
+	 		}
+            //Look for onupdate inline ([ Node, string ])
+            let value = this.updateValue($node, key, origValue);
 			//Look for property first:
 			let isProp = m2d2.utils.hasProp($node, key);
 			let isAttr = m2d2.utils.hasAttr($node, key);
@@ -320,7 +365,7 @@ class m2d2 {
 			if(foundMatch) {
 				let error = false;
 				switch(key) {
-					case "classList":
+					case "classList": //TODO: test
 						if(m2d2.utils.isArray(value)) {
 							value.forEach(v => {
 								$node[key].add(v);
@@ -331,10 +376,12 @@ class m2d2 {
 							error = true;
 						}
 						break
-					case "style":
+					case "style": //TODO: test
 					case "dataset": //TODO: as it is already a DOM, we don't need it maybe?
 						if(m2d2.utils.isPlainObject(value)) {
-							Object.assign($node[key], value);
+							Object.keys(value).forEach(k => {
+								$node[key][k] = this.updateValue($node[key], k, value[k]);
+							});
 						} else {
 							error = true;
 						}
@@ -355,10 +402,11 @@ class m2d2 {
 					console.log("Into Node:");
 					console.log($node);
 				}
-				// Look for elements:
+			// Look for elements:
 			} else {
 			    const options = [];
 			    try {
+			        // TEST: 03
 			        // Functions can not be placed directly into elements, so we skip
 			        if(key !== "template" &&! m2d2.utils.isFunction(value)) {
                         //Look for ID:
@@ -392,11 +440,16 @@ class m2d2 {
 						console.log($node);
 						console.log("It might be what we expect, but if it is not expected it could result " +
 									"on some elements mistakenly rendered. You can specify " +
-									"'warn : false' under that element to hide this message.")
+									"'warn : false' under that element to hide this message.") //TODO: add link to reference
 					}
 				} else if(options.length === 1) { // Found single option: place values
 					const opt = options[0];
-					 if(m2d2.utils.isElement(opt)) {
+					if(m2d2.utils.isElement(opt)) { //TODO: test (no template or no items)
+                        const obj = this.plainToObject(opt, value);
+                        const opt_key = m2d2.utils.isPlainObject(obj) && Object.keys(obj).length >= 1 ? Object.keys(obj)[0] : null;
+                        if(opt_key) {
+                            value = this.updateValue(opt, opt_key, origValue);
+                        }
 						if(m2d2.utils.isArray(value)) { // Process Array
 							const template = object["template"];
 							this.doItems(opt, value, template);
@@ -455,11 +508,12 @@ class m2d2 {
 						}
     				} else if(isFunc) {
 						if(m2d2.updates) {
+						    // By using addEventListener we can assign multiple listeners to a single node //TODO: document
 							if (key === "onupdate") {
-								$node.addEventListener(key, value, true);
+								$node.addEventListener("update", value, true); //TODO: document
 							}
-							$node[key] = value;
 						}
+						$node[key] = value;
 					} else if(key !== "template" && (key !== "warn" && value !== false)) { //We handle templates inside items
 						if(object.warn === undefined || object.warn !== false) { //TODO: document
 							console.error("Not sure what you want to do with key: " + key + " under element: ");
@@ -480,13 +534,35 @@ class m2d2 {
 		    const native = ["BODY","FRAME","IFRAME","IMG","LINK","SCRIPT","STYLE"].indexOf($node.tagName) >= 0;
 		    const inputImage = $node.tagName === "INPUT" && $node.type === "image";
 		    if(! (native || inputImage)) {
-                const loadedEvent = new CustomEvent('onload');
-		        $node.addEventListener("onload", $node.onload, true);
-		        $node.dispatchEvent(loadedEvent);
+		        // We don't need to add the event as it exists natively and it was assigned during: $node.onload = ...;
+                $node.dispatchEvent(new CustomEvent('load'));
 		    }
 		}
 		return $node;
 	}
+
+    /**
+     * Identify if value is an update link (inline onupdate)
+	 * @param {*} value
+     * @returns {boolean}
+     */
+    isUpdateLink(value) {
+        let isLink = false
+        if(m2d2.utils.isArray(value) && (value.length === 2 || value.length === 3)) {
+            const twoArgs = value.length === 2;
+            // First element in array must be Node || DomStringMap (dataset) || CSSStyleDeclaration (style)
+            const acceptedType = m2d2.utils.isNode(value[0]) ||
+                value[0] instanceof DOMStringMap ||
+                value[0] instanceof CSSStyleDeclaration
+            // Second must be 'string' and Third can be a 'function'
+            const otherTypes = twoArgs ? m2d2.utils.isString(value[1]) :
+                          m2d2.utils.isString(value[1]) && m2d2.utils.isFunction(value[2]);
+            // If only two args are in array, add an empty function:
+            isLink = acceptedType && otherTypes;
+            if(isLink && twoArgs) { value.push(v => { return v; }) } //TODO: Document function
+        }
+        return isLink
+    }
 
     /**
 	 * Convert plain value into object if needed
@@ -494,10 +570,22 @@ class m2d2 {
 	 * @param {*} value
 	 */
     plainToObject($node, value) {
-		if(!m2d2.utils.isPlainObject(value) &&! m2d2.utils.isFunction(value) &&! (value instanceof HTMLElement)) {
+		if(!m2d2.utils.isPlainObject(value) &&! m2d2.utils.isFunction(value) &&! m2d2.utils.isElement(value)) {
 			// When setting values to the node (simplified version):
 			if(m2d2.utils.isHtml(value)) {
 				value = { html : value };
+		    } else if(this.isUpdateLink(value)) {
+                const obj  = value[0];
+                const prop = value[1];
+                const callback = value[2];
+		        let tmpVal = this.plainToObject($node, callback(obj[prop]));
+		        if(m2d2.utils.isPlainObject(tmpVal)) {
+		            const newValue = {};
+		            Object.keys(tmpVal).forEach(k => {
+		                newValue[k] = value;
+		            });
+		            value = newValue;
+		        }
 			} else if(m2d2.utils.isArray(value)) {
 			    value = { items : value };
 			} else if(m2d2.utils.hasAttrOrProp($node, "value")) {
@@ -735,6 +823,8 @@ class m2d2 {
                                     $template = m2d2.utils.newElement(key);
                                 } else if(val.tagName !== undefined) {
                                     $template = m2d2.utils.newElement(val.tagName);
+									template[val.tagName] = val;
+									delete(template[key]);
                                 } else {
                                     console.error("Template defined an element which can not be identified: [" + key + "], using <span> in:");
                                     console.log(template);
@@ -743,7 +833,7 @@ class m2d2 {
                                     $template = m2d2.utils.newElement("span");
                                 }
                             } else {
-                                console.error("Template has no definition and it can not be guessed. Using <span>. Template: ");
+                                console.error("Template has no definition, and it can not be guessed. Using <span>. Template: ");
                                 console.log(template);
                                 console.log("Node: ");
                                 console.log($node);
@@ -810,20 +900,104 @@ class m2d2 {
         }
 	}
 
+    /**
+     * Handle [ Node, string ] values (inline onupdate)
+     * @private
+	 * @param {HTMLElement} $node
+	 * @param {string} key
+	 * @param {*} value
+     */
+    updateValue($node, key, value) {
+		// TEST: 06
+        if(this.isUpdateLink(value)) {
+			const _this = this;
+            const obj  = value[0];
+            const prop = value[1];
+            const callback = value[2];
+			value = obj[prop];
+			if(obj instanceof CSSStyleDeclaration && this._stored.styles.includes(obj)) {
+				const parent = this._stored.styleNodes[this._stored.styles.indexOf(obj)];
+				if(m2d2.updates) {
+					parent.onupdate = function (ev) {
+						if (ev.detail && ev.detail.property === "style" && ev.detail.newValue.startsWith(prop + ":")) {
+							_this.setShortValue($node, key, callback(this.style[prop]));
+						}
+					}
+				}
+			} else if(obj instanceof DOMStringMap && this._stored.datasets.includes(obj)) {
+				const parent = this._stored.datasetNodes[this._stored.datasets.indexOf(obj)];
+				if(m2d2.updates) {
+					parent.onupdate = (ev) => {
+						if (ev.detail && ev.detail.property === "data-" + prop) {
+							_this.setShortValue($node, key, callback(ev.detail.newValue));
+						}
+					}
+				}
+			} else {
+				if(m2d2.updates) {
+					obj.onupdate = (ev) => {
+						if (ev.detail && ev.detail.property === prop) {
+							if (!m2d2.utils.isObject($node[key])) {
+								_this.setShortValue($node, key, callback(ev.detail.newValue));
+							}
+						}
+					}
+				}
+			}
+		}
+		return value;
+	}
+
 	/**
-	 * If selector is a Node, will return that node,
-	 * otherwise will look inside root
-	 * @private
-	 * @param {string, HTMLElement, Node} selector
-	 * @param {HTMLElement, Node} $root
-	 * @returns {HTMLElement, Node}
+	 * Place a value either in a property or in a node (short)
+	 * @param $node {Node}
+	 * @param key {string}
+	 * @param value {*}
 	 */
-    getNode(selector, $root) {
-        if ($root === undefined) {
-            $root = document;
-        }
-        return selector instanceof Node ? selector : $root.querySelector(selector);
-    };
+	setShortValue($node, key, value) {
+		if(m2d2.utils.isNode($node[key])) {
+			if(m2d2.short) {
+				const o = this.plainToObject($node[key], value);
+				const k = m2d2.utils.isPlainObject(o) && Object.keys(o).length >= 1 ? Object.keys(o)[0] : null;
+				if (k) {
+					$node[key][k] = value;
+				}
+			} else {
+				console.log("Short is disabled. Trying to set a value ("+value+") in a node:")
+				console.log($node[key]);
+				console.log("Either turn on 'short' functionality, or be sure you specify the property, like: 'node.text'")
+			}
+		} else {
+			$node[key] = value
+		}
+	}
+
+	/**
+	 * Place a value either in a property or in a node (short)
+	 * @param $node {Node}
+	 * @param key {string}
+	 * @param sample {*} Sample value (to automatically guess property)
+	 * @returns {*} current value
+	 */
+	getShortValue($node, key, sample) {
+		let value = null;
+		if(m2d2.utils.isNode($node[key])) {
+			if(m2d2.short) {
+				const o = this.plainToObject($node[key], sample || "");
+				const k = m2d2.utils.isPlainObject(o) && Object.keys(o).length >= 1 ? Object.keys(o)[0] : null;
+				if (k) {
+					value = $node[key][k];
+				}
+			} else {
+				console.log("Short is disabled. Trying to get a value from node:")
+				console.log($node[key]);
+				console.log("Either turn on 'short' functionality, or be sure you specify the property, like: 'node.text'")
+			}
+		} else {
+			value = $node[key];
+		}
+		return value;
+	}
 
 	/**
 	 * Basic Proxy to enable assign values to elements
@@ -845,7 +1019,7 @@ class m2d2 {
                     switch (true) {
 						case t === null || t === undefined: return null;
                     	// Functions should bind target as "this"
-						case typeof t === "function": return t.bind(target);
+						case m2d2.utils.isFunction(t): return t.bind(target);
 						// If there was a failed attempt to set proxy, return it on read:
 						case t._proxy && target["$" + property] !== undefined: return target["$" + property];
 						case t._proxy === undefined && m2d2.utils.isElement(t): return this.proxy(t);
@@ -855,24 +1029,13 @@ class m2d2 {
                 set: (target, property, value) => {
                     let oldValue = "";
                     if(m2d2.utils.isElement(target[property])) {
-                        let key = "";
-                        if(m2d2.utils.isHtml(value)) {
-                            key = "html";
-						} else if(m2d2.utils.hasAttrOrProp(target[property], "value")) {
-							key = "value";
-						} else if(m2d2.utils.isString(value) && target[property].tagName === "IMG") {
-						    key = "src"; //TODO: document
-						} else if(m2d2.utils.isString(value) || m2d2.utils.isNumeric(value)) {
-                            key = "text";
-                        }
-                        if(key) {
-                            oldValue = target[property][key];
-                            target[property][key] = value;
-                        }
+						oldValue = this.getShortValue(target, property, value);
+						this.setShortValue(target, property, value);
                     } else if(property === "onupdate") {
                     	if(m2d2.updates) {
 							if (m2d2.utils.isFunction(value)) {
-								target.addEventListener("onupdate", value, true);
+						        // By using addEventListener we can assign multiple listeners to a single node
+								target.addEventListener("update", value, true);
 								oldValue = target[property];
 								target[property] = value;
 							} else {
@@ -890,13 +1053,14 @@ class m2d2 {
                         this.doItems(target, value);
                     } else {
                         oldValue = target[property];
+                        value = this.updateValue(target, property, value);
                         target[property] = value;
                     }
 					// Check for onupdate //TODO: document
 					// This will observe changes on values
 					if(m2d2.updates && target.onupdate !== undefined) {
 					    if(value !== oldValue) {
-                            target.dispatchEvent(new CustomEvent("onupdate", {
+                            target.dispatchEvent(new CustomEvent("update", {
                                 detail: {
                                     type     : typeof value,
                                     property : property,
@@ -926,11 +1090,11 @@ class m2d2 {
 			// Forms will link elements which can not be set as proxy so we
 			// add a link named `"$" + key` but this have the side effect to
 			// generate two triggers (one for the element and one for the Proxy).
-			if(this._storedEvents.indexOf(m) >= 0) { return } else {
-				this._storedEvents.push(m);
+			if(this._stored.events.indexOf(m) >= 0) { return } else {
+				this._stored.events.push(m);
 				setTimeout(() => {
-					const i = this._storedEvents.indexOf(m);
-					if(i >= 0) { this._storedEvents.splice(i, 1); }
+					const i = this._stored.events.indexOf(m);
+					if(i >= 0) { this._stored.events.splice(i, 1); }
 				}, m2d2.storedEventsTimeout); //TODO: this will prevent repeated events to be triggered in less than 50ms : document
 			}
 			// Check for onupdate //TODO: document
@@ -938,7 +1102,7 @@ class m2d2 {
 				if(m.type === "attributes") {
 					const value = m2d2.utils.getAttrOrProp(target, m.attributeName);
 					if(value !== m.oldValue) {
-                        target.dispatchEvent(new CustomEvent("onupdate", {
+                        target.dispatchEvent(new CustomEvent("update", {
                             detail: {
                                 type     : typeof value,
                                 property : m.attributeName,
@@ -951,9 +1115,9 @@ class m2d2 {
 				    const $child = m.addedNodes[0] || m.removedNodes[0];
 					if($child.nodeName === "#text") {
 						const value = m.addedNodes[0].textContent;
-						const oldValue = m.removedNodes[0].textContent;
+						const oldValue = m.removedNodes.length ? m.removedNodes[0].textContent : null;
 						if(value !== oldValue) {
-                            target.dispatchEvent(new CustomEvent("onupdate", {
+                            target.dispatchEvent(new CustomEvent("update", {
                                  detail: {
                                      type     : typeof value,
                                      property : "text",
@@ -967,7 +1131,7 @@ class m2d2 {
 						const value = m.addedNodes;
 						const oldValue = m.removedNodes;
 						if(value !== oldValue) {
-                            target.dispatchEvent(new CustomEvent("onupdate", {
+                            target.dispatchEvent(new CustomEvent("update", {
                                  detail: {
                                      type     : typeof value,
                                      property : "items",
@@ -1103,7 +1267,7 @@ class m2d2 {
 					case "push": // Add one item at the end:
 						func = function(obj) {
 						    obj = _this.plainToObject(this, obj);
-							if(obj instanceof HTMLElement) {
+							if(m2d2.utils.isElement(obj)) {
 								this.append(obj);
 							} else if (m2d2.utils.isPlainObject(obj)) {
 							    const index = this.items.length;
@@ -1147,7 +1311,7 @@ class m2d2 {
 					case "unshift": // Add an item to the beginning
 						func = function(obj) {
 						    obj = _this.plainToObject(this, obj);
-							if(obj instanceof HTMLElement) {
+							if(m2d2.utils.isElement(obj)) {
 								this.prepend(obj);
 						    } else if (m2d2.utils.isPlainObject(obj)) {
 							    const index = this.items.length;
@@ -1165,7 +1329,7 @@ class m2d2 {
 						switch(true) {
 					        case method === "findAll":
 					            arrMethod = "filter"; // Use "filter"
-                            case typeof Array.prototype[method] == "function":
+                            case m2d2.utils.isFunction(Array.prototype[method]):
                                 // Convert nodes to proxy so we can use short assignment
                                 // at, concat, every, filter, find, findIndex, forEach, includes, indexOf, join,
                                 // keys, lastIndexOf, map, reduce, reduceRight, slice, some, values
@@ -1204,7 +1368,7 @@ class m2d2 {
                                                 if(m2d2.utils.isArray(args[i])) {
                                                     for(let j = 0; j < args[i].length; j++) {
                                                         let obj = args[i][j];
-                                                        if(!(obj instanceof HTMLElement)) {
+							                            if(! m2d2.utils.isElement(obj)) {
                                                             obj = _this.plainToObject(this, args[i][j]);
                                                             if (m2d2.utils.isPlainObject(obj)) {
 							                                    const index = this.items.length;

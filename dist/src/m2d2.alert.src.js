@@ -1,14 +1,17 @@
 /**
  * Author : A.Lepe (dev@alepe.com) - intellisrc.com
  * License: MIT
- * Version: 2.1.0
- * Updated: 2022-01-16
+ * Version: 2.1.1
+ * Updated: 2022-02-24
  * Content: Extension (Debug)
  */
 
 /**
  * M2D2 Alerts Extension
  * @since 2021-05-20
+ *
+ * A replacement of `alert`,`prompt` and `confirm`. Inspired by `SweetAlert`, with
+ * customizable theme and better M2D2 integration.
  *
  * This extension provides:
  * $.wait       : Displays a spinner without any button in it.
@@ -19,42 +22,10 @@
  * $.prompt     : Displays an input prompt with "cancel" and "send" buttons.
  * $.message    : Free form message (all the previous implementations uses this function)
  * $.closeAll   : Close any message that might be open
- *
- * Example Usage:
- *   - Common uses:
- *  $.wait :
- *      const waitMsg = $.wait("Please wait...");
- *      setTimeout(() => { waitMsg.close(); }, 2000);
- *
- *  $.alert, $.success, $.failure :
- *      $.alert("Hint of the day", "To exit, click in 'logout' button.", () => { console.log("The alert has been closed.") });
- *      $.success("Data has been saved!", () => { console.log("The alert has been closed. I didn't specified text, just title.") });
- *      $.failure("Server error"); //Display just the message
- *
- *  $.confirm:
- *      $.confirm("Are you sure?", "You are about to delete all images!", (res) => { if(res) { console.log("All images are gone!") });
- *
- *  $.prompt:
- *      $.prompt("Please enter your name:", (res) => { console.log("your name is:" + res); });
- *      $.prompt("Please enter your age:", "No need to lie...", (res) => { console.log("your age is:" + res); });
- *      $.prompt("Please enter your sex:", {
- *          select : ["Female","Male","Other"]
- *      }, (res, raw) => { console.log("your sex is:" + res); });
- *
- *  $.message:
- *      $.message({
-            icon : "times",     // OPTIONAL: you can use : "question", "info", "error", "ok", "input", "wait"
-            css  : "special",   // Set class or classes
-            title : "Title",
-            text  : "Text to use",
-            buttons : ["No way!", "Roger"], // Specify button text and classes which in this case be: "no_way" and "roger"
-            callback : function() {}
-        });
- *
- *  Notes:
- *   - callback gets two arguments:
- *        * The first one is the simplest return value when possible
- *        * The second one is the form data as an object, for example: { button : "send", answer : "Hello" }
+
+ * Documentation :
+ * https://gitlab.com/intellisrc/m2d2/tree/master/documentation/alert.md
+ * https://github.com/intellisrc/m2d2/tree/master/documentation/alert.md
  */
 m2d2.load($ => {
     function close(afterClose) {
@@ -77,31 +48,43 @@ m2d2.load($ => {
             }
         }
     }
-    function getIconClass(type) {
-        let css = [];
-        switch(type) {
-            case "question" :
-                css = ["fa", "fa-question-circle"];
-            break
-            case "info" :
-                css = ["fa", "fa-exclamation-circle"];
-            break
-            case "error":
-                css = ["fa", "fa-exclamation-triangle"];
-            break
-            case "ok":
-                css = ["fa", "fa-check"];
-            break
-            case "input":
-                css = ["fa", "fa-edit"];
-            break
-            case "wait":
-                css = ["fa", "fa-cog", "fa-spin"];
-            break
-        }
-        return css
+    const faIcons = {
+        wrap     : false,
+        question : ["fa", "fa-question-circle"],
+        info     : ["fa", "fa-exclamation-circle"],
+        error    : ["fa", "fa-exclamation-triangle"],
+        ok       : ["fa", "fa-check"],
+        input    : ["fa", "fa-edit"],
+        wait     : ["fa", "fa-cog", "fa-spin"]
+    }
+    const material = {
+        wrap     : "material-icons",
+        question : "help",
+        info     : "info",
+        error    : "error",
+        ok       : "done",
+        input    : "edit",
+        wait     : "pending"
+    }
+    const defaultCss = {
+        wrap     : false,
+        question : "icon_question",
+        info     : "icon_info",
+        error    : "icon_error",
+        ok       : "icon_ok",
+        input    : "icon_input",
+        wait     : "icon_wait"
     }
     $.message = function(options) {
+        let css = defaultCss;
+        switch ($.messageIcons) {
+            case "fa": css = faIcons; break
+            case "material" : css = material; break
+            default:
+                if($.isObject($.messageIcons)) {
+                    css = $.messageIcons;
+                }
+        }
         if(options) {
             if(! $.isFunction(options.callback)) {
                 if(options.callback &&! options.text) {
@@ -130,12 +113,17 @@ m2d2.load($ => {
                             justifyContent: "center",
                             alignItems: "center"
                         },
-                        front : {
+                        front : Object.assign({
                             tagName : "form",
                             css : (options.css ? ($.isArray(options.css) ? options.css : [options.css]) : [])
-                                    .concat(["m2d2-alert-front", "popup", options.icon], getIconClass(options.icon)),
+                                  .concat(["m2d2-alert-front", "popup", options.icon]),
                             style : {
                                 zIndex : 100
+                            },
+                            icon : {
+                                tagName : "span",
+                                css : ["icon", options.icon].concat(css.wrap ? [css.wrap] : css[options.icon]).concat(options.icon === "wait" ? "spin" : ""),
+                                text : css.wrap ? css[options.icon] : ""
                             },
                             message : {
                                 tagName : "div",
@@ -206,43 +194,46 @@ m2d2.load($ => {
                                 const def = this.find("[autofocus]");
                                 if(def) { def.focus(); }
                             }
-                        }
+                        }, function (ob) {
+                            let newButtons = {};
+                            if(ob.length) {
+                                newButtons = {
+                                    buttons : {
+                                        tagName : "div",
+                                        css : "m2d2-alert-buttons"
+                                    }
+                                };
+                                ob.forEach(b => {
+                                    const key = b.toLowerCase().replace(/[^a-z ]/g,"").replace(" ","_");
+                                    newButtons.buttons[key] = {
+                                        tagName : "button",
+                                        type : "submit",
+                                        value : key,
+                                        css : ["color", key],
+                                        text : $.dict !== undefined ? $.dict(b) : b,
+                                        autofocus : ["ok","yes"].includes(b),
+                                        formNoValidate : ["cancel"].includes(b),
+                                        // we append a hidden input with the value of the button clicked:
+                                        onclick : function() {
+                                            $(this.closest("form"), {
+                                                hide : {
+                                                    tagName : "input",
+                                                    type : "hidden",
+                                                    name : "button",
+                                                    value : this.value
+                                                }
+                                            });
+                                        }
+                                    }
+                                });
+                            }
+                            return newButtons;
+                        }(options.buttons)
+                        )
                     }
                 }
             });
         });
-        if(options.buttons.length) {
-            const newButtons = {
-                buttons : {
-                    tagName : "div",
-                    css : "m2d2-alert-buttons"
-                }
-            };
-            options.buttons.forEach(b => {
-                const key = b.toLowerCase().replace(/[^a-z ]/g,"").replace(" ","_");
-                newButtons.buttons[key] = {
-                    tagName : "button",
-                    type : "submit",
-                    value : key,
-                    css : ["color", key],
-                    text : $.dict !== undefined ? $.dict(b) : b,
-                    autofocus : ["ok","yes"].includes(b),
-                    formNoValidate : ["cancel"].includes(b),
-                    // we append a hidden input with the value of the button clicked:
-                    onclick : function() {
-                        $(this.closest("form"), {
-                            hide : {
-                                tagName : "input",
-                                type : "hidden",
-                                name : "button",
-                                value : this.value
-                            }
-                        });
-                    }
-                }
-            });
-            $("#m2d2-alert .m2d2-alert-front", newButtons);
-        }
         // Add automatically name to fields in case it is not specified:
         let i = 1;
         $("#m2d2-alert .m2d2-alert-front").findAll("input, select, textarea").forEach(elem => {
