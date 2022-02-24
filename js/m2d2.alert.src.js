@@ -72,6 +72,10 @@ m2d2.load($ => {
         switch ($.messageIcons) {
             case "fa": css = faIcons; break
             case "material" : css = material; break
+            default:
+                if($.isObject($.messageIcons)) {
+                    css = $.messageIcons;
+                }
         }
         if(options) {
             if(! $.isFunction(options.callback)) {

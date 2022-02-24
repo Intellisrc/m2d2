@@ -217,7 +217,9 @@ $.confirm("Are you sure?", "This is important", res => {
 });
 ```
 
-[Try it](https://gl.githack.com/intellisrc/m2d2/raw/master/examples/extensions/alert.html)
+[Try it (UTF8 Icons)](https://gl.githack.com/intellisrc/m2d2/raw/master/examples/extensions/alert.html)
+[Try it (FontAwesome)](https://gl.githack.com/intellisrc/m2d2/raw/master/examples/extensions/alert-fontawesome.html)
+[Try it (Google Material)](https://gl.githack.com/intellisrc/m2d2/raw/master/examples/extensions/alert-material.html)
 or
 [Learn about it](documentation/alert.md)
 

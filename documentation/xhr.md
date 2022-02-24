@@ -59,3 +59,17 @@ $.put("/api/v1.0/user/markus/", {
 });
 ```
 
+### Aborting connections:
+
+When you assign the request to a variable, it will return the `XMLHttpRequest` object. Aborting it is as simple as:
+
+```js
+// Aborting after 5 seconds:
+let timeout;
+const request = $.get("/slow/server", res => {
+    clearTimeout(timeout);
+});
+timeout = setTimeout(() =>{
+    request.abort();
+}, 5000);
+```

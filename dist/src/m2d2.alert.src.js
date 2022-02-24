@@ -80,6 +80,10 @@ m2d2.load($ => {
         switch ($.messageIcons) {
             case "fa": css = faIcons; break
             case "material" : css = material; break
+            default:
+                if($.isObject($.messageIcons)) {
+                    css = $.messageIcons;
+                }
         }
         if(options) {
             if(! $.isFunction(options.callback)) {
@@ -118,7 +122,7 @@ m2d2.load($ => {
                             },
                             icon : {
                                 tagName : "span",
-                                css : ["icon", options.icon, css.wrap || css[options.icon]].concat(options.icon === "wait" ? "spin" : ""),
+                                css : ["icon", options.icon].concat(css.wrap ? [css.wrap] : css[options.icon]).concat(options.icon === "wait" ? "spin" : ""),
                                 text : css.wrap ? css[options.icon] : ""
                             },
                             message : {

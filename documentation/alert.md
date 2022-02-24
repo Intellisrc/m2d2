@@ -19,6 +19,48 @@ This extension provides:
 In order to display the alerts, you need to add (and possibly modify) the [alert.css](../examples/css/alert.css) file.
 We have included the [scss files](../examples/css/alert/) for your convenience.
 
+The easiest way is to use `UTF-8` icons (no extra files needed). 
+Check the inline CSS included in the [alert.html](../examples/extensions/alert.html) example.
+You can easily replace the icons with SVG files, for example (just use the css classes).
+
+If you use [Font Awesome](https://fontawesome.com), take a look to the [alert-fontawesome.html](../examples/extensions/alert-fontawesome.html) example.
+
+> In order to use Font Awesome icons, you need to specify: `$.messageIcons = 'fa'`.
+
+If you use [Google Material Icons](https://material.io/icons), take a look to the [alert-material.html](../examples/extensions/alert-material.html) example.
+
+> In order to use Google Material icons, you need to specify: `$.messageIcons = 'material'`.
+
+If you are using other icons, or want to change the ones set by default, you can set your custom icons in this way:
+
+* Add special classes to icons (example Font Awesome):
+```js
+const faIcons = {
+    wrap     : false,
+    question : ["fa", "fa-question-circle"],
+    info     : ["fa", "fa-exclamation-circle"],
+    error    : ["fa", "fa-exclamation-triangle"],
+    ok       : ["fa", "fa-check"],
+    input    : ["fa", "fa-edit"],
+    wait     : ["fa", "fa-cog", "fa-spin"]
+}
+```
+Output example: `<span class="fa fa-cog fa-spin"></span>`
+
+* Add a parent class and type as text (like Material Icons):
+```js
+const material = {
+    wrap     : "material-icons",
+    question : "help",
+    info     : "info",
+    error    : "error",
+    ok       : "done",
+    input    : "edit",
+    wait     : "pending"
+}
+```
+Output example: `<span class="materia-icons">pending</span>`
+
 ## Example Usage:
 
 ### $.wait :
@@ -28,10 +70,8 @@ setTimeout(() => {
     waitMsg.close(); 
 }, 2000);
 ```
-**IMPORTANT:**
+You can use the callback to wait until the alert closes to perform some action:
 
-If you want to open another alert (of any type, like: failure, success, etc),
-specify a callback in `close()` method, for example:
 ```js
 const waitMsg = $.wait("Please wait...");
 // By passing a callback, you are sure that the `wait` message was closed properly.
