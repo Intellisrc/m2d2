@@ -5,6 +5,12 @@
 [![npm version](https://badge.fury.io/js/m2d2.svg)](https://www.npmjs.com/package/m2d2)
 [![npm downloads](https://img.shields.io/npm/dt/m2d2?color=C52)](https://www.npmjs.com/package/m2d2)
 ---
+[<button style="padding:10px; border:0; border-radius:4px;background: #666; color: white;">Quick Start</button>](#quick-start)
+[<button style="padding:10px; border:0; border-radius:4px;background: #666; color: white;">Documentation</button>](#documentation)
+[<button style="padding:10px; border:0; border-radius:4px;background: #666; color: white;">Install</button>](#install)
+[<button style="padding:10px; border:0; border-radius:4px;background: #666; color: white;">Tutorial</button>](#tutorial)
+[<button style="padding:10px; border:0; border-radius:4px;background: #666; color: white;">Examples</button>](#live-demo)
+---
 A class to easily place data in DOM and update them immediately upon change. It has no dependencies. It is similar to Angular, Vue, ReactJS and alike frameworks and shares some similarities with JQuery.
 
 The main goal of this framework is to keep the HTML and JS pure and clean, without having to either setup rules in the HTML (like in Angular), use HTML templates inside Javascript like in React, or use mixed templates like Vue. 
