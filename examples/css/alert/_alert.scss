@@ -13,37 +13,28 @@
         justify-content: center;
         align-items: center;
         flex-direction: column;
-
-        &.question::before {
-            color: $blue;
-            font-size: 200%;
-            margin: $padding;
-        }
-        &.ok::before {
-            color: $green;
-            font-size: 200%;
-            margin: $padding;
-        }
-        &.input::before {
-            color: $orange;
-            font-size: 200%;
-            margin: $padding;
-        }
-        &.wait::before {
-            color: white;
-            font-size: 200%;
+        .icon {
+            font-size: 3em;
             margin: $padding;
             display: block;
         }
-        &.error::before {
-            color: $red;
-            font-size: 200%;
-            margin: $padding;
+        &.question .icon {
+            color: $blue;
         }
-        &.info::before {
+        &.ok .icon {
+            color: $green;
+        }
+        &.input .icon {
+            color: $orange;
+        }
+        &.wait .icon {
+            color: white;
+        }
+        &.error .icon {
+            color: $red;
+        }
+        &.info .icon {
             color: $yellow;
-            font-size: 200%;
-            margin: $padding;
         }
 
         .m2d2-alert-title {
@@ -68,6 +59,9 @@
             width : 100%;
             button {
                 min-width: 100px;
+                text-transform: capitalize;
+                padding: 10px 20px;
+                cursor: pointer;
             }
             .ok, .yes, .send {
                 float: right;

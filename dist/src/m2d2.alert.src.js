@@ -2,7 +2,7 @@
  * Author : A.Lepe (dev@alepe.com) - intellisrc.com
  * License: MIT
  * Version: 2.1.1
- * Updated: 2022-02-23
+ * Updated: 2022-02-24
  * Content: Extension (Debug)
  */
 
@@ -48,31 +48,39 @@ m2d2.load($ => {
             }
         }
     }
-    function getIconClass(type) {
-        let css = [];
-        switch(type) {
-            case "question" :
-                css = ["fa", "fa-question-circle"];
-            break
-            case "info" :
-                css = ["fa", "fa-exclamation-circle"];
-            break
-            case "error":
-                css = ["fa", "fa-exclamation-triangle"];
-            break
-            case "ok":
-                css = ["fa", "fa-check"];
-            break
-            case "input":
-                css = ["fa", "fa-edit"];
-            break
-            case "wait":
-                css = ["fa", "fa-cog", "fa-spin"];
-            break
-        }
-        return css
+    const faIcons = {
+        wrap     : false,
+        question : ["fa", "fa-question-circle"],
+        info     : ["fa", "fa-exclamation-circle"],
+        error    : ["fa", "fa-exclamation-triangle"],
+        ok       : ["fa", "fa-check"],
+        input    : ["fa", "fa-edit"],
+        wait     : ["fa", "fa-cog", "fa-spin"]
+    }
+    const material = {
+        wrap     : "material-icons",
+        question : "help",
+        info     : "info",
+        error    : "error",
+        ok       : "done",
+        input    : "edit",
+        wait     : "pending"
+    }
+    const defaultCss = {
+        wrap     : false,
+        question : "icon_question",
+        info     : "icon_info",
+        error    : "icon_error",
+        ok       : "icon_ok",
+        input    : "icon_input",
+        wait     : "icon_wait"
     }
     $.message = function(options) {
+        let css = defaultCss;
+        switch ($.messageIcons) {
+            case "fa": css = faIcons; break
+            case "material" : css = material; break
+        }
         if(options) {
             if(! $.isFunction(options.callback)) {
                 if(options.callback &&! options.text) {
@@ -104,9 +112,14 @@ m2d2.load($ => {
                         front : Object.assign({
                             tagName : "form",
                             css : (options.css ? ($.isArray(options.css) ? options.css : [options.css]) : [])
-                                    .concat(["m2d2-alert-front", "popup", options.icon], getIconClass(options.icon)),
+                                  .concat(["m2d2-alert-front", "popup", options.icon]),
                             style : {
                                 zIndex : 100
+                            },
+                            icon : {
+                                tagName : "span",
+                                css : ["icon", options.icon, css.wrap || css[options.icon]].concat(options.icon === "wait" ? "spin" : ""),
+                                text : css.wrap ? css[options.icon] : ""
                             },
                             message : {
                                 tagName : "div",

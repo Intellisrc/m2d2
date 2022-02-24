@@ -1,7 +1,6 @@
 html * {
     box-sizing: border-box;
-    font-size: 16px;
-    font-family: verdana, tahoma, sans-serif;
+    font-family: Noto, verdana, tahoma, sans-serif;
 }
 body {
     max-width: 1500px;
@@ -16,6 +15,7 @@ body {
         "footer example";
     grid-gap: 10px;
     height: 100vh;
+    font-size: 16px;
 }
 header {
     grid-area: header;

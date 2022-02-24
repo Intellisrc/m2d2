@@ -1,8 +1,8 @@
 #m2d2-alert .m2d2-alert-front {
     min-width: 400px;
     min-height: 100px;
-    background-color: #EEE;
-    border: 1px solid #2196f3;
+    background-color: #D9D9D9;
+    border: 1px solid #9D9D9D;
     outline: 2px solid #EEE;
     padding: 10px;
     box-shadow: 0 0 5px 1px #000;
@@ -11,37 +11,30 @@
     justify-content: center;
     align-items: center;
     flex-direction: column;
+    border-radius: 8px;
 }
-#m2d2-alert .m2d2-alert-front.question::before {
-    color: #54c1e3;
-    font-size: 200%;
-    margin: 10px;
-}
-#m2d2-alert .m2d2-alert-front.ok::before {
-    color: #59bea0;
-    font-size: 200%;
-    margin: 10px;
-}
-#m2d2-alert .m2d2-alert-front.input::before {
-    color: #f3863d;
-    font-size: 200%;
-    margin: 10px;
-}
-#m2d2-alert .m2d2-alert-front.wait::before {
-    color: white;
-    font-size: 200%;
-    margin: 10px;
+#m2d2-alert .m2d2-alert-front .icon {
+    font-size: 3em;
     display: block;
-}
-#m2d2-alert .m2d2-alert-front.error::before {
-    color: #f06d65;
-    font-size: 200%;
     margin: 10px;
 }
-#m2d2-alert .m2d2-alert-front.info::before {
+#m2d2-alert .m2d2-alert-front.question .icon {
+    color: #54c1e3;
+}
+#m2d2-alert .m2d2-alert-front.ok .icon {
+    color: #59bea0;
+}
+#m2d2-alert .m2d2-alert-front.input .icon {
     color: #f3863d;
-    font-size: 200%;
-    margin: 10px;
+}
+#m2d2-alert .m2d2-alert-front.wait .icon {
+    color: #333333;
+}
+#m2d2-alert .m2d2-alert-front.error .icon {
+    color: #f06d65;
+}
+#m2d2-alert .m2d2-alert-front.info .icon {
+    color: #f3863d;
 }
 #m2d2-alert .m2d2-alert-front .m2d2-alert-title {
     font-size: 200%;
@@ -66,6 +59,9 @@
 }
 #m2d2-alert .m2d2-alert-front .m2d2-alert-buttons button {
     min-width: 100px;
+    text-transform: capitalize;
+    padding: 10px 20px;
+    cursor: pointer;
 }
 #m2d2-alert .m2d2-alert-front .m2d2-alert-buttons .ok, #m2d2-alert .m2d2-alert-front .m2d2-alert-buttons .yes, #m2d2-alert .m2d2-alert-front .m2d2-alert-buttons .send {
     float: right;
@@ -73,6 +69,7 @@
 #m2d2-alert .m2d2-alert-front .m2d2-alert-buttons .no, #m2d2-alert .m2d2-alert-front .m2d2-alert-buttons .cancel {
     float: left;
 }
+/** POPUP ANIMATION **/
 @keyframes popup {
     0%    { transform: scale(1); }
     50%   { transform: scale(1.4); }
@@ -92,4 +89,18 @@
 }
 .vanish {
     animation: vanish 0.5s;
+}
+/** WAIT SPIN **/
+@keyframes spin {
+    0% {
+        transform: rotate(0deg)
+    }
+    to {
+        transform: rotate(1turn)
+    }
+}
+.icon.spin,
+.material-icons.spin,
+.fa.fa-spin::before {
+    animation: spin 2s linear infinite;
 }
