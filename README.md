@@ -5,8 +5,9 @@
 [![npm version](https://badge.fury.io/js/m2d2.svg)](https://www.npmjs.com/package/m2d2)
 [![npm downloads](https://img.shields.io/npm/dt/m2d2?color=C52)](https://www.npmjs.com/package/m2d2)
 ---
-[Quick Start](#quick-start) |
-[Documentation](#documentation) |
+[Quick Start](documentation/quick.md) |
+[Documentation](documentation/m2d2.md) |
+[Recommendations](documentation/recommendations.md) |
 [Install](#install) |
 [Tutorial](#tutorial) |
 [Examples](#live-demo)
