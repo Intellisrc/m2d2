@@ -64,7 +64,7 @@ class Utils {
         return !isNaN(parseFloat(n)) && isFinite(n);
     };
 	/**
-	 * Return true if selector us an id selector
+	 * Return true if selector is an id selector
 	 * @param {string} s
 	 * @returns {boolean}
 	 */
