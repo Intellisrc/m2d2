@@ -1,6 +1,6 @@
 {
   "name": "m2d2",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "A very easy, clean and extensible way to build interactive web-based user interfaces.",
   "main": "dist/m2d2.bundle.min.js",
   "scripts": {

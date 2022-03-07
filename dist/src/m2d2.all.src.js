@@ -1,8 +1,8 @@
 /**
  * Author : A.Lepe (dev@alepe.com) - intellisrc.com
  * License: MIT
- * Version: 2.1.1
- * Updated: 2022-02-24
+ * Version: 2.1.2
+ * Updated: 2022-03-07
  * Content: Full Bundle (Debug)
  */
 
@@ -383,9 +383,6 @@ class Utils {
  * @author: A. Lepe
  * @url : https://gitlab.com/intellisrc/m2d2/
  * @since: May, 2018
- * @version: 2.0.0
- * @updated: 2021-04-16
- *
  *
  * M2D2 Class
  */
@@ -510,7 +507,7 @@ class m2d2 {
 		}
 		if($node._m2d2 === undefined) {
 			$node._m2d2 = true; //flag to prevent it from re-assign methods
-			["parent","sibling","next","prev","find","findAll","onupdate","onready","show","onshow","inView","css","text","html","getData","index"].forEach(f => {
+			["parent","sibling","posterior","anterior","find","findAll","onupdate","onready","show","onshow","inView","css","text","html","getData","index"].forEach(f => {
 				if($node.hasOwnProperty(f)) {
 					console.log("Node already had ["+f+"] property. It might cause unexpected behaviour.")
 					console.log("You may need to update the M2D2 version or report it to: github.com/intellisrc/m2d2/")
@@ -624,10 +621,9 @@ class m2d2 {
 			    inView: () => { //TODO: document
 			        return m2d2.utils.inView($node);
 			    },
-				next: () => { //TEST: 07
-				    return $node.nextElementSibling;
-				},
-				prev: () => { //TEST: 07
+				posterior: () => { //TEST: 07
+				    return $node.nextElementSibling;				},
+				anterior: () => { //TEST: 07
                     return $node.previousElementSibling;
 				},
 				parent: () => { //TODO: test
@@ -646,10 +642,10 @@ class m2d2 {
 					return nodeList;
 				},
 			}, extend);
-			// Some elements like <OPTION> already have index
+			// Only if the object doesn't have index already (like OPTION)
 			if($node.index === undefined) {
 				$node.index = () => { //TEST: 07
-					return Array.from($node.parentNode.children).indexOf($node);
+				    return Array.from($node.parentNode.children).indexOf($node);
 				}
 			}
 			// Let attributes know about changes in values //TODO: test
