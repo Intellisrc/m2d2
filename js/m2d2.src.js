@@ -280,7 +280,17 @@ class m2d2 {
 					for (let pair of fd.entries()) {
                         const elem = $node.find("[name='"+pair[0]+"']");
 						if(include || elem.type === "hidden" || elem.show) {
-							data[pair[0]] = elem.type === "file" ? elem.files : pair[1];
+						    const name = pair[0];
+						    const val = elem.type === "file" ? elem.files : pair[1];
+						    if(data[name] !== undefined) {
+						        if(m2d2.utils.isArray(data[name])) {
+						            data[name].push(val);
+						        } else {
+							        data[name] = [data[name], val];
+							    }
+						    } else {
+							    data[name] = val;
+							}
                         }
 					}
 					return data;
