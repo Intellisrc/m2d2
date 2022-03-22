@@ -7,7 +7,7 @@ body {
     margin: auto;
     border: 1px solid #CCC;
     display: grid;
-    grid-template-columns: 40% auto;
+    grid-template-columns: auto auto;
     grid-template-rows: min-content 20% auto;
     grid-template-areas:
         "header header"
