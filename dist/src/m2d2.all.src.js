@@ -2601,6 +2601,7 @@ m2d2.load($ => {
                 this.connected = true;
                 this.request(this.initRequest);
                 this.onConnect();
+
             }
             const onClose = (e) => {
                 this.connected = false;
@@ -2610,7 +2611,6 @@ m2d2.load($ => {
                         if(this.connected) {
                             console.log("Reconnected...")
                             clearInterval(this.interval);
-                            this.interval = null;
                         } else {
                             try {
                                 this.webSocket.close();
