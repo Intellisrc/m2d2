@@ -2,7 +2,7 @@
  * Author : A.Lepe (dev@alepe.com) - intellisrc.com
  * License: MIT
  * Version: 2.1.2
- * Updated: 2022-03-07
+ * Updated: 2022-03-22
  * Content: Full Bundle (Debug)
  */
 
@@ -333,6 +333,9 @@ class Utils {
 	 * @returns {HTMLElement}
 	 */
 	newElement(tagName) {
+	    if(!tagName || this.isNumeric(tagName)) {
+	        tagName = "invalid";
+	    }
 		return document.createElement(tagName);
 	};
 	/**
@@ -1074,10 +1077,28 @@ class m2d2 {
         $newItem.dataset.id = index;
         // Add "selected" property
         this.setUniqueAttrib($newItem, "selected"); //TODO: Document
+        // Add template to object //TODO: it might not work with events
+        this.addTemplatesToObjectDeep($template, obj);
         // Set values and links
 		let $newNode = this.doDom($newItem, obj);
 		// Place Events:
 		return this.getItemWithEvents($node, $newNode);
+	}
+
+    /**
+     * Try to set template to objects deep in tree
+     */
+	addTemplatesToObjectDeep($template, obj) {
+        if(m2d2.utils.isPlainObject(obj)) {
+            Object.keys(obj).forEach(key => {
+                if($template[key] && $template[key].__template &&! obj.template) {
+                    obj[key].template = $template[key].__template;
+                }
+                if($template[key] && obj[key]) {
+                    this.addTemplatesToObjectDeep($template[key], obj[key]);
+                }
+            });
+        }
 	}
 
 	/**
@@ -1189,7 +1210,7 @@ class m2d2 {
                         $template = m2d2.utils.newElement("dd");
                         break;
                     default:
-                        if(template) {
+                        if(template && m2d2.utils.isPlainObject(template)) {
                             const children = Object.keys(template).length;
                             if(children) {
                                 if(children > 1) {
@@ -1250,15 +1271,21 @@ class m2d2 {
 					$template = m2d2.utils.newElement(template);
 				}
 			}
-			if($template.childrenElementCount > 1) {
-			    console.log("Templates only supports a single child. Multiple children were detected, wrapping them with <span>. Template:");
-			    console.log($template);
-			    const $span = m2d2.utils.newElement("span");
-			    $span.append($template);
-			    $template = $span;
-			}
 			if ($template) {
-				m2d2.utils.defineProp($node, "_template", $template); // This is the DOM
+                if($template.childrenElementCount > 1) {
+                    console.log("Templates only supports a single child. Multiple children were detected, wrapping them with <span>. Template:");
+                    console.log($template);
+                    const $span = m2d2.utils.newElement("span");
+                    $span.append($template);
+                    $template = $span;
+                } else {
+				    m2d2.utils.defineProp($node, "_template", $template); // This is the DOM
+				}
+			} else {
+			    console.log("Template was not found for element, using <span>:");
+			    console.log($node);
+                const $span = m2d2.utils.newElement("span");
+                $template = $span;
 			}
 			return $template;
 		}
@@ -2521,7 +2548,7 @@ m2d2.load($ => {
         request(msg) {
             if (msg) {
                 try {
-                    this.webSocket.send(JSON.stringify(msg));
+                    this.webSocket.send($.isObject(msg) ? JSON.stringify(msg) : msg);
                 } catch(e) {
                     this.webSocket.onerror(e);
                 }
@@ -2531,7 +2558,7 @@ m2d2.load($ => {
          * Connect and return the websocket object
          */
         getSocket(onMessage, onOpen, onClose) {
-            const webSocket = new WebSocket(this.path);
+            const webSocket = new WebSocket(this.url);
             webSocket.onopen = onOpen;
             webSocket.onclose = onClose;
             webSocket.onmessage = (res) => {
@@ -2560,7 +2587,13 @@ m2d2.load($ => {
             this.host = options.host || window.location.hostname;
             this.secure = options.secure === true;
             this.port = options.port || (this.secure ? 443 : 80);
-            this.path = "ws" + (this.secure ? "s" : "") + "://" + this.host + ":" + this.port + "/" + (options.path || "");
+            this.path = "/" + (options.path.replace(/^\//,"") || "");
+            this.args = Object.assign({}, options.args);
+            const protocol = "ws" + (this.secure ? "s" : "") + "://";
+            const hostPort = this.host + ":" + this.port;
+            const uriPath  = this.path;
+            const queryStr = (this.args ? "?" + new URLSearchParams(this.args).toString() : "");
+            this.url = protocol + hostPort + uriPath + queryStr;
             this.connected = false;
             this.interval = null;
             //-------- Connect ----------

@@ -1,0 +1,58 @@
+<html>
+<head>
+    <title>Demo using M2D2 : Objects</title>
+    <meta name="HandheldFriendly" content="1">
+    <meta name="viewport" content="width=device-width, maximum-scale=1.0">
+    <meta name="theme-color" content="#333333">
+    <link rel="stylesheet" href="../css/examples.css" type="text/css"/>
+    <script src="../../dist/src/m2d2.all.src.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        // When ready...
+        m2d2.ready($ => {
+            const list = $("#list", {
+                template: {
+                    li : {
+                        css : "item",
+                        info : {
+                            tagName : "p",
+                            css : "info",
+                            extra : {
+                                tagName : "div",
+                                css : "extra",
+                                template : {
+                                    dl : {
+                                        dt : {
+                                            onclick : function() { alert("Ehhh?"); }
+                                        },
+                                        dd : "",
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            for(var x = 0; x < 3; x++) {
+                list.items.push({
+                    dataset : { added : "x" + x },
+                    info : {
+                        extra : {
+                            items : [
+                                { css : "one", dt : "One " + x, dd : "1" },
+                                { css : "two", dt : "Two " + x, dd : "2" },
+                            ]
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+</head>
+<body>
+<article id="main">
+    <h1>Test</h1>
+    <ul id="list">
+    </ul>
+</article>
+</body>
+</html>
