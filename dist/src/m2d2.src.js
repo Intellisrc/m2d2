@@ -403,7 +403,29 @@ class m2d2 {
 	static updates = true; //Enable "onupdate" (false = better performance) TODO: document (use MutationObserver)
 	static utils = new Utils();
 
-	constructor() {}
+	constructor() {
+        // Override some methods to prevent strange behaviour (issue #53):
+       ["after","before","append","prepend","insertAdjacentElement","replaceWith"].forEach(p => {
+            Element.prototype["_"+p] = Element.prototype[p];
+            Element.prototype[p] = function(...args) {
+                const arrArgs = Array.from(args);
+                arrArgs.forEach((arg, index) => {
+                    if(arg.domNode !== undefined && arg.domNode instanceof Element) { arrArgs[index] = arg.domNode; }
+                })
+                this["_"+p].apply(this, arrArgs);
+            }
+        });
+        /*["insertBefore","replaceChild","removeChild","appendChild","prependChild"].forEach(p => {
+            Node.prototype["_"+p] = Node.prototype[p];
+            Node.prototype[p] = function(...args) {
+                const arrArgs = Array.from(args);
+                arrArgs.forEach((arg, index) => {
+                    if(arg.domNode !== undefined && arg.domNode instanceof Node) { arrArgs[index] = arg.domNode; }
+                })
+                this["_"+p].apply(this, arrArgs);
+            }
+        });*/
+	}
 	//------------------------- STATIC -----------------------------
 	static instance = new m2d2();
 	static extensions = {}; // Additional properties for DOM
@@ -1423,10 +1445,10 @@ class m2d2 {
 	 * @returns {Proxy, Object}
 	 */
 	proxy (obj, force) {
-	    if(!m2d2.short || (obj === null || (obj._proxy !== undefined && force === undefined))) {
+	    if(!m2d2.short || (obj === null || (obj.domNode !== undefined && force === undefined))) {
 	        return obj;
 	    } else {
-	        obj._proxy = obj;
+	        obj.domNode = obj;
             const handler = {
                 get: (target, property) => {
                     const t = target[property];
@@ -1435,8 +1457,8 @@ class m2d2 {
                     	// Functions should bind target as "this"
 						case m2d2.utils.isFunction(t): return t.bind(target);
 						// If there was a failed attempt to set proxy, return it on read:
-						case t._proxy && target["$" + property] !== undefined: return target["$" + property];
-						case t._proxy === undefined && m2d2.utils.isElement(t): return this.proxy(t);
+						case t.domNode && target["$" + property] !== undefined: return target["$" + property];
+						case t.domNode === undefined && m2d2.utils.isElement(t): return this.proxy(t);
 						default: return t;
 					}
                 },
@@ -1572,7 +1594,7 @@ class m2d2 {
 			}
 			options.subtree = true;
 			options.childList = true;
-			const toObserve = $node._proxy || $node;
+			const toObserve = $node.domNode || $node;
 			mutationObserver.observe(toObserve, options);
 		}
 	}
