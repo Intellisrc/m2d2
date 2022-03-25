@@ -47,7 +47,9 @@
                 }
                 loading.show = false;
                 users.disabled = false;
-
+            }, err => {
+                console.log(err);
+                loading.text = "Error: " + err.reason;
             });
             // Specify initial state and events:
             return {
@@ -72,6 +74,7 @@
             if(id) {
                 loading.show = true;
                 users.disabled = true;
+                loading.text = "Loading...";
                 $.get("https://jsonplaceholder.typicode.com/users", { id : id }, json => {
                     let info = json[0]; //get the first item
                     loading.show = false;
@@ -88,7 +91,10 @@
                             }
                         }
                     });
-                });
+                }, err => {
+                    loading.text = "Error: " + err.reason;
+                    users.disabled = false;
+                }, 100);
             } else {
                 $(user, Object.assign({}, empty_user));
             }
