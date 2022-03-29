@@ -2,7 +2,7 @@
  * Author : A.Lepe (dev@alepe.com) - intellisrc.com
  * License: MIT
  * Version: 2.1.2
- * Updated: 2022-03-25
+ * Updated: 2022-03-29
  * Content: Core (Debug)
  */
 
@@ -415,16 +415,6 @@ class m2d2 {
                 this["_"+p].apply(this, arrArgs);
             }
         });
-        /*["insertBefore","replaceChild","removeChild","appendChild","prependChild"].forEach(p => {
-            Node.prototype["_"+p] = Node.prototype[p];
-            Node.prototype[p] = function(...args) {
-                const arrArgs = Array.from(args);
-                arrArgs.forEach((arg, index) => {
-                    if(arg.domNode !== undefined && arg.domNode instanceof Node) { arrArgs[index] = arg.domNode; }
-                })
-                this["_"+p].apply(this, arrArgs);
-            }
-        });*/
 	}
 	//------------------------- STATIC -----------------------------
 	static instance = new m2d2();

@@ -2,7 +2,7 @@
  * Author : A.Lepe (dev@alepe.com) - intellisrc.com
  * License: MIT
  * Version: 2.1.2
- * Updated: 2022-03-25
+ * Updated: 2022-03-29
  * Content: Full Bundle (Debug)
  */
 
@@ -415,16 +415,6 @@ class m2d2 {
                 this["_"+p].apply(this, arrArgs);
             }
         });
-        /*["insertBefore","replaceChild","removeChild","appendChild","prependChild"].forEach(p => {
-            Node.prototype["_"+p] = Node.prototype[p];
-            Node.prototype[p] = function(...args) {
-                const arrArgs = Array.from(args);
-                arrArgs.forEach((arg, index) => {
-                    if(arg.domNode !== undefined && arg.domNode instanceof Node) { arrArgs[index] = arg.domNode; }
-                })
-                this["_"+p].apply(this, arrArgs);
-            }
-        });*/
 	}
 	//------------------------- STATIC -----------------------------
 	static instance = new m2d2();
@@ -2391,6 +2381,7 @@ m2d2.load($ => {
             field    : "file", //Field name
             multiple : true, // Allow multiple files to be selected to upload,
             maxFiles : 0, // Maximum number of files to allow to upload. 0 = unlimited
+            maxParallel : 0, // Maximum number of files to upload simultaneously. 0 = unlimited
             maxSizeMb: 0, // Maximum size per file (P) or total (S) to allow
       }, options);
       options = null; // Do not use it later:
@@ -2407,7 +2398,7 @@ m2d2.load($ => {
       }
       if(opts.onDone == undefined)      { opts.onDone = (response, allDone) => { console.log(response) }}
       if(opts.onError  == undefined)    { opts.onError  = (response) => { console.log("Error : "); console.log(response); }}
-      if(opts.onUpdate == undefined)    { opts.onUpdate = (pct, file, index) => { console.log("Uploading : " + pct + "% " + (opts.oneByOne ? "[ " + file.name + " ]" : "")) } }
+      if(opts.onUpdate == undefined)    { opts.onUpdate = (pct, file, index) => { console.log("Uploading : " + pct + "% " + (opts.parallel ? "[ " + file.name + " ]" : "")) } }
       if(opts.onResponse == undefined)  { opts.onResponse = (res) => { return res } } // Return it without modifying it
 
       el.addEventListener('change', () => {
@@ -2429,19 +2420,42 @@ m2d2.load($ => {
                     }
                 }
                 new Promise(resolve => {
-                    if(opts.oneByOne) {
+                    if(opts.parallel) {
                         let index = 0;
-                        const fileDone = Array(el.files.length).fill(false);
-                        Array.from(el.files).forEach(file => {
+                        const files = Array.from(el.files)
+                        const fileDone = Array(files.length).fill(false);
+                        let uploading = [];
+                        // Process a single file
+                        const uploadFile = function(file) {
                             new FileUpload(el.name, [file], index++, opts, (data, files, index) => {
                                 fileDone[index] = true;
+                                if(uploading.length) {
+                                   delete uploading[uploading.indexOf(file)];
+                                   uploading = uploading.filter(e => { return e === 0 || e });
+                                }
                                 const allDone = fileDone.indexOf(false) === -1;
                                 opts.onDone(getResponse(data, files, index), allDone);
                                 if(allDone) {
                                     resolve();
                                 }
                             });
-                        });
+                        }
+                        // Decide limits
+                        if(opts.maxParallel) {
+                            const timer = setInterval(() => {
+                                if(files.length === 0) {
+                                    clearInterval(timer);
+                                } else {
+                                    while(uploading.length < opts.maxParallel * 1) {
+                                        const file = files.shift();
+                                        uploading.push(file);
+                                        uploadFile(file);
+                                    }
+                                }
+                            }, 100);
+                        } else { // No limits
+                            files.forEach(uploadFile);
+                        }
                     } else {
                         new FileUpload(el.name, el.files, 0, opts, (data, files, index) => {
                             opts.onDone(getResponse(data, files, index), true);
@@ -2483,7 +2497,7 @@ m2d2.load($ => {
 
       xhr.upload.addEventListener("progress", function(e) {
         if (e.lengthComputable) {
-          if(options.oneByOne) {
+          if(options.parallel) {
               const percentage = Math.round((e.loaded * 100) / e.total);
               options.onUpdate(percentage, files[0], index);
           } else {
