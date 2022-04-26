@@ -13,7 +13,7 @@
 	    $("#out", {
 	        items : []
 	    });
-	    $.get("http://localhost:7171/test").partial(res => {
+	    $.get("http://localhost:7171/stream").partial(res => {
 	        res.trim().split('\n').forEach(line => {
 	            out.items.push(JSON.parse(line).time);
 	        });
@@ -29,3 +29,32 @@
 </article>
 </body>
 </html>
+<script>
+    /* To test, create web server with ICL library:
+    @CompileStatic
+    class WebStreamTest implements ServiciableSingle {
+        static void main(String[] args) {
+            new WebService(port: 7171).add(new WebStreamTest()).start()
+        }
+
+        @Override
+        Service getService() {
+            return new Service(
+                path: "/stream",
+                allowOrigin: "*",
+                action : {
+                    Request request, Response response ->
+                        response.raw().setContentType(Mime.JSON) //"application/x-ndjson"
+                        (1..60).each {
+                            response.raw().outputStream.println(JSON.encode([ time: SysClock.now.YMDHmsS ]))
+                            response.raw().outputStream.flush()
+                            sleep(100)
+                        }
+                        response.raw().outputStream.close()
+                        return null
+                }
+            )
+        }
+    }
+    */
+</script>
