@@ -1,6 +1,5 @@
 m2d2.load($ => {
     /**
-     * @version 2020-05-09
      * @author A.Lepe (dev@alepe.com)
      * XHR implementation
      *
@@ -13,6 +12,7 @@ m2d2.load($ => {
      * $.options
      * $.trace
      * $.patch
+	 * $.head
      *
      * Documentation :
      * https://gitlab.com/intellisrc/m2d2/tree/master/documentation/xhr.md
@@ -20,7 +20,7 @@ m2d2.load($ => {
      */
 
      /**
-     * @param method: HTTP method (GET, POST, PUT, DELETE)
+     * @param method: HTTP method (GET, POST, PUT, DELETE, etc)
      * @param url: service URL
      * @param data: Data object to send (in case of POST and PUT)
      * @param callback: Callback on Success (it will return data)
@@ -40,6 +40,7 @@ m2d2.load($ => {
                 data = JSON.stringify(data);
             } else {
                 switch(method.toUpperCase()) {
+                    case "HEAD":
                     case "GET":
                         if(typeof data == "string") {
                             const obj = {};
@@ -69,6 +70,26 @@ m2d2.load($ => {
         request.onerror = function(e) {
             error_callback({type : "Connection", reason: "Connection Refused", status: 0 });
         }
+		let loadedBytes = 0;
+		request.onreadystatechange = function() {
+		  switch(request.readyState) {
+			case request.HEADERS_RECEIVED: //Headers
+                const headers = request.getAllResponseHeaders().trim().split('\r\n').reduce((acc, current) => {
+                      const [x,v] = current.split(': ');
+                      return Object.assign(acc, { [x] : v });
+                }, {});
+				request.dispatchEvent(new CustomEvent('headers', { detail : headers }));
+				if(method == "HEAD") {
+				    callback(headers);
+				}
+				break
+			case request.LOADING: //Partial
+				const partial = request.response.substr(loadedBytes);
+				loadedBytes = request.responseText.length;
+				request.dispatchEvent(new CustomEvent('partial', { detail : partial }));
+				break
+		  }
+		};
         request.onload = function() {
             let data = {};
             try {
@@ -79,7 +100,7 @@ m2d2.load($ => {
                 data.error = { type : "Parse Error", reason : err.message, status: 0 }
             }
             if (request.status >= 200 && request.status < 400) {
-                if(callback !== undefined) {
+                if(callback !== undefined && method != "HEAD") {
                     callback(data);
                 }
             } else if(request.status >= 400) {
@@ -95,6 +116,19 @@ m2d2.load($ => {
                 error_callback(data.error);
             }
         };
+		// Override if needed
+		request.headers = function(callback) {
+		    request.addEventListener("headers", function(e) {
+		        callback(e.detail)
+		    });
+	    }
+		// Override if needed
+		request.partial = function(callback) {
+		    request.addEventListener("partial", function(e) {
+		        callback(e.detail)
+		    });
+		}
+		// Send
         request.send(data);
         return request;
     };
@@ -108,7 +142,7 @@ m2d2.load($ => {
      * xhr.get(url, json);
      */
     const xhr = {};
-    ["get","post","put","delete","connect","options","trace","patch"].forEach(function(method) {
+    ["get","post","put","delete","connect","options","trace","patch","head"].forEach(function(method) {
         xhr[method] = function() {
             let url, data, callback, error_callback, json, timeout;
             // noinspection FallThroughInSwitchStatementJS

@@ -5,6 +5,7 @@ const gulp = require('gulp'),
     rename = require('gulp-rename'),
 	terser = require('gulp-terser'),
 	header = require('gulp-header-comment'),
+    maps   = require('gulp-sourcemaps'),
 	umd	   = require('gulp-umd');
 
 const paths = {
