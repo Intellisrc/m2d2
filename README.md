@@ -171,9 +171,15 @@ You can use this library either with Web or NodeJS, Framework7, etc.
 
 ### For the Web
 
-#### Option 1 : Get M2D2 using npm
+#### Option 1 : Get M2D2 using npm / yarn
+
+[npm web page](https://www.npmjs.com/package/m2d2) | [yarn web page](https://yarnpkg.com/package/m2d2)
 
 > npm i m2d2
+
+or
+
+> yarn add m2d2
 
 Then you will find the library files under `node_modules/m2d2/dist/` (more about this below).
 
