@@ -469,3 +469,41 @@ m2d2.ready($ => {
 
 This way, you don't pollute the global scope. Just be careful not to override any [other extension](m2d2.md#extensions) 
 or properties already set in the M2D2 instance (for example, see [Utils](m2d2.md#utils)).
+
+## 12. Improving items performance
+
+When handling thousands of `items` (elements), it is better to prepare your list first and set it all at once
+instead of pushing each element, for example:
+
+Instead of...
+```js
+const list = $("#list", {
+    items : [],
+    onload : function (ev) {
+        for(let i = 1; i <= 100000; i++) {
+            this.items.push({
+                text: "Item: " + i,
+                css : i % 2 == 0 ? "even" : "odd"
+            })
+        }
+    }
+})
+```
+
+Do:
+```js
+const list = $("#list", {
+    items : [],
+    onload : function (ev) {
+        const tmpList = [];
+        for(let i = 1; i <= 100000; i++) {
+            tmpList.push({
+                text: "Item: " + i,
+                css : i % 2 == 0 ? "even" : "odd"
+            })
+        }
+        this.items = tmpList;
+    }
+})
+```
+See it in action: [Performance Test](http://gl.githack.com/intellisrc/m2d2/raw/master/examples/tests/performance.html)

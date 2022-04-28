@@ -48,54 +48,66 @@ Content: `;
 // Core minified
 gulp.task('js', gulp.series([], function() {
 	return gulp.src(paths.js)
+		.pipe(maps.init())
 		.pipe(terser())
 		.pipe(concat(paths.prefix + '.min.js'))
+		.pipe(maps.write(''))
 		.pipe(gulp.dest(paths.build));
 }));
 // Extensions pack minified
 gulp.task('ext', gulp.series(['js'], function() {
 	return gulp.src(paths.ext)
+		.pipe(maps.init())
 		.pipe(terser())
 		.pipe(header(headers + "Extension"))
         .pipe(rename({ extname : "" })) //remove extensions
         .pipe(rename({ extname : ".min.js" }))
+		.pipe(maps.write(''))
 		.pipe(gulp.dest(paths.build));
 }));
 // Core + Extensions pack minified
 gulp.task('bundle', gulp.series(['js', 'ext'], function() {
 	return gulp.src(paths.bundle)
+		.pipe(maps.init())
 		.pipe(concat(paths.prefix + '.bundle.min.js'))
 		.pipe(umd(umdOpts))
 		.pipe(terser())
 		.pipe(header(headers + "Full Bundle"))
+		.pipe(maps.write(''))
 		.pipe(gulp.dest(paths.build));
 }));
 // Core + Extensions XHR
 gulp.task('xhr', gulp.series(['bundle'], function() {
 	return gulp.src(paths.xhr)
+		.pipe(maps.init())
 		.pipe(concat(paths.prefix + '.bundle.xhr.min.js'))
 		.pipe(umd(umdOpts))
 		.pipe(terser())
 		.pipe(header(headers + "XHR Bundle"))
+		.pipe(maps.write(''))
 		.pipe(gulp.dest(paths.build));
 }));
 // Core + Extensions WS
 gulp.task('ws', gulp.series(['bundle'], function() {
 	return gulp.src(paths.ws)
+		.pipe(maps.init())
 		.pipe(concat(paths.prefix + '.bundle.ws.min.js'))
 		.pipe(umd(umdOpts))
 		.pipe(terser())
 		.pipe(header(headers + "WebSocket Bundle"))
+		.pipe(maps.write(''))
 		.pipe(gulp.dest(paths.build));
 }));
 // Core minified with umd (the first time 'js' is used a base for bundles, this is for m2d2.min.js)
 gulp.task('jse', gulp.series(['ws'], function() {
 	return gulp.src(paths.js)
+		.pipe(maps.init())
 		.pipe(terser())
 		.pipe(concat(paths.prefix + '.min.js'))
 		.pipe(umd(umdOpts))
 		.pipe(terser())
 		.pipe(header(headers + "Core"))
+		.pipe(maps.write(''))
 		.pipe(gulp.dest(paths.build));
 }));
 // Source only for development
