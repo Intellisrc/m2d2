@@ -316,6 +316,9 @@ class Utils {
 	 * @returns {HTMLElement}
 	 */
 	newElement(tagName) {
+	    if(!tagName || this.isNumeric(tagName)) {
+	        tagName = "invalid";
+	    }
 		return document.createElement(tagName);
 	};
 	/**

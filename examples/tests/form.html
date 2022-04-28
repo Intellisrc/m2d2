@@ -22,7 +22,7 @@
 }
 
 .reservation label {
-	padding: 0;
+	padding: 5px;
 	font-weight: bold;
 	display: block;
 }
@@ -32,7 +32,8 @@
     float: right;
 }
 
-.reservation select {
+.reservation select,
+.reservation .select {
 	margin-left: 2em;
 	width: 20em;
 	border: 1px solid #ccc;
@@ -65,7 +66,7 @@ cite {
 	font-size: 80%;
 }
 </style>
-<script src="../../dist/src/m2d2.all.src.js" type="text/javascript"></script>
+<script src="../../dist/m2d2.min.js" type="text/javascript"></script>
 <!-- Import Demo menu: -->
 <script src="../js/demo-links.js" type="text/javascript"></script>
 <!--                   -->
@@ -82,26 +83,38 @@ m2d2.ready($ => {
 			autocomplete : true,
             autofocus : true,
             placeholder : "Your Name",
-			size : 30
+			size : 30,
+			oninput : function(ev) {
+                console.log("Name changed to: " + this.value)
+            }
 		},
 		phone : {
 			type : "tel",
 			autocomplete : true,
 			placeholder : "123-4567-8901",
 			pattern : "[0-9]{3,5}-[0-9]{3,5}-[0-9]{3,5}",
-			size : 20
+			size : 20,
+			oninput : function(ev) {
+                console.log("Phone changed to: " + this.value)
+            }
 		},
 		email : {
 			type : "email",
 			autocomplete : true,
 			placeholder : "you@example.com",
 			required : true,
-			size : 30
+			size : 30,
+			oninput : function(ev) {
+                console.log("Email changed to: " + this.value)
+            }
 		},
         lang : {
             type : "text",
             value : "English",
-            size : 30
+            size : 30,
+			oninput : function(ev) {
+                console.log("Lang changed to: " + this.value)
+            }
         },
 		taxi : {
 			template : {
@@ -110,6 +123,9 @@ m2d2.ready($ => {
 						input : {
 							type: "radio",
 							name: "taxi-options",
+                            onchange: function(ev) {
+                                console.log("Taxi type changed to: " + this.value)
+                            }
 						}
 					}
 				}
@@ -127,6 +143,9 @@ m2d2.ready($ => {
 						input : {
 							type : "checkbox",
 							name : "extras-options",
+                            onchange: function(ev) {
+                                console.log("Extras item: " + this.parent().text + " = " + (this.checked ? "YES" : "NO"))
+                            }
 						}
 					}
 				}
@@ -139,13 +158,19 @@ m2d2.ready($ => {
 		},
 		date : {
 			type : "date",
-			value : new Date()
+			value : new Date(),
+			oninput : function(ev) {
+                console.log("Date changed to: " + this.value)
+            }
 		},
 		time : {
 			type : "time",
             min  : "10:00",
             max  : "20:00",
-			value : "10:00"
+			value : "10:00",
+			oninput : function(ev) {
+                console.log("Time changed to: " + this.value)
+            }
 		},
 		pickup : {
 			//template : 'option', <-- not required as it is automatically guessed
@@ -154,7 +179,10 @@ m2d2.ready($ => {
 				{ value : "office", text: "Taxi Office" },
 				{ value : "town_hall", text: "Town Hall" },
 				{ value : "telepathy", text: "We'll Guess!" },
-			]
+			],
+			onchange : function(ev) {
+                console.log("Pickup changed to: " + this.value)
+            }
 		},
         destinations : {
             //template : 'option', <-- not required as it is automatically guessed
@@ -166,37 +194,34 @@ m2d2.ready($ => {
         },
 		dropoff : {
 			type : "text",
-			list : "destinations"
+			css  : "select",
+			list : "destinations",
+			oninput : function(ev) {
+                console.log("Dropoff changed to: " + this.value)
+            }
 		},
 		comment : {
 			cols : 50,
-			rows : 5
+			rows : 5,
+			oninput : function(ev) {
+                console.log("Comment changed to: " + this.value)
+            }
 		},
 		button : {
-			disabled : false
+			disabled : false,
+			onclick : function(ev) {
+                console.log("Button clicked!")
+            }
 		},
         onsubmit : function(event) {
-            if(this.checkValidity()) {
-                alert("Thank you");
-                this.reset();
-            }
+            console.log(this.getData());
             return false;
         }
 	});
-	form.name.onupdate = (ev) => {
-	    if(ev.detail.property === "value") {
-            console.log("Input changed")
-        }
-    }
-	form.pickup.onupdate = (ev) => {
-        if(ev.detail.property === "value") {
-            console.log(ev);
-        }
-    }
 });
 </script>
 </head>
-<body>
+<body class="example">
 <article>
     <h1>Form M2D2 Demo</h1>
     <p>

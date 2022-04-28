@@ -1,8 +1,8 @@
 /**
  * Author : A.Lepe (dev@alepe.com) - intellisrc.com
  * License: MIT
- * Version: 2.1.1
- * Updated: 2022-02-24
+ * Version: 2.1.2
+ * Updated: 2022-04-28
  * Content: Full Bundle (Debug)
  */
 
@@ -333,6 +333,9 @@ class Utils {
 	 * @returns {HTMLElement}
 	 */
 	newElement(tagName) {
+	    if(!tagName || this.isNumeric(tagName)) {
+	        tagName = "invalid";
+	    }
 		return document.createElement(tagName);
 	};
 	/**
@@ -383,9 +386,6 @@ class Utils {
  * @author: A. Lepe
  * @url : https://gitlab.com/intellisrc/m2d2/
  * @since: May, 2018
- * @version: 2.0.0
- * @updated: 2021-04-16
- *
  *
  * M2D2 Class
  */
@@ -403,7 +403,19 @@ class m2d2 {
 	static updates = true; //Enable "onupdate" (false = better performance) TODO: document (use MutationObserver)
 	static utils = new Utils();
 
-	constructor() {}
+	constructor() {
+        // Override some methods to prevent strange behaviour (issue #53):
+       ["after","before","append","prepend","insertAdjacentElement","replaceWith"].forEach(p => {
+            Element.prototype["_"+p] = Element.prototype[p];
+            Element.prototype[p] = function(...args) {
+                const arrArgs = Array.from(args);
+                arrArgs.forEach((arg, index) => {
+                    if(arg.domNode !== undefined && arg.domNode instanceof Element) { arrArgs[index] = arg.domNode; }
+                })
+                this["_"+p].apply(this, arrArgs);
+            }
+        });
+	}
 	//------------------------- STATIC -----------------------------
 	static instance = new m2d2();
 	static extensions = {}; // Additional properties for DOM
@@ -510,7 +522,7 @@ class m2d2 {
 		}
 		if($node._m2d2 === undefined) {
 			$node._m2d2 = true; //flag to prevent it from re-assign methods
-			["parent","sibling","next","prev","find","findAll","onupdate","onready","show","onshow","inView","css","text","html","getData","index"].forEach(f => {
+			["parent","sibling","posterior","anterior","find","findAll","onupdate","onready","show","onshow","inView","css","text","html","getData","index"].forEach(f => {
 				if($node.hasOwnProperty(f)) {
 					console.log("Node already had ["+f+"] property. It might cause unexpected behaviour.")
 					console.log("You may need to update the M2D2 version or report it to: github.com/intellisrc/m2d2/")
@@ -624,10 +636,9 @@ class m2d2 {
 			    inView: () => { //TODO: document
 			        return m2d2.utils.inView($node);
 			    },
-				next: () => { //TEST: 07
-				    return $node.nextElementSibling;
-				},
-				prev: () => { //TEST: 07
+				posterior: () => { //TEST: 07
+				    return $node.nextElementSibling;				},
+				anterior: () => { //TEST: 07
                     return $node.previousElementSibling;
 				},
 				parent: () => { //TODO: test
@@ -646,10 +657,10 @@ class m2d2 {
 					return nodeList;
 				},
 			}, extend);
-			// Some elements like <OPTION> already have index
+			// Only if the object doesn't have index already (like OPTION)
 			if($node.index === undefined) {
 				$node.index = () => { //TEST: 07
-					return Array.from($node.parentNode.children).indexOf($node);
+				    return Array.from($node.parentNode.children).indexOf($node);
 				}
 			}
 			// Let attributes know about changes in values //TODO: test
@@ -665,7 +676,17 @@ class m2d2 {
 					for (let pair of fd.entries()) {
                         const elem = $node.find("[name='"+pair[0]+"']");
 						if(include || elem.type === "hidden" || elem.show) {
-							data[pair[0]] = elem.type === "file" ? elem.files : pair[1];
+						    const name = pair[0];
+						    const val = elem.type === "file" ? elem.files : pair[1];
+						    if(data[name] !== undefined) {
+						        if(m2d2.utils.isArray(data[name])) {
+						            data[name].push(val);
+						        } else {
+							        data[name] = [data[name], val];
+							    }
+						    } else {
+							    data[name] = val;
+							}
                         }
 					}
 					return data;
@@ -1068,10 +1089,28 @@ class m2d2 {
         $newItem.dataset.id = index;
         // Add "selected" property
         this.setUniqueAttrib($newItem, "selected"); //TODO: Document
+        // Add template to object //TODO: it might not work with events
+        this.addTemplatesToObjectDeep($template, obj);
         // Set values and links
 		let $newNode = this.doDom($newItem, obj);
 		// Place Events:
 		return this.getItemWithEvents($node, $newNode);
+	}
+
+    /**
+     * Try to set template to objects deep in tree
+     */
+	addTemplatesToObjectDeep($template, obj) {
+        if(m2d2.utils.isPlainObject(obj)) {
+            Object.keys(obj).forEach(key => {
+                if($template[key] && $template[key].__template &&! obj.template) {
+                    obj[key].template = $template[key].__template;
+                }
+                if($template[key] && obj[key]) {
+                    this.addTemplatesToObjectDeep($template[key], obj[key]);
+                }
+            });
+        }
 	}
 
 	/**
@@ -1183,7 +1222,7 @@ class m2d2 {
                         $template = m2d2.utils.newElement("dd");
                         break;
                     default:
-                        if(template) {
+                        if(template && m2d2.utils.isPlainObject(template)) {
                             const children = Object.keys(template).length;
                             if(children) {
                                 if(children > 1) {
@@ -1244,15 +1283,21 @@ class m2d2 {
 					$template = m2d2.utils.newElement(template);
 				}
 			}
-			if($template.childrenElementCount > 1) {
-			    console.log("Templates only supports a single child. Multiple children were detected, wrapping them with <span>. Template:");
-			    console.log($template);
-			    const $span = m2d2.utils.newElement("span");
-			    $span.append($template);
-			    $template = $span;
-			}
 			if ($template) {
-				m2d2.utils.defineProp($node, "_template", $template); // This is the DOM
+                if($template.childrenElementCount > 1) {
+                    console.log("Templates only supports a single child. Multiple children were detected, wrapping them with <span>. Template:");
+                    console.log($template);
+                    const $span = m2d2.utils.newElement("span");
+                    $span.append($template);
+                    $template = $span;
+                } else {
+				    m2d2.utils.defineProp($node, "_template", $template); // This is the DOM
+				}
+			} else {
+			    console.log("Template was not found for element, using <span>:");
+			    console.log($node);
+                const $span = m2d2.utils.newElement("span");
+                $template = $span;
 			}
 			return $template;
 		}
@@ -1390,10 +1435,10 @@ class m2d2 {
 	 * @returns {Proxy, Object}
 	 */
 	proxy (obj, force) {
-	    if(!m2d2.short || (obj === null || (obj._proxy !== undefined && force === undefined))) {
+	    if(!m2d2.short || (obj === null || (obj.domNode !== undefined && force === undefined))) {
 	        return obj;
 	    } else {
-	        obj._proxy = obj;
+	        obj.domNode = obj;
             const handler = {
                 get: (target, property) => {
                     const t = target[property];
@@ -1402,8 +1447,8 @@ class m2d2 {
                     	// Functions should bind target as "this"
 						case m2d2.utils.isFunction(t): return t.bind(target);
 						// If there was a failed attempt to set proxy, return it on read:
-						case t._proxy && target["$" + property] !== undefined: return target["$" + property];
-						case t._proxy === undefined && m2d2.utils.isElement(t): return this.proxy(t);
+						case t.domNode && target["$" + property] !== undefined: return target["$" + property];
+						case t.domNode === undefined && m2d2.utils.isElement(t): return this.proxy(t);
 						default: return t;
 					}
                 },
@@ -1539,7 +1584,7 @@ class m2d2 {
 			}
 			options.subtree = true;
 			options.childList = true;
-			const toObserve = $node._proxy || $node;
+			const toObserve = $node.domNode || $node;
 			mutationObserver.observe(toObserve, options);
 		}
 	}
@@ -2336,6 +2381,7 @@ m2d2.load($ => {
             field    : "file", //Field name
             multiple : true, // Allow multiple files to be selected to upload,
             maxFiles : 0, // Maximum number of files to allow to upload. 0 = unlimited
+            maxParallel : 0, // Maximum number of files to upload simultaneously. 0 = unlimited
             maxSizeMb: 0, // Maximum size per file (P) or total (S) to allow
       }, options);
       options = null; // Do not use it later:
@@ -2352,7 +2398,7 @@ m2d2.load($ => {
       }
       if(opts.onDone == undefined)      { opts.onDone = (response, allDone) => { console.log(response) }}
       if(opts.onError  == undefined)    { opts.onError  = (response) => { console.log("Error : "); console.log(response); }}
-      if(opts.onUpdate == undefined)    { opts.onUpdate = (pct, file, index) => { console.log("Uploading : " + pct + "% " + (opts.oneByOne ? "[ " + file.name + " ]" : "")) } }
+      if(opts.onUpdate == undefined)    { opts.onUpdate = (pct, file, index) => { console.log("Uploading : " + pct + "% " + (opts.parallel ? "[ " + file.name + " ]" : "")) } }
       if(opts.onResponse == undefined)  { opts.onResponse = (res) => { return res } } // Return it without modifying it
 
       el.addEventListener('change', () => {
@@ -2374,19 +2420,42 @@ m2d2.load($ => {
                     }
                 }
                 new Promise(resolve => {
-                    if(opts.oneByOne) {
+                    if(opts.parallel) {
                         let index = 0;
-                        const fileDone = Array(el.files.length).fill(false);
-                        Array.from(el.files).forEach(file => {
+                        const files = Array.from(el.files)
+                        const fileDone = Array(files.length).fill(false);
+                        let uploading = [];
+                        // Process a single file
+                        const uploadFile = function(file) {
                             new FileUpload(el.name, [file], index++, opts, (data, files, index) => {
                                 fileDone[index] = true;
+                                if(uploading.length) {
+                                   delete uploading[uploading.indexOf(file)];
+                                   uploading = uploading.filter(e => { return e === 0 || e });
+                                }
                                 const allDone = fileDone.indexOf(false) === -1;
                                 opts.onDone(getResponse(data, files, index), allDone);
                                 if(allDone) {
                                     resolve();
                                 }
                             });
-                        });
+                        }
+                        // Decide limits
+                        if(opts.maxParallel) {
+                            const timer = setInterval(() => {
+                                if(files.length === 0) {
+                                    clearInterval(timer);
+                                } else {
+                                    while(uploading.length < opts.maxParallel * 1) {
+                                        const file = files.shift();
+                                        uploading.push(file);
+                                        uploadFile(file);
+                                    }
+                                }
+                            }, 100);
+                        } else { // No limits
+                            files.forEach(uploadFile);
+                        }
                     } else {
                         new FileUpload(el.name, el.files, 0, opts, (data, files, index) => {
                             opts.onDone(getResponse(data, files, index), true);
@@ -2428,7 +2497,7 @@ m2d2.load($ => {
 
       xhr.upload.addEventListener("progress", function(e) {
         if (e.lengthComputable) {
-          if(options.oneByOne) {
+          if(options.parallel) {
               const percentage = Math.round((e.loaded * 100) / e.total);
               options.onUpdate(percentage, files[0], index);
           } else {
@@ -2515,7 +2584,7 @@ m2d2.load($ => {
         request(msg) {
             if (msg) {
                 try {
-                    this.webSocket.send(JSON.stringify(msg));
+                    this.webSocket.send($.isObject(msg) ? JSON.stringify(msg) : msg);
                 } catch(e) {
                     this.webSocket.onerror(e);
                 }
@@ -2525,7 +2594,7 @@ m2d2.load($ => {
          * Connect and return the websocket object
          */
         getSocket(onMessage, onOpen, onClose) {
-            const webSocket = new WebSocket(this.path);
+            const webSocket = new WebSocket(this.url);
             webSocket.onopen = onOpen;
             webSocket.onclose = onClose;
             webSocket.onmessage = (res) => {
@@ -2554,7 +2623,13 @@ m2d2.load($ => {
             this.host = options.host || window.location.hostname;
             this.secure = options.secure === true;
             this.port = options.port || (this.secure ? 443 : 80);
-            this.path = "ws" + (this.secure ? "s" : "") + "://" + this.host + ":" + this.port + "/" + (options.path || "");
+            this.path = "/" + (options.path.replace(/^\//,"") || "");
+            this.args = Object.assign({}, options.args);
+            const protocol = "ws" + (this.secure ? "s" : "") + "://";
+            const hostPort = this.host + ":" + this.port;
+            const uriPath  = this.path;
+            const queryStr = (this.args ? "?" + new URLSearchParams(this.args).toString() : "");
+            this.url = protocol + hostPort + uriPath + queryStr;
             this.connected = false;
             this.interval = null;
             //-------- Connect ----------
@@ -2562,6 +2637,7 @@ m2d2.load($ => {
                 this.connected = true;
                 this.request(this.initRequest);
                 this.onConnect();
+
             }
             const onClose = (e) => {
                 this.connected = false;
@@ -2571,7 +2647,6 @@ m2d2.load($ => {
                         if(this.connected) {
                             console.log("Reconnected...")
                             clearInterval(this.interval);
-                            this.interval = null;
                         } else {
                             try {
                                 this.webSocket.close();
@@ -2593,7 +2668,6 @@ m2d2.load($ => {
 });
 m2d2.load($ => {
     /**
-     * @version 2020-05-09
      * @author A.Lepe (dev@alepe.com)
      * XHR implementation
      *
@@ -2606,6 +2680,7 @@ m2d2.load($ => {
      * $.options
      * $.trace
      * $.patch
+	 * $.head
      *
      * Documentation :
      * https://gitlab.com/intellisrc/m2d2/tree/master/documentation/xhr.md
@@ -2613,14 +2688,15 @@ m2d2.load($ => {
      */
 
      /**
-     * @param method: HTTP method (GET, POST, PUT, DELETE)
+     * @param method: HTTP method (GET, POST, PUT, DELETE, etc)
      * @param url: service URL
      * @param data: Data object to send (in case of POST and PUT)
      * @param callback: Callback on Success (it will return data)
      * @param error_callback: Callback on Failure
      * @param json : Boolean (if set, it will set request content-type as json and in case of GET, it will send it as body instead of query)
+     * @param timeout : number (milliseconds)
      */
-    const XHR = function(method, url, data, callback, error_callback, json) {
+    const XHR = function(method, url, data, callback, error_callback, json, timeout) {
         const request = new XMLHttpRequest();
         if(json === undefined) { json = false }
         if(error_callback === undefined) { error_callback = function(e) { console.log(e); } }
@@ -2632,7 +2708,13 @@ m2d2.load($ => {
                 data = JSON.stringify(data);
             } else {
                 switch(method.toUpperCase()) {
+                    case "HEAD":
                     case "GET":
+                        if(typeof data == "string") {
+                            const obj = {};
+                            obj[data] = "";
+                            data = obj;
+                        }
                         url += (url.indexOf("?") !== -1 ? "&" : "?") + (Object.keys(data).map(key => key + '=' + data[key]).join('&'));
                         data = "";
                         break
@@ -2642,36 +2724,79 @@ m2d2.load($ => {
             }
         }
         request.open(method, url, true);
+        if(timeout) {
+            request.timeout = timeout;
+            request.ontimeout = function(err) {
+                error_callback({ type : "Timeout", reason: "Connection timed out", status: 0 });
+            }
+        }
         if(json) {
             request.setRequestHeader('Content-Type', 'application/json');
         } else {
             request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
         }
         request.onerror = function(e) {
-            error_callback({type : "Connection", reason: "Connection Refused"});
+            error_callback({type : "Connection", reason: "Connection Refused", status: 0 });
         }
+		let loadedBytes = 0;
+		request.onreadystatechange = function() {
+		  switch(request.readyState) {
+			case request.HEADERS_RECEIVED: //Headers
+                const headers = request.getAllResponseHeaders().trim().split('\r\n').reduce((acc, current) => {
+                      const [x,v] = current.split(': ');
+                      return Object.assign(acc, { [x] : v });
+                }, {});
+				request.dispatchEvent(new CustomEvent('headers', { detail : headers }));
+				if(method == "HEAD") {
+				    callback(headers);
+				}
+				break
+			case request.LOADING: //Partial
+				const partial = request.response.substr(loadedBytes);
+				loadedBytes = request.responseText.length;
+				request.dispatchEvent(new CustomEvent('partial', { detail : partial }));
+				break
+		  }
+		};
         request.onload = function() {
             let data = {};
             try {
                 data = request.responseText ? JSON.parse(request.responseText) : {
-                    error: {type: "Unknown", reason: "Unknown Error"}
+                    error: { type: "Response", reason: "Empty response", status: 0 }
                 };
             } catch(err) {
-                data.error = { type : "Parse Error", reason : err.message }
+                data.error = { type : "Parse Error", reason : err.message, status: 0 }
             }
             if (request.status >= 200 && request.status < 400) {
-                if(callback !== undefined) {
+                if(callback !== undefined && method != "HEAD") {
                     callback(data);
                 }
-            } else {
+            } else if(request.status >= 400) {
                 if(error_callback !== undefined) {
                     if(typeof data.error == "string") {
-                        data.error = { type : "Exception", reason : data.error }
+                        data.error = { type : "Exception", reason : data.error, status : request.status }
                     }
                     error_callback(data.error);
                 }
+            } else if(request.status) {
+                console.log("Received response with code: " + request.status)
+            } else if(data.error) {
+                error_callback(data.error);
             }
         };
+		// Override if needed
+		request.headers = function(callback) {
+		    request.addEventListener("headers", function(e) {
+		        callback(e.detail)
+		    });
+	    }
+		// Override if needed
+		request.partial = function(callback) {
+		    request.addEventListener("partial", function(e) {
+		        callback(e.detail)
+		    });
+		}
+		// Send
         request.send(data);
         return request;
     };
@@ -2682,62 +2807,53 @@ m2d2.load($ => {
      * xhr.get(url, data, callback, json);
      * xhr.get(url, data, json);
      * xhr.get(url, callback, json);
+     * xhr.get(url, json);
      */
     const xhr = {};
-    ["get","post","put","delete","connect","options","trace","patch"].forEach(function(method) {
+    ["get","post","put","delete","connect","options","trace","patch","head"].forEach(function(method) {
         xhr[method] = function() {
-            let url, data, callback, error_callback, json;
+            let url, data, callback, error_callback, json, timeout;
             // noinspection FallThroughInSwitchStatementJS
-            switch(arguments.length) {
-                case 5:
-                    if(typeof arguments[4] == "boolean") {
-                        json = arguments[4];
+            Array.from(arguments).forEach(a => {
+                if(typeof a === "string") {
+                    if(! url) {
+                        url = a;
+                    } else if(! data) {
+                        data = a;
                     } else {
-                        console.log("Passed JSON argument: " + arguments[4] + " is not boolean.");
+                        console.log("Incorrect arguments passed to: " + method + " [" + url + "]. URL (or data as string) was already specified.")
                     }
-                case 4:
-                    if(typeof arguments[3] == "function") {
-                        error_callback = arguments[3];
-                    } else if(arguments.length === 4 && typeof arguments[3] == "boolean") {
-                        // Make error callback optional:
-                        json = arguments[3];
+                } else if(typeof a === "object") {
+                    if(! data) {
+                        data = a;
                     } else {
-                        console.log("Passed argument 4: " + arguments[3] + " is mistaken");
+                        console.log("Incorrect arguments passed to: " + method + " [" + url + "]. Possibly data was duplicated.")
                     }
-                case 3:
-                    if(typeof arguments[2] == "function") {
-                        if(typeof arguments[1] == "function" && arguments.length < 5) {
-                            error_callback = arguments[2];
-                        } else {
-                            callback = arguments[2];
-                        }
-                    } else if(arguments.length === 3 && typeof arguments[2] == "boolean") {
-                        // Make callback and error callback optional:
-                        json = arguments[2];
+                } else if(typeof a === "function") {
+                    if(! callback) {
+                        callback = a;
+                    } else if(! error_callback) {
+                        error_callback = a;
                     } else {
-                        console.log("Passed argument 3: " + arguments[2] + " is mistaken");
+                        console.log("Incorrect arguments passed to: " + method + " [" + url + "]. Too many functions.")
                     }
-                case 2:
-                    if(typeof arguments[1] == "object" || typeof arguments[1] == "string") {
-                        data = arguments[1];
-                    } else if(typeof arguments[1] == "function") {
-                        // Make data optional:
-                        callback = arguments[1];
+                } else if(typeof a === "boolean") {
+                    if(! json) {
+                        json = a;
                     } else {
-                        console.log("Passed argument 2: " + arguments[1] + " is mistaken");
+                        console.log("Incorrect arguments passed to: " + method + " [" + url + "]. Json flag was already specified.")
                     }
-                case 1:
-                    if(typeof arguments[0] == "string") {
-                        url = arguments[0];
-                    } else if(Array.isArray(arguments[0])) {
-                        url = arguments[0].join("/");
+                } else if(typeof a === "number") {
+                    if(! timeout) {
+                        timeout = a;
                     } else {
-                        console.log("Passed URL: "+arguments[0]+" was not a string.");
+                        console.log("Incorrect arguments passed to: " + method + " [" + url + "]. Timeout was already specified.")
                     }
-                    break;
-                default:
-                    console.log("Incorrect number of arguments passed to xhr");
-            }
+                } else {
+                    console.log("Incorrect arguments passed to: " + method + " [" + url + "]. Argument with type: " + (typeof a) + " is not accepted:");
+                    console.log(a);
+                }
+            });
             if(data === undefined) { data = {} }
             /*
             console.log("URL: " + url);
@@ -2746,10 +2862,11 @@ m2d2.load($ => {
             console.log("ERROR CALLBACK: " + error_callback);
             console.log("JSON: " + json);
             */
-            return XHR(method.toUpperCase(), url, data, callback, error_callback, json);
+            return XHR(method.toUpperCase(), url, data, callback, error_callback, json, timeout);
         }
     });
     Object.assign($, xhr);
 });
+
 return m2d2;
 }));

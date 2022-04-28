@@ -165,15 +165,10 @@ Read the documentation, try the tutorial or the examples:
 ### General Recommendations
 [Best practices when using M2D2](documentation/recommendations.md)
 
-### Project Example:
-[30 minute reading](documentation/project.md)
-
 ### Tutorial:
 [Learn it now using jsfiddle](https://gl.githack.com/intellisrc/m2d2/raw/master/examples/tutorial.html)
 
 ### Live Demo:
-[Try it now using jsfiddle](https://gl.githack.com/intellisrc/m2d2/raw/master/examples/examples.html)
-
 [Stand-alone html + js examples](https://gl.githack.com/intellisrc/m2d2/raw/master/examples/tests/index.html)
 
 ### Documentation:
@@ -186,9 +181,15 @@ You can use this library either with Web or NodeJS, Framework7, etc.
 
 ### For the Web
 
-#### Option 1 : Get M2D2 using npm
+#### Option 1 : Get M2D2 using npm / yarn
+
+[npm web page](https://www.npmjs.com/package/m2d2) | [yarn web page](https://yarnpkg.com/package/m2d2)
 
 > npm i m2d2
+
+or
+
+> yarn add m2d2
 
 Then you will find the library files under `node_modules/m2d2/dist/` (more about this below).
 
@@ -349,12 +350,12 @@ or
 ---
 For your convenience, there are some minimized files included in each release (you can find them under `dist/` directory if you install via `npm` or download them clicking on the file name):
 
-|        		 		 	| Core | Alert  | Storage | Lang    | XHR   |  WS   |  Size |
-| ------------------------- | ---- | ------ | ------- | ------- | ----- | ----- | ----- |
-| [m2d2.min.js](https://gl.githack.com/intellisrc/m2d2/raw/master/dist/m2d2.min.js)		  		| Yes  | No     |   No    | No      | No    | No    |  19K  |
-| [m2d2.bundle.xhr.min.js](https://gl.githack.com/intellisrc/m2d2/raw/master/dist/m2d2.bundle.xhr.min.js)	| Yes  | Yes    |   Yes   | Yes     | Yes   | No    |  28K  |
-| [m2d2.bundle.ws.min.js](https://gl.githack.com/intellisrc/m2d2/raw/master/dist/m2d2.bundle.ws.min.js)		| Yes  | Yes    |   Yes   | Yes     | No    | Yes   |  27K  |
-| [m2d2.bundle.min.js](https://gl.githack.com/intellisrc/m2d2/raw/master/dist/m2d2.bundle.min.js)		| Yes  | Yes    |   Yes   | Yes     | Yes   | Yes   |  29K  |
+| 		 		 	                                                                                                  | Core | Alert | Storage | Lang | XHR | WS  | Size |
+|----------------------------------------------------------------------------------------------------------|------|-------|---------|------|-----|-----|------|
+| [m2d2.min.js](https://gl.githack.com/intellisrc/m2d2/raw/master/dist/m2d2.min.js)		  		                  | Yes  | No    | No      | No   | No  | No  | 19K  |
+| [m2d2.bundle.xhr.min.js](https://gl.githack.com/intellisrc/m2d2/raw/master/dist/m2d2.bundle.xhr.min.js)	 | Yes  | Yes   | Yes     | Yes  | Yes | No  | 28K  |
+| [m2d2.bundle.ws.min.js](https://gl.githack.com/intellisrc/m2d2/raw/master/dist/m2d2.bundle.ws.min.js)		  | Yes  | Yes   | Yes     | Yes  | No  | Yes | 27K  |
+| [m2d2.bundle.min.js](https://gl.githack.com/intellisrc/m2d2/raw/master/dist/m2d2.bundle.min.js)		        | Yes  | Yes   | Yes     | Yes  | Yes | Yes | 29K  |
 
 ## Import:
 

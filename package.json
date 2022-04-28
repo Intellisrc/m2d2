@@ -1,6 +1,6 @@
 {
   "name": "m2d2",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "A very easy, clean and extensible way to build interactive web-based user interfaces.",
   "main": "dist/m2d2.bundle.min.js",
   "scripts": {
@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://gitlab.com/intellisrc/m2d2/"
+    "url": "https://github.com/intellisrc/m2d2/"
   },
   "keywords": [
     "reactive",
@@ -19,11 +19,12 @@
   "author": "Alberto Lepe",
   "license": "MIT",
   "bugs": {
-    "url": "https://gitlab.com/intellisrc/m2d2/-/issues"
+    "url": "https://github.com/Intellisrc/m2d2/issues"
   },
   "homepage": "https://gitlab.com/intellisrc/m2d2/",
   "files": [
     "dist/m2d2.*.js",
+    "dist/*.map",
     "dist/src/*",
     "ws/*",
     "xhr/*",
@@ -35,6 +36,7 @@
     "gulp-concat": "^2.5.2",
     "gulp-header-comment": "^0.9.0",
     "gulp-rename": "^2.0.0",
+    "gulp-sourcemaps": "^3.0.0",
     "gulp-terser": "^1.2.0",
     "gulp-umd": "^2.0.0",
     "karma": "^6.3.16",

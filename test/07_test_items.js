@@ -66,11 +66,11 @@ QUnit.test('Items test with selected', function (assert) {
    assert.equal(list.items.selected().text, "clicked");
    assert.equal(list.items.selected().index(), 5);
    assert.equal(list.items.selected().dataset.id, 5);
-   assert.equal(list.items.selected().prev().index(), 4);
-   assert.equal(list.items.selected().next().index(), 6);
+   assert.equal(list.items.selected().anterior().index(), 4);
+   assert.equal(list.items.selected().posterior().index(), 6);
 
-   list.items.selected().next().selected = true;
+   list.items.selected().posterior().selected = true;
    assert.equal(list.items.selected().index(), 6)
-   list.items.selected().prev().selected = true;
+   list.items.selected().anterior().selected = true;
    assert.equal(list.items.selected().index(), 5)
 });

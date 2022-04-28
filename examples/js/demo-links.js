@@ -27,7 +27,7 @@ m2d2.ready($ => {
             });
         }
         return {
-            header : { h3 : "Examples" },
+            header : { h1 : "Examples" },
             aside : {
                 nav : {
                     ul : {
