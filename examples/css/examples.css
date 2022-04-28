@@ -51,6 +51,10 @@ header button {
     line-height: 20px;
 }
 
+header button:hover {
+    background-color: #2a303b;
+}
+
 header button.prev::before {
     content: '◀';
     float: left;
@@ -94,8 +98,8 @@ aside li {
     list-style: none;
 }
 
-aside li:hover {
-    background-color: #FFC;
+aside li:hover a {
+    background-color: #2a303b;
     cursor: pointer;
 }
 
