@@ -1,4 +1,4 @@
-# M2D2 Alert Extension
+# M2D2 Alerts Extension
 
 A replacement of `alert`,`prompt` and `confirm`. Inspired by `SweetAlert`, with
 customizable theme and better M2D2 integration.

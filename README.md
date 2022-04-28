@@ -29,6 +29,21 @@ how the framework works or how you can apply it to your work.
 
 This framework can work together with any other as it is just pure Javascript. Although, once you use it, you will like how clean your code can be.
 
+### Is M2D2 for you?
+
+These are some reasons why you may be interested in using M2D2:
+
+- [ ] I deploy mainly for modern browsers (no Internet Explorer, for example)
+- [ ] I like to keep my HTML and my Javascript codes clean and simple
+- [ ] I like Javascript, but I would like to update the HTML in an easier way
+- [ ] I have used JQuery, but I want to make my code to react to value changes automatically
+- [ ] I don't want to spend too much time in learning a new framework
+- [ ] I really don't like to have all my code in a single file
+- [ ] I have some JQuery or Javascript libraries that I would like to use
+- [ ] I don't want very complicated codes to achieve simple things
+
+If you checked one or more of the above boxes, M2D2 will suit you well.
+
 ### Framework/Library comparison:
 
 | 		 		 	         | M2D2 | JQuery | Angular | ReactJS | Vue   |
@@ -208,6 +223,9 @@ Then you will use it something like:
 import m2d2 from 'm2d2';
 const $ = m2d2.load();
 ```
+
+You can use it [together with JQuery](documentation/m2d2.md#using-with-jquery), or [with Framework7](documentation/m2d2.md#using-with-framework7)
+or any other framework of your choice.
 
 ## Extensions:
 

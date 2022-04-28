@@ -20,8 +20,8 @@ $.ws.connect({
 }, msg => { // When we receive a message it will be returned here: (as JSON)
     // Your message handling code goes here
 });
-wsc.request({ ... }); // To request something to the server, send it as object.
-wsc.disconnect(); // Disconnect from server (it will turn off reconnection)
+$.ws.request({ ... }); // To request something to the server, send it as object.
+$.ws.disconnect(); // Disconnect from server (it will turn off reconnection)
 ```
 
 ## Example:
