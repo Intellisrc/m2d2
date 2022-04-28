@@ -8,15 +8,24 @@ body {
     margin: auto;
     display: grid;
     grid-template-columns: 50% 50%;
-    grid-template-rows: min-content 20% auto;
-    grid-template-areas: "header header"
-        "links example"
-        "footer example";
     grid-gap: 10px;
     height: 100vh;
     font-size: 16px;
     background-color: #181d26;
     color: #eee;
+}
+
+body.example {
+    grid-template-rows: min-content auto;
+    grid-template-areas: "header header"
+        "links example";
+}
+
+body.tutorial {
+    grid-template-rows: min-content 20% auto;
+    grid-template-areas: "header header"
+        "links example"
+        "footer example";
 }
 
 header {
@@ -56,7 +65,13 @@ article {
     padding: 10px;
     grid-area: example;
 }
-
+body.example article {
+    background-color: #eee;
+    color: black;
+}
+body.example article h1 {
+    color: white;
+}
 section {
     display: grid;
     grid-template-rows: 50% 50%;
@@ -104,6 +119,7 @@ footer {
     padding: 5px;
 }
 
+aside ul,
 aside ol {
     padding: 0 10px;
 }
@@ -127,6 +143,10 @@ h1 {
 
 code {
     margin: 10px 0;
+}
+
+table td {
+    color: black;
 }
 
 #lessons a[href] {
