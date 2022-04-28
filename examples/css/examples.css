@@ -153,6 +153,7 @@ table td {
     color: black;
 }
 
+#lesson a[href],
 #lessons a[href] {
     color: #f9528f;
 }

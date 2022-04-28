@@ -31,16 +31,16 @@ This framework can work together with any other as it is just pure Javascript. A
 
 ### Framework/Library comparison:
 
-|        		 		 	| M2D2 | JQuery | Angular | ReactJS | Vue   |
-| ------------------------- | ---- | ------ | ------- | ------- | ----- |
-| Size  		  			| 19Kb |  88Kb  |  60Kb   | 166Kb   | 181Kb |
-| Easy to learn   			|  Yes |  Yes   |   No    |   No    |  No   |
-| Clean and standard HTML 	|  Yes |  Yes   |   No    |   Yes   |  No   |
-| Clean Javascript    		|  Yes |  Yes   |   Yes   |   No    |  Yes  |
-| Good for small projects   |  Yes |  Yes   |   No    |   Yes   |  Yes  |
-| Good for large projects   |  Yes |  No    |   Yes   |   Yes   |  Yes  |
-| Observe object changes    |  Yes |  No    |   Yes   |   Yes   |  Yes  |
-| Large community           |  No  |  Yes   |   Yes   |   Yes   |  Yes  |
+| 		 		 	         | M2D2 | JQuery | Angular | ReactJS | Vue   |
+|---------------------------|------|--------|---------|---------|-------|
+| Size  		  			 | 19Kb | 88Kb   | 60Kb    | 166Kb   | 181Kb |
+| Easy to learn   			 | Yes  | Yes    | No      | No      | No    |
+| Clean and standard HTML 	 | Yes  | Yes    | No      | Yes     | No    |
+| Clean Javascript    		 | Yes  | Yes    | Yes     | No      | Yes   |
+| Good for small projects   | Yes  | Yes    | No      | Yes     | Yes   |
+| Good for large projects   | Yes  | No     | Yes     | Yes     | Yes   |
+| Observe object changes    | Yes  | No     | Yes     | Yes     | Yes   |
+| Large community           | No   | Yes    | Yes     | Yes     | Yes   |
 
 ### Repositories (synchronized):
 
@@ -149,9 +149,6 @@ Read the documentation, try the tutorial or the examples:
 
 ### General Recommendations
 [Best practices when using M2D2](documentation/recommendations.md)
-
-### Project Example:
-[30 minute reading](documentation/project.md)
 
 ### Tutorial:
 [Learn it now using jsfiddle](https://gl.githack.com/intellisrc/m2d2/raw/master/examples/tutorial.html)
@@ -335,12 +332,12 @@ or
 ---
 For your convenience, there are some minimized files included in each release (you can find them under `dist/` directory if you install via `npm` or download them clicking on the file name):
 
-|        		 		 	| Core | Alert  | Storage | Lang    | XHR   |  WS   |  Size |
-| ------------------------- | ---- | ------ | ------- | ------- | ----- | ----- | ----- |
-| [m2d2.min.js](https://gl.githack.com/intellisrc/m2d2/raw/master/dist/m2d2.min.js)		  		| Yes  | No     |   No    | No      | No    | No    |  19K  |
-| [m2d2.bundle.xhr.min.js](https://gl.githack.com/intellisrc/m2d2/raw/master/dist/m2d2.bundle.xhr.min.js)	| Yes  | Yes    |   Yes   | Yes     | Yes   | No    |  28K  |
-| [m2d2.bundle.ws.min.js](https://gl.githack.com/intellisrc/m2d2/raw/master/dist/m2d2.bundle.ws.min.js)		| Yes  | Yes    |   Yes   | Yes     | No    | Yes   |  27K  |
-| [m2d2.bundle.min.js](https://gl.githack.com/intellisrc/m2d2/raw/master/dist/m2d2.bundle.min.js)		| Yes  | Yes    |   Yes   | Yes     | Yes   | Yes   |  29K  |
+| 		 		 	                                                                                                  | Core | Alert | Storage | Lang | XHR | WS  | Size |
+|----------------------------------------------------------------------------------------------------------|------|-------|---------|------|-----|-----|------|
+| [m2d2.min.js](https://gl.githack.com/intellisrc/m2d2/raw/master/dist/m2d2.min.js)		  		                  | Yes  | No    | No      | No   | No  | No  | 19K  |
+| [m2d2.bundle.xhr.min.js](https://gl.githack.com/intellisrc/m2d2/raw/master/dist/m2d2.bundle.xhr.min.js)	 | Yes  | Yes   | Yes     | Yes  | Yes | No  | 28K  |
+| [m2d2.bundle.ws.min.js](https://gl.githack.com/intellisrc/m2d2/raw/master/dist/m2d2.bundle.ws.min.js)		  | Yes  | Yes   | Yes     | Yes  | No  | Yes | 27K  |
+| [m2d2.bundle.min.js](https://gl.githack.com/intellisrc/m2d2/raw/master/dist/m2d2.bundle.min.js)		        | Yes  | Yes   | Yes     | Yes  | Yes | Yes | 29K  |
 
 ## Import:
 

@@ -36,11 +36,11 @@ m2d2.ready($ => {
                 });
                 example.items.push({
                     css : "code",
-                    src : getCodeURL(item)
+                    src : item.id ? getCodeURL(item) : "#"
                 });
                 example.items.push({
                     css : "view",
-                    src : getViewURL(item)
+                    src : item.id ? getViewURL(item) : "#"
                 });
                 lessons.update(item.lessons);
                 sel.selected = true;

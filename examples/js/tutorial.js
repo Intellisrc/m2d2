@@ -60,6 +60,13 @@ const pages = [
         ]
     },
     {
+        id : "",
+        title: "Still under construction... ",
+        description: "I'm sorry, this tutorial is not finished yet. Meanwhile, please read the rest " +
+            "of the <a href='https://gitlab.com/intellisrc/m2d2/-/blob/master/documentation/m2d2.md'>documentation</a>.",
+        lessons : []
+    }
+    /*{
         id : "vsk6be21",
         title: "Checkout Example (Async)",
         description: "This is an example on how to use templates to place and modify items.\n" +
@@ -71,5 +78,5 @@ const pages = [
         title: "Form Example",
         description: "This example, shows how M2D2 can be used easily to create, populate and validate forms",
         lessons : []
-    },
+    },*/
 ];
