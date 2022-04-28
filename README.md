@@ -157,8 +157,6 @@ Read the documentation, try the tutorial or the examples:
 [Learn it now using jsfiddle](https://gl.githack.com/intellisrc/m2d2/raw/master/examples/tutorial.html)
 
 ### Live Demo:
-[Try it now using jsfiddle](https://gl.githack.com/intellisrc/m2d2/raw/master/examples/examples.html)
-
 [Stand-alone html + js examples](https://gl.githack.com/intellisrc/m2d2/raw/master/examples/tests/index.html)
 
 ### Documentation:
