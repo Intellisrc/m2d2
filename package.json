@@ -24,6 +24,7 @@
   "homepage": "https://gitlab.com/intellisrc/m2d2/",
   "files": [
     "dist/m2d2.*.js",
+    "dist/*.map",
     "dist/src/*",
     "ws/*",
     "xhr/*",
