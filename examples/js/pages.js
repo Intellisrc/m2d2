@@ -24,31 +24,33 @@ m2d2.ready($ => {
         }
         example.items.clear();
         let found = false;
+        let nextSet = false;
         buttons.find(".prev").dataset.id = "";
         buttons.find(".prev").disabled = true;
         buttons.find(".next").disabled = true;
         pages.forEach(item => {
             if(item.id === sel.dataset.id) {
                 $("#lesson", {
-                    title: item.title,
+                    title: { text : item.title },
                     description: item.description
                 });
                 example.items.push({
                     css : "code",
-                    src : getCodeURL(item)
+                    src : item.id ? getCodeURL(item) : "#"
                 });
                 example.items.push({
                     css : "view",
-                    src : getViewURL(item)
+                    src : item.id ? getViewURL(item) : "#"
                 });
                 lessons.update(item.lessons);
                 sel.selected = true;
                 found = true;
-            } else {
+            } else if(!nextSet) {
                 if(found) {
                     buttons.find(".next").dataset.id = item.id;
                     buttons.find(".next").disabled = false;
                     buttons.find(".next").text = item.title;
+                    nextSet = true;
                 } else {
                     buttons.find(".prev").dataset.id = item.id;
                     buttons.find(".prev").disabled = false;

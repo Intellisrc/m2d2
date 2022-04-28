@@ -11,6 +11,7 @@ $.ws.connect({
     host         : "localhost", // Server name
     path         : "", // WebSocket's URL path, for example: ws://server/<path> (default: "")
     port         : 80, // Port in which the WebSocket server is listening (default: 80, 443)
+    args         : {}, // Arguments to pass as query string in the URL, example: { id : "myId" }
     secure       : false, // If true, will use wss
     reconnect    : true, // Try to reconnect if it gets disconnected (default: true)
     request      : { ... }, // Initial Request (optional)
@@ -29,6 +30,7 @@ $.ws.connect({
     host : "localhost",
     port : "8080",
     path : "ws/",
+    args : { id : profile.username },
     request : {
         status : [ "profile", "messages" ]
     },
@@ -52,8 +54,10 @@ $.ws.connect({
 });
 // Profile:
 const profile = $("#profile", {
+    username : "user1000",
     disconnect : {
         onclick : function(ev) {
+            // This request will be sent as JSON encoded string (see note below for sending plain text)
             $.ws.request({
                 save : draft.text // Send unsaved information
             });
@@ -62,3 +66,4 @@ const profile = $("#profile", {
     }
 });
 ```
+NOTE: You can also request using a string, for example: `$.ws.request("ping");`.

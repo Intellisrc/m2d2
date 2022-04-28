@@ -2,96 +2,182 @@ html * {
     box-sizing: border-box;
     font-family: Noto, verdana, tahoma, sans-serif;
 }
+
 body {
     max-width: 1500px;
     margin: auto;
-    border: 1px solid #CCC;
     display: grid;
-    grid-template-columns: 40% auto;
-    grid-template-rows: min-content 20% auto;
-    grid-template-areas:
-        "header header"
-        "links example"
-        "footer example";
+    grid-template-columns: 50% 50%;
     grid-gap: 10px;
     height: 100vh;
     font-size: 16px;
+    background-color: #181d26;
+    color: #eee;
 }
+
+body.example {
+    grid-template-rows: min-content auto;
+    grid-template-areas: "header header"
+        "links example";
+}
+
+body.tutorial {
+    grid-template-rows: min-content 20% auto;
+    grid-template-areas: "header header"
+        "links example"
+        "footer example";
+}
+
 header {
     grid-area: header;
-    padding: 20px;
+    padding: 0;
     display: grid;
-    grid-template-columns: 50% 50%;
-    background: #CCC;
+    grid-template-columns: 50% auto;
+    grid-gap: 0;
+    border-bottom: 1px solid #5a1e34;
 }
+
 header h3 {
     margin: 0;
 }
+
 header button {
-    margin: 0 20px;
-    padding: 10px;
+    padding: 15px;
     cursor: pointer;
+    background: #1c2128;
+    color: #eee;
+    border: 1px solid #414a52;
+    margin: 10px;
+    line-height: 20px;
 }
+
+header button:hover {
+    background-color: #2a303b;
+}
+
 header button.prev::before {
-    content: '⏪';
+    content: '◀';
     float: left;
 }
+
 header button.next::after {
-    content: '⏩';
+    content: '▶';
     float: right;
 }
+
 article {
     padding: 10px;
     grid-area: example;
+}
+body.example article {
+    background-color: #eee;
+    color: black;
+}
+body.example article h1 {
+    color: white;
 }
 section {
     display: grid;
     grid-template-rows: 50% 50%;
     border: 1px solid #333;
 }
+
 iframe {
     min-height: 300px;
 }
+
 aside {
     grid-area: links;
+    background-color: #20262E;
+    overflow: auto;
 }
+
 aside li {
     background-color: #EEE;
     margin: 1px;
     list-style: none;
 }
-aside li:hover {
-    background-color: #FFC;
+
+aside li:hover a {
+    background-color: #2a303b;
     cursor: pointer;
 }
+
 aside li[selected], aside li[selected] a {
-    background-color: #FF6;
+    background-color: #5a1e34;
     cursor: default;
 }
+
 aside a {
     display: block;
     padding: 10px;
     text-decoration: none;
-    color: #333;
+    background: #1c2128;
+    color: #eee;
 }
+
 footer {
     grid-area: footer;
-    border: 1px solid #CCC;
     border-bottom: 0;
+    background-color: #20262E;
+    padding: 5px;
 }
-aside ol,
+
+aside ul,
+aside ol {
+    padding: 0 10px;
+}
+
 footer ol {
-    padding-left: 25px;
-    padding-right: 5px;
+    padding: 0 10px 0 25px;
+
 }
+
 footer li {
     margin: 20px 0;
 }
+
 h1 {
-    color: #333;
     margin: 0;
-    padding: 5px;
-    background: #CCC;
+    padding: 15px;
+    background: #1c2128;
     font-size: 18px;
     text-align: center;
 }
+
+code {
+    margin: 10px 0;
+}
+
+table td {
+    color: black;
+}
+
+#lesson a[href],
+#lessons a[href] {
+    color: #f9528f;
+}
+
+button:disabled {
+    color: #cfb8b8 !important;
+    visibility: hidden;
+}
+
+blockquote {
+    background: #ffffd8;
+    padding: 20px;
+}
+
+::-webkit-scrollbar {
+    width: 2px;
+    height: 2px;
+}
+
+::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 5px #1c2128;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #5a1e34;
+}
+

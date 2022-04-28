@@ -18,7 +18,7 @@ m2d2.load($ => {
         request(msg) {
             if (msg) {
                 try {
-                    this.webSocket.send(JSON.stringify(msg));
+                    this.webSocket.send($.isObject(msg) ? JSON.stringify(msg) : msg);
                 } catch(e) {
                     this.webSocket.onerror(e);
                 }
@@ -28,7 +28,7 @@ m2d2.load($ => {
          * Connect and return the websocket object
          */
         getSocket(onMessage, onOpen, onClose) {
-            const webSocket = new WebSocket(this.path);
+            const webSocket = new WebSocket(this.url);
             webSocket.onopen = onOpen;
             webSocket.onclose = onClose;
             webSocket.onmessage = (res) => {
@@ -57,7 +57,13 @@ m2d2.load($ => {
             this.host = options.host || window.location.hostname;
             this.secure = options.secure === true;
             this.port = options.port || (this.secure ? 443 : 80);
-            this.path = "ws" + (this.secure ? "s" : "") + "://" + this.host + ":" + this.port + "/" + (options.path || "");
+            this.path = "/" + (options.path.replace(/^\//,"") || "");
+            this.args = Object.assign({}, options.args);
+            const protocol = "ws" + (this.secure ? "s" : "") + "://";
+            const hostPort = this.host + ":" + this.port;
+            const uriPath  = this.path;
+            const queryStr = (this.args ? "?" + new URLSearchParams(this.args).toString() : "");
+            this.url = protocol + hostPort + uriPath + queryStr;
             this.connected = false;
             this.interval = null;
             //-------- Connect ----------
@@ -65,6 +71,7 @@ m2d2.load($ => {
                 this.connected = true;
                 this.request(this.initRequest);
                 this.onConnect();
+
             }
             const onClose = (e) => {
                 this.connected = false;
@@ -74,7 +81,6 @@ m2d2.load($ => {
                         if(this.connected) {
                             console.log("Reconnected...")
                             clearInterval(this.interval);
-                            this.interval = null;
                         } else {
                             try {
                                 this.webSocket.close();

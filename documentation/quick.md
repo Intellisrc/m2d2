@@ -311,5 +311,4 @@ This will likely help you to start. For more details:
 * [A complete project example and tutorial](project.md)
 * [Full documentation](m2d2.md)
 * [Tutorial using jsfiddle](https://gl.githack.com/intellisrc/m2d2/raw/master/examples/tutorial.html)
-* [Examples using jsfiddle](https://gl.githack.com/intellisrc/m2d2/raw/master/examples/examples.html)
 * [Stand-alone html + js examples](https://gl.githack.com/intellisrc/m2d2/raw/master/examples/tests/index.html)

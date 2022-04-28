@@ -2,9 +2,6 @@
  * @author: A. Lepe
  * @url : https://gitlab.com/intellisrc/m2d2/
  * @since: May, 2018
- * @version: 2.0.0
- * @updated: 2021-04-16
- *
  *
  * M2D2 Class
  */
@@ -22,7 +19,19 @@ class m2d2 {
 	static updates = true; //Enable "onupdate" (false = better performance) TODO: document (use MutationObserver)
 	static utils = new Utils();
 
-	constructor() {}
+	constructor() {
+        // Override some methods to prevent strange behaviour (issue #53):
+       ["after","before","append","prepend","insertAdjacentElement","replaceWith"].forEach(p => {
+            Element.prototype["_"+p] = Element.prototype[p];
+            Element.prototype[p] = function(...args) {
+                const arrArgs = Array.from(args);
+                arrArgs.forEach((arg, index) => {
+                    if(arg.domNode !== undefined && arg.domNode instanceof Element) { arrArgs[index] = arg.domNode; }
+                })
+                this["_"+p].apply(this, arrArgs);
+            }
+        });
+	}
 	//------------------------- STATIC -----------------------------
 	static instance = new m2d2();
 	static extensions = {}; // Additional properties for DOM
@@ -129,7 +138,7 @@ class m2d2 {
 		}
 		if($node._m2d2 === undefined) {
 			$node._m2d2 = true; //flag to prevent it from re-assign methods
-			["parent","sibling","next","prev","find","findAll","onupdate","onready","show","onshow","inView","css","text","html","getData","index"].forEach(f => {
+			["parent","sibling","posterior","anterior","find","findAll","onupdate","onready","show","onshow","inView","css","text","html","getData","index"].forEach(f => {
 				if($node.hasOwnProperty(f)) {
 					console.log("Node already had ["+f+"] property. It might cause unexpected behaviour.")
 					console.log("You may need to update the M2D2 version or report it to: github.com/intellisrc/m2d2/")
@@ -243,10 +252,9 @@ class m2d2 {
 			    inView: () => { //TODO: document
 			        return m2d2.utils.inView($node);
 			    },
-				next: () => { //TEST: 07
-				    return $node.nextElementSibling;
-				},
-				prev: () => { //TEST: 07
+				posterior: () => { //TEST: 07
+				    return $node.nextElementSibling;				},
+				anterior: () => { //TEST: 07
                     return $node.previousElementSibling;
 				},
 				parent: () => { //TODO: test
@@ -265,10 +273,10 @@ class m2d2 {
 					return nodeList;
 				},
 			}, extend);
-			// Some elements like <OPTION> already have index
+			// Only if the object doesn't have index already (like OPTION)
 			if($node.index === undefined) {
 				$node.index = () => { //TEST: 07
-					return Array.from($node.parentNode.children).indexOf($node);
+				    return Array.from($node.parentNode.children).indexOf($node);
 				}
 			}
 			// Let attributes know about changes in values //TODO: test
@@ -284,7 +292,17 @@ class m2d2 {
 					for (let pair of fd.entries()) {
                         const elem = $node.find("[name='"+pair[0]+"']");
 						if(include || elem.type === "hidden" || elem.show) {
-							data[pair[0]] = elem.type === "file" ? elem.files : pair[1];
+						    const name = pair[0];
+						    const val = elem.type === "file" ? elem.files : pair[1];
+						    if(data[name] !== undefined) {
+						        if(m2d2.utils.isArray(data[name])) {
+						            data[name].push(val);
+						        } else {
+							        data[name] = [data[name], val];
+							    }
+						    } else {
+							    data[name] = val;
+							}
                         }
 					}
 					return data;
@@ -687,10 +705,28 @@ class m2d2 {
         $newItem.dataset.id = index;
         // Add "selected" property
         this.setUniqueAttrib($newItem, "selected"); //TODO: Document
+        // Add template to object //TODO: it might not work with events
+        this.addTemplatesToObjectDeep($template, obj);
         // Set values and links
 		let $newNode = this.doDom($newItem, obj);
 		// Place Events:
 		return this.getItemWithEvents($node, $newNode);
+	}
+
+    /**
+     * Try to set template to objects deep in tree
+     */
+	addTemplatesToObjectDeep($template, obj) {
+        if(m2d2.utils.isPlainObject(obj)) {
+            Object.keys(obj).forEach(key => {
+                if($template[key] && $template[key].__template &&! obj.template) {
+                    obj[key].template = $template[key].__template;
+                }
+                if($template[key] && obj[key]) {
+                    this.addTemplatesToObjectDeep($template[key], obj[key]);
+                }
+            });
+        }
 	}
 
 	/**
@@ -802,7 +838,7 @@ class m2d2 {
                         $template = m2d2.utils.newElement("dd");
                         break;
                     default:
-                        if(template) {
+                        if(template && m2d2.utils.isPlainObject(template)) {
                             const children = Object.keys(template).length;
                             if(children) {
                                 if(children > 1) {
@@ -863,15 +899,21 @@ class m2d2 {
 					$template = m2d2.utils.newElement(template);
 				}
 			}
-			if($template.childrenElementCount > 1) {
-			    console.log("Templates only supports a single child. Multiple children were detected, wrapping them with <span>. Template:");
-			    console.log($template);
-			    const $span = m2d2.utils.newElement("span");
-			    $span.append($template);
-			    $template = $span;
-			}
 			if ($template) {
-				m2d2.utils.defineProp($node, "_template", $template); // This is the DOM
+                if($template.childrenElementCount > 1) {
+                    console.log("Templates only supports a single child. Multiple children were detected, wrapping them with <span>. Template:");
+                    console.log($template);
+                    const $span = m2d2.utils.newElement("span");
+                    $span.append($template);
+                    $template = $span;
+                } else {
+				    m2d2.utils.defineProp($node, "_template", $template); // This is the DOM
+				}
+			} else {
+			    console.log("Template was not found for element, using <span>:");
+			    console.log($node);
+                const $span = m2d2.utils.newElement("span");
+                $template = $span;
 			}
 			return $template;
 		}
@@ -1009,10 +1051,10 @@ class m2d2 {
 	 * @returns {Proxy, Object}
 	 */
 	proxy (obj, force) {
-	    if(!m2d2.short || (obj === null || (obj._proxy !== undefined && force === undefined))) {
+	    if(!m2d2.short || (obj === null || (obj.domNode !== undefined && force === undefined))) {
 	        return obj;
 	    } else {
-	        obj._proxy = obj;
+	        obj.domNode = obj;
             const handler = {
                 get: (target, property) => {
                     const t = target[property];
@@ -1021,8 +1063,8 @@ class m2d2 {
                     	// Functions should bind target as "this"
 						case m2d2.utils.isFunction(t): return t.bind(target);
 						// If there was a failed attempt to set proxy, return it on read:
-						case t._proxy && target["$" + property] !== undefined: return target["$" + property];
-						case t._proxy === undefined && m2d2.utils.isElement(t): return this.proxy(t);
+						case t.domNode && target["$" + property] !== undefined: return target["$" + property];
+						case t.domNode === undefined && m2d2.utils.isElement(t): return this.proxy(t);
 						default: return t;
 					}
                 },
@@ -1158,7 +1200,7 @@ class m2d2 {
 			}
 			options.subtree = true;
 			options.childList = true;
-			const toObserve = $node._proxy || $node;
+			const toObserve = $node.domNode || $node;
 			mutationObserver.observe(toObserve, options);
 		}
 	}
