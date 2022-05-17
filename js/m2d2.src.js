@@ -26,7 +26,7 @@ class m2d2 {
             Element.prototype[p] = function(...args) {
                 const arrArgs = Array.from(args);
                 arrArgs.forEach((arg, index) => {
-                    if(arg.domNode !== undefined && arg.domNode instanceof Element) { arrArgs[index] = arg.domNode; }
+                    if(arg !== undefined && arg.domNode !== undefined && arg.domNode instanceof Element) { arrArgs[index] = arg.domNode; }
                 })
                 this["_"+p].apply(this, arrArgs);
             }
