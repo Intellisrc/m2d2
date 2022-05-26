@@ -27,6 +27,8 @@
             // onDone   : (response, allDone) => { ... }, // response: contains result from the server (JSON), in (S) will trigger each file.
             // onError  : (response) => { ... }, // response: object with relevant information. In (S) will trigger independently.
             // onResponse : (response) => { ... }, // Modify response from server (if needed)
+            upload   : "", // URL to upload to
+            args     : {},  // Query params
             accept   : "*/*", // You can limit the file type, for example: "image/*", "image/jpg", etc.
             parallel : false, // If false, it will send all files in a sequence (S)
             field    : "file", //Field name
@@ -47,6 +49,9 @@
         console.log("Upload not specified. Using current page.")
         opts.upload = "";
       }
+      const queryStr = (opts.args ? (opts.upload.indexOf("?") !== -1 ? "&" : "?") + new URLSearchParams(opts.args).toString() : "");
+      opts.upload += queryStr;
+
       if(opts.onDone == undefined)      { opts.onDone = (response, allDone) => { console.log(response) }}
       if(opts.onError  == undefined)    { opts.onError  = (response) => { console.log("Error : "); console.log(response); }}
       if(opts.onUpdate == undefined)    { opts.onUpdate = (pct, file, index) => { console.log("Uploading : " + pct + "% " + (opts.parallel ? "[ " + file.name + " ]" : "")) } }
