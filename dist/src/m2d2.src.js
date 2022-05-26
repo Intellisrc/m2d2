@@ -1,8 +1,8 @@
 /**
  * Author : A.Lepe (dev@alepe.com) - intellisrc.com
  * License: MIT
- * Version: 2.1.2
- * Updated: 2022-04-28
+ * Version: 2.1.3
+ * Updated: 2022-05-26
  * Content: Core (Debug)
  */
 
@@ -81,7 +81,7 @@ class Utils {
         return !isNaN(parseFloat(n)) && isFinite(n);
     };
 	/**
-	 * Return true if selector us an id selector
+	 * Return true if selector is an id selector
 	 * @param {string} s
 	 * @returns {boolean}
 	 */
@@ -410,7 +410,7 @@ class m2d2 {
             Element.prototype[p] = function(...args) {
                 const arrArgs = Array.from(args);
                 arrArgs.forEach((arg, index) => {
-                    if(arg.domNode !== undefined && arg.domNode instanceof Element) { arrArgs[index] = arg.domNode; }
+                    if(arg !== undefined && arg.domNode !== undefined && arg.domNode instanceof Element) { arrArgs[index] = arg.domNode; }
                 })
                 this["_"+p].apply(this, arrArgs);
             }

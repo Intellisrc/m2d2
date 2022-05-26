@@ -1,8 +1,8 @@
 /**
  * Author : A.Lepe (dev@alepe.com) - intellisrc.com
  * License: MIT
- * Version: 2.1.2
- * Updated: 2022-04-28
+ * Version: 2.1.3
+ * Updated: 2022-05-26
  * Content: Extension (Debug)
  */
 

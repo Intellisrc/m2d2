@@ -183,26 +183,28 @@
       const form    = getFileForm(fieldName, files);
       let loadIndex = 0;
       files.forEach(f => {
-          const reader  = new FileReader();
-          reader.onload = function(evt) {
-            loaded[loadIndex++] = true;
-            if(loaded.indexOf(false) === -1) {
-                xhr.send(form);
-            }
-          };
-          reader.readAsBinaryString(f);
+          if(f) {
+              const reader  = new FileReader();
+              reader.onload = function(evt) {
+                loaded[loadIndex++] = true;
+                if(loaded.indexOf(false) === -1) {
+                    xhr.send(form);
+                }
+              };
+              reader.readAsBinaryString(f);
+          }
       });
     }
     /**
      * Prepares form
      */
     function getFileForm(fieldName, files) {
-        const form    = new FormData();
-
+        const form = new FormData();
         files.forEach(file => {
-            form.append(fieldName, file, file.name);
+            if(file) {
+                form.append(fieldName, file, file.name);
+            }
         });
-
         return form
     }
  });
