@@ -1,8 +1,8 @@
 /**
  * Author : A.Lepe (dev@alepe.com) - intellisrc.com
  * License: MIT
- * Version: 2.1.2
- * Updated: 2022-04-28
+ * Version: 2.1.3
+ * Updated: 2022-05-31
  * Content: Extension (Debug)
  */
 
@@ -27,6 +27,8 @@
             // onDone   : (response, allDone) => { ... }, // response: contains result from the server (JSON), in (S) will trigger each file.
             // onError  : (response) => { ... }, // response: object with relevant information. In (S) will trigger independently.
             // onResponse : (response) => { ... }, // Modify response from server (if needed)
+            upload   : "", // URL to upload to
+            args     : {},  // Query params
             accept   : "*/*", // You can limit the file type, for example: "image/*", "image/jpg", etc.
             parallel : false, // If false, it will send all files in a sequence (S)
             field    : "file", //Field name
@@ -47,6 +49,9 @@
         console.log("Upload not specified. Using current page.")
         opts.upload = "";
       }
+      const queryStr = (opts.args ? (opts.upload.indexOf("?") !== -1 ? "&" : "?") + new URLSearchParams(opts.args).toString() : "");
+      opts.upload += queryStr;
+
       if(opts.onDone == undefined)      { opts.onDone = (response, allDone) => { console.log(response) }}
       if(opts.onError  == undefined)    { opts.onError  = (response) => { console.log("Error : "); console.log(response); }}
       if(opts.onUpdate == undefined)    { opts.onUpdate = (pct, file, index) => { console.log("Uploading : " + pct + "% " + (opts.parallel ? "[ " + file.name + " ]" : "")) } }
@@ -191,26 +196,28 @@
       const form    = getFileForm(fieldName, files);
       let loadIndex = 0;
       files.forEach(f => {
-          const reader  = new FileReader();
-          reader.onload = function(evt) {
-            loaded[loadIndex++] = true;
-            if(loaded.indexOf(false) === -1) {
-                xhr.send(form);
-            }
-          };
-          reader.readAsBinaryString(f);
+          if(f) {
+              const reader  = new FileReader();
+              reader.onload = function(evt) {
+                loaded[loadIndex++] = true;
+                if(loaded.indexOf(false) === -1) {
+                    xhr.send(form);
+                }
+              };
+              reader.readAsBinaryString(f);
+          }
       });
     }
     /**
      * Prepares form
      */
     function getFileForm(fieldName, files) {
-        const form    = new FormData();
-
+        const form = new FormData();
         files.forEach(file => {
-            form.append(fieldName, file, file.name);
+            if(file) {
+                form.append(fieldName, file, file.name);
+            }
         });
-
         return form
     }
  });
