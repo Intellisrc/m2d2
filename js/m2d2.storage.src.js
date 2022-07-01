@@ -31,7 +31,7 @@ m2d2.load($ => {
         this.get = function(key) {
             let val;
             try {
-                val = JSON.parse(this.store.getItem(key)) || {};
+                val = JSON.parse(this.store.getItem(key));
             } catch(ignore) {
                 val = this.store.getItem(key);
             }
