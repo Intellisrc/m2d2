@@ -1,8 +1,8 @@
 /**
  * Author : A.Lepe (dev@alepe.com) - intellisrc.com
  * License: MIT
- * Version: 2.1.4
- * Updated: 2022-08-15
+ * Version: 2.1.5
+ * Updated: 2023-05-04
  * Content: Core (Debug)
  */
 
@@ -1004,6 +1004,8 @@ class m2d2 {
 				}
 			} else if(m2d2.utils.isString(value) && $node.tagName === "IMG") {
 			    value = { src : value };
+			} else if(m2d2.utils.isString(value) && $node.tagName === "A" && $node.hasAttribute("href")) {
+				value = { href : value };
 			} else if(m2d2.utils.isString(value) || m2d2.utils.isNumeric(value)) {
 				value = { text : value };
 			}

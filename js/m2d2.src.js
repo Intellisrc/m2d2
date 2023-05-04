@@ -620,6 +620,8 @@ class m2d2 {
 				}
 			} else if(m2d2.utils.isString(value) && $node.tagName === "IMG") {
 			    value = { src : value };
+			} else if(m2d2.utils.isString(value) && $node.tagName === "A" && $node.hasAttribute("href")) {
+				value = { href : value };
 			} else if(m2d2.utils.isString(value) || m2d2.utils.isNumeric(value)) {
 				value = { text : value };
 			}
