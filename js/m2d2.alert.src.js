@@ -50,7 +50,7 @@ m2d2.load($ => {
         wait     : ["fa", "fa-cog", "fa-spin"]
     }
     const material = {
-        wrap     : "material-icons",
+        wrap     : "material-symbols-outlined",
         question : "help",
         info     : "info",
         error    : "error",
@@ -108,13 +108,13 @@ m2d2.load($ => {
                         front : Object.assign({
                             tagName : "form",
                             css : (options.css ? ($.isArray(options.css) ? options.css : [options.css]) : [])
-                                  .concat(["m2d2-alert-front", "popup", options.icon]),
+                                  .concat(["m2d2-alert-front", "popup" || "default"]),
                             style : {
                                 zIndex : 100
                             },
                             icon : {
                                 tagName : "span",
-                                css : ["icon", options.icon].concat(css.wrap ? [css.wrap] : css[options.icon]).concat(options.icon === "wait" ? "spin" : ""),
+                                css : ["m2d2-icon"].concat(css.wrap ? css.wrap : css[options.icon]).concat(options.icon === "wait" ? "spin" : ""),
                                 text : css.wrap ? css[options.icon] : ""
                             },
                             message : {
@@ -237,6 +237,7 @@ m2d2.load($ => {
     }
     $.wait = (title, text, callback) => {
         return $.message({
+            css : "wait",
             icon : "wait",
             title : title,
             buttons : [],
@@ -246,6 +247,7 @@ m2d2.load($ => {
     }
     $.alert = (title, text, callback) => {
         return $.message({
+            css : "alert",
             icon : "info",
             title : title,
             buttons : ["ok"],
@@ -255,6 +257,7 @@ m2d2.load($ => {
     }
     $.success = (title, text, callback) => {
         return $.message({
+            css : "success",
             icon : "ok",
             title : title,
             buttons : ["ok"],
@@ -264,6 +267,7 @@ m2d2.load($ => {
     }
     $.failure = (title, text, callback) => {
         return $.message({
+            css : "failure",
             icon : "error",
             title : title,
             buttons : ["ok"],
@@ -273,6 +277,7 @@ m2d2.load($ => {
     }
     $.confirm = (title, text, callback) => {
         return $.message({
+            css : "confirm",
             icon : "question",
             title : title,
             buttons : ["yes", "no"],
@@ -282,6 +287,7 @@ m2d2.load($ => {
     }
     $.prompt = (title, text, callback) => {
         return $.message({
+            css : "prompt",
             icon : "input",
             title : title,
             buttons : ["cancel","send"],
