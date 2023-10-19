@@ -1,8 +1,8 @@
 /**
  * Author : A.Lepe (dev@alepe.com) - intellisrc.com
  * License: MIT
- * Version: 2.1.3
- * Updated: 2022-05-31
+ * Version: 2.1.5
+ * Updated: 2023-05-04
  * Content: Extension (Debug)
  */
 
@@ -65,7 +65,7 @@ m2d2.load($ => {
             this.host = options.host || window.location.hostname;
             this.secure = options.secure === true;
             this.port = options.port || (this.secure ? 443 : 80);
-            this.path = "/" + (options.path.replace(/^\//,"") || "");
+            this.path = "/" + (options.path ? options.path.replace(/^\//,"") : "");
             this.args = Object.assign({}, options.args);
             const protocol = "ws" + (this.secure ? "s" : "") + "://";
             const hostPort = this.host + ":" + this.port;
