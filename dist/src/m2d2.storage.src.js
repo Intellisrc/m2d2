@@ -1,8 +1,8 @@
 /**
  * Author : A.Lepe (dev@alepe.com) - intellisrc.com
  * License: MIT
- * Version: 2.1.5
- * Updated: 2023-05-04
+ * Version: 2.1.6
+ * Updated: 2024-02-13
  * Content: Extension (Debug)
  */
 
@@ -39,9 +39,9 @@ m2d2.load($ => {
         this.get = function(key) {
             let val;
             try {
-                val = JSON.parse(this.store.getItem(key));
+                val = JSON.parse(this.store.getItem(key)) || {};
             } catch(ignore) {
-                val = this.store.getItem(key);
+                val = this.store.getItem(key) || {};
             }
             if(val["$"] !== undefined) {
                 val = val["$"];

@@ -1,8 +1,8 @@
 /**
  * Author : A.Lepe (dev@alepe.com) - intellisrc.com
  * License: MIT
- * Version: 2.1.5
- * Updated: 2023-05-04
+ * Version: 2.1.6
+ * Updated: 2024-02-13
  * Content: Full Bundle (Debug)
  */
 
@@ -1874,7 +1874,7 @@ m2d2.load($ => {
         wait     : ["fa", "fa-cog", "fa-spin"]
     }
     const material = {
-        wrap     : "material-icons",
+        wrap     : "material-symbols-outlined",
         question : "help",
         info     : "info",
         error    : "error",
@@ -1932,13 +1932,13 @@ m2d2.load($ => {
                         front : Object.assign({
                             tagName : "form",
                             css : (options.css ? ($.isArray(options.css) ? options.css : [options.css]) : [])
-                                  .concat(["m2d2-alert-front", "popup", options.icon]),
+                                  .concat(["m2d2-alert-front", "popup" || "default"]),
                             style : {
                                 zIndex : 100
                             },
                             icon : {
                                 tagName : "span",
-                                css : ["icon", options.icon].concat(css.wrap ? [css.wrap] : css[options.icon]).concat(options.icon === "wait" ? "spin" : ""),
+                                css : ["m2d2-icon"].concat(css.wrap ? css.wrap : css[options.icon]).concat(options.icon === "wait" ? "spin" : ""),
                                 text : css.wrap ? css[options.icon] : ""
                             },
                             message : {
@@ -2061,6 +2061,7 @@ m2d2.load($ => {
     }
     $.wait = (title, text, callback) => {
         return $.message({
+            css : "wait",
             icon : "wait",
             title : title,
             buttons : [],
@@ -2070,6 +2071,7 @@ m2d2.load($ => {
     }
     $.alert = (title, text, callback) => {
         return $.message({
+            css : "alert",
             icon : "info",
             title : title,
             buttons : ["ok"],
@@ -2079,6 +2081,7 @@ m2d2.load($ => {
     }
     $.success = (title, text, callback) => {
         return $.message({
+            css : "success",
             icon : "ok",
             title : title,
             buttons : ["ok"],
@@ -2088,6 +2091,7 @@ m2d2.load($ => {
     }
     $.failure = (title, text, callback) => {
         return $.message({
+            css : "failure",
             icon : "error",
             title : title,
             buttons : ["ok"],
@@ -2097,6 +2101,7 @@ m2d2.load($ => {
     }
     $.confirm = (title, text, callback) => {
         return $.message({
+            css : "confirm",
             icon : "question",
             title : title,
             buttons : ["yes", "no"],
@@ -2106,6 +2111,7 @@ m2d2.load($ => {
     }
     $.prompt = (title, text, callback) => {
         return $.message({
+            css : "prompt",
             icon : "input",
             title : title,
             buttons : ["cancel","send"],
@@ -2331,9 +2337,9 @@ m2d2.load($ => {
         this.get = function(key) {
             let val;
             try {
-                val = JSON.parse(this.store.getItem(key));
+                val = JSON.parse(this.store.getItem(key)) || {};
             } catch(ignore) {
-                val = this.store.getItem(key);
+                val = this.store.getItem(key) || {};
             }
             if(val["$"] !== undefined) {
                 val = val["$"];
