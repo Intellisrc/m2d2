@@ -1,7 +1,7 @@
 /**
  * Author : A.Lepe (dev@alepe.com) - intellisrc.com
  * License: MIT
- * Version: 2.1.6
+ * Version: 2.1.7
  * Updated: 2024-02-19
  * Content: Core (Debug)
  */
@@ -421,7 +421,7 @@ class m2d2 {
 	static extensions = {}; // Additional properties for DOM
 	static main = (() => {
 		const f = (selector, object) => {
-			const node = this.instance.getProxyNode(selector, object);
+			const node = this.instance.getProxyNode(selector, object || {});
 			// TEST: 13
 			if(node && node.onready && m2d2.utils.isFunction(node.onready)) {
 				node.addEventListener("ready", node.onready, { once : true });

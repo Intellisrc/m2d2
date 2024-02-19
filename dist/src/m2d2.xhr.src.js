@@ -1,7 +1,7 @@
 /**
  * Author : A.Lepe (dev@alepe.com) - intellisrc.com
  * License: MIT
- * Version: 2.1.6
+ * Version: 2.1.7
  * Updated: 2024-02-19
  * Content: Extension (Debug)
  */
@@ -150,7 +150,7 @@ m2d2.load($ => {
      * xhr.get(url, json);
      */
     const xhr = {};
-    ["get","post","put","delete","connect","options","trace","patch","head"].forEach(function(method) {
+    ["get","post","put","delete","connect","options","trace","patch","head","copy"].forEach(function(method) {
         xhr[method] = function() {
             let url, data, callback, error_callback, json, timeout;
             // noinspection FallThroughInSwitchStatementJS

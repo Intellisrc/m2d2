@@ -142,7 +142,7 @@ m2d2.load($ => {
      * xhr.get(url, json);
      */
     const xhr = {};
-    ["get","post","put","delete","connect","options","trace","patch","head"].forEach(function(method) {
+    ["get","post","put","delete","connect","options","trace","patch","head","copy"].forEach(function(method) {
         xhr[method] = function() {
             let url, data, callback, error_callback, json, timeout;
             // noinspection FallThroughInSwitchStatementJS

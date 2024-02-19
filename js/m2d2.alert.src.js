@@ -135,6 +135,7 @@ m2d2.load($ => {
                                             input : {
                                                 type : "text",
                                                 name : "answer",
+                                                css : "input",
                                                 onload : function() {
                                                     this.focus();
                                                 }
