@@ -13,6 +13,7 @@ This extension provides:
  * $.options
  * $.trace
  * $.patch
+ * $.copy
 
 ## General Usage:
 
