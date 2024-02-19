@@ -1239,7 +1239,7 @@ class m2d2 {
 		}
 		const items = $node.items;
 		// Non-Standard or non-existent in Array:
-		const nonStd = ["clear", "get", "remove", "selected", "first", "last", "findAll"];
+		const nonStd = ["clear", "get", "remove", "selected", "unselect", "first", "last", "findAll"];
 		// Array properties:
 		Object.getOwnPropertyNames(Array.prototype).concat(nonStd).forEach(method => {
 			if(items[method] === undefined) {
@@ -1288,6 +1288,16 @@ class m2d2 {
 					case "selected": // will return the selected item in list
 					    func = function() {
 					        return _this.proxy(this.find(":scope > " + "[selected]")); //only direct children
+					    }
+					    break;
+					case "unselect": // will unselect selected item
+					    func = function() {
+					        if(this.items.length) {
+					            const sel = this.items.selected();
+					            if(sel) {
+					                sel.selected = false;
+					            }
+					        }
 					    }
 					    break;
 					case "first": // returns the first item in list
