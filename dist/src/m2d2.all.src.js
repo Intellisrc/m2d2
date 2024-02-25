@@ -1,8 +1,8 @@
 /**
  * Author : A.Lepe (dev@alepe.com) - intellisrc.com
  * License: MIT
- * Version: 2.1.7
- * Updated: 2024-02-19
+ * Version: 2.1.9
+ * Updated: 2024-02-25
  * Content: Full Bundle (Debug)
  */
 
@@ -1307,6 +1307,7 @@ class m2d2 {
 
 	/**
 	 * It will set a unique attribute among a group of nodes (grouped by parent)
+	 * for example a single "selected" element
 	 * @private
 	 * @param {HTMLElement, Node} $node
 	 * @param {string} key
@@ -1318,10 +1319,9 @@ class m2d2 {
                     return this.hasAttribute(key);
                 },
                 set : function(val) {
-                    const prevSel = this.parentNode ? this.parentNode.find("["+key+"]") : null;
-                    if(prevSel) {
-                        this.parentNode.findAll("["+key+"]").forEach(node => {
-                            node.removeAttribute(key);
+                    if(this.parentNode) {
+                        this.parentNode.findAll("["+key+"]").forEach(el => {
+                            el.removeAttribute(key);
                         });
                     }
 					m2d2.utils.setAttr(this, key, val);

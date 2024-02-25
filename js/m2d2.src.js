@@ -936,7 +936,7 @@ class m2d2 {
                 },
                 set : function(val) {
                     if(this.parentNode) {
-                        this.parentNode.findAll("["+key+"]")).forEach(el => {
+                        this.parentNode.findAll("["+key+"]").forEach(el => {
                             el.removeAttribute(key);
                         });
                     }
