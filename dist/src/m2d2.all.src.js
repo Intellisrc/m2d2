@@ -1320,7 +1320,9 @@ class m2d2 {
                 set : function(val) {
                     const prevSel = this.parentNode ? this.parentNode.find("["+key+"]") : null;
                     if(prevSel) {
-                        prevSel.removeAttribute(key);
+                        this.parentNode.findAll("["+key+"]").forEach(node => {
+                            node.removeAttribute(key);
+                        });
                     }
 					m2d2.utils.setAttr(this, key, val);
                 }

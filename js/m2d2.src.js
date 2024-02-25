@@ -923,6 +923,7 @@ class m2d2 {
 
 	/**
 	 * It will set a unique attribute among a group of nodes (grouped by parent)
+	 * for example a single "selected" element
 	 * @private
 	 * @param {HTMLElement, Node} $node
 	 * @param {string} key
@@ -934,9 +935,10 @@ class m2d2 {
                     return this.hasAttribute(key);
                 },
                 set : function(val) {
-                    const prevSel = this.parentNode ? this.parentNode.find("["+key+"]") : null;
-                    if(prevSel) {
-                        prevSel.removeAttribute(key);
+                    if(this.parentNode) {
+                        this.parentNode.findAll("["+key+"]")).forEach(el => {
+                            el.removeAttribute(key);
+                        });
                     }
 					m2d2.utils.setAttr(this, key, val);
                 }
