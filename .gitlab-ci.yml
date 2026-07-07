@@ -1,17 +1,36 @@
-build:
-  stage: build
-  image: node:alpine3.14
-  script:
-    - npm install
-    - npm install -g gulp gulp-concat gulp-header-comment gulp-rename gulp-terser gulp-umd
-    - /usr/local/bin/gulp
+# GitLab CI for the m2d2 TypeScript rewrite.
+# Toolchain: Vitest + jsdom (tests), esbuild (bundling), tsc (types/typecheck).
+# No browser, no Karma, no Gulp.
 
+stages:
+  - test
+  - build
+
+# Run unit tests (Vitest + jsdom). No browser binary required.
 test:
   stage: test
-  image: shivjm/node-chromium-alpine:node17-chromium93
-  variables:
-    CHROME_BIN: "/usr/bin/chromium-browser"
+  image: node:20-alpine
   script:
-    - npm install    
-    - npm install -g karma-cli karma-chrome-launcher karma-qunit qunit
-    - /usr/local/bin/karma start karma.conf.js
+    - npm ci
+    - npm test
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - node_modules/
+
+# Build the distributables (esbuild ESM/CJS/IIFE + CSS + .d.ts) and typecheck.
+build:
+  stage: build
+  image: node:20-alpine
+  script:
+    - npm ci
+    - npm run typecheck
+    - npm run build
+  artifacts:
+    paths:
+      - dist/
+    expire_in: 1 week
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - node_modules/
