@@ -6,15 +6,19 @@
     <meta name="theme-color" content="#333333">
     <meta charset="UTF-8">
     <link rel="stylesheet" href="../css/examples.css" type="text/css" />
-    <style>
-        #login { display: block; width: 310px; }
-        label { display: inline-block; width: 100px; }
-        input { width: 200px; }
-        div { padding : 5px; }
-        .right { text-align: right; }
-    </style>
-    <script src="../../dist/m2d2.bundle.min.js" type="text/javascript"></script>
-    <!-- DEBUG script src="../../dist/src/m2d2.all.src.js" type="text/javascript"></script -->
+    <link rel="stylesheet" href="../css/demo.css" type="text/css" />
+	<style>
+		.msg {
+			margin: 10px;
+			padding: 10px;
+			text-align: center;
+			background: #EEE;
+			font-size: 80%;
+		}
+	</style>
+    <!-- form/button styles: see demo.css -->
+    <script src="../../dist/m2d2.min.js" type="text/javascript"></script>
+    <!-- DEBUG script src="../../dist/m2d2.min.js" type="text/javascript"></script -->
     <script type="text/javascript">
         const _ = m2d2.load().dict.set({
             username : {
@@ -74,7 +78,7 @@
         <a href="#" class="en">English</a>
         <a href="#" class="es">Spanish</a>
     </div>
-    <div>
+    <div class="msg">
         Current language: <span id="current">en</span>
     </div>
 </article>

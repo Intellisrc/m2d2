@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="../css/lesson.css">
+<title>M2D2 Lesson 5 — Membership</title>
+<style>
+    body { font-family: system-ui, sans-serif; padding: 16px; color: #222; }
+    h2 { margin: 0 0 8px; font-size: 16px; }
+    ul { list-style: none; padding: 0; margin: 0; }
+    li.user { padding: 8px; border-bottom: 1px solid #eee; }
+    .name { font-weight: 600; }
+    .email { color: #666; font-size: 13px; }
+    .groups { margin-top: 6px; display: flex; gap: 12px; flex-wrap: wrap; }
+    .groups label { font-size: 13px; display: flex; gap: 3px; align-items: center; }
+</style>
+</head>
+<body>
+<div class="panel">
+    <h2>Users & group membership</h2>
+    <ul id="users"></ul>
+</div>
+<p id="log" style="font-size:12px;color:#666"></p>
+
+<script src="../../dist/m2d2.min.js"></script>
+<script>
+/**
+ * Lesson 5: Membership.
+ * Users belong to groups. We wire checkboxes to each user's groupIds array
+ * using event delegation on the container.
+ *
+ * Teaching points:
+ *   - A membership is a many-to-many link stored as groupIds on each user.
+ *   - Checkboxes are rendered as HTML per row; event delegation catches changes.
+ *   - The underlying data array is the source of truth; the DOM follows.
+ */
+
+const users = [
+    { id: 1, name: "Ada Lovelace",  email: "ada@analyticalengine.io", groupIds: [101] },
+    { id: 2, name: "Alan Turing",   email: "alan@enigma.co.uk",       groupIds: [101, 102] },
+    { id: 3, name: "Grace Hopper",  email: "grace@navy.mil",          groupIds: [102] }
+];
+const groups = [
+    { id: 101, name: "Pioneers" },
+    { id: 102, name: "Engineers" }
+];
+
+m2d2.ready($ => {
+    const $users = $("#users", {
+        warn: false,
+        template: { li: { /* per-row spec in render() */ } },
+        items: []
+    });
+
+    function render() {
+        $users.items.clear();
+        users.forEach(u => {
+            // Build the checkbox labels as an array of HTML strings, joined:
+            const checkboxes = groups.map(g => {
+                const checked = u.groupIds.indexOf(g.id) >= 0;
+                return '<label><input type="checkbox" data-uid="' + u.id +
+                       '" data-gid="' + g.id + '"' + (checked ? " checked" : "") +
+                       '> ' + g.name + '</label>';
+            }).join(" ");
+            $users.items.push({
+                name:   { tagName: "span", css: "name",  text: u.name },
+                email:  { tagName: "span", css: "email", text: " (" + u.email + ")" },
+                groups: { tagName: "div",  css: "groups", html: checkboxes }
+            });
+        });
+    }
+    render();
+
+    // Event delegation for checkbox changes:
+    document.getElementById("users").addEventListener("change", function (e) {
+        if (e.target.type !== "checkbox") return;
+        const uid = parseInt(e.target.dataset.uid, 10);
+        const gid = parseInt(e.target.dataset.gid, 10);
+        const user = users.find(u => u.id === uid);
+        if (!user) return;
+        const idx = user.groupIds.indexOf(gid);
+        if (e.target.checked && idx < 0) user.groupIds.push(gid);
+        else if (!e.target.checked && idx >= 0) user.groupIds.splice(idx, 1);
+        $("#log", user.name + " → groups: [" + user.groupIds.join(", ") + "]");
+    });
+});
+</script>
+</body>
+</html>

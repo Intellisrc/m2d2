@@ -1,0 +1,177 @@
+/* Shared lesson styles — professional form/button/list look.
+   Linked by every tutorial lesson so the iframe result screen looks
+   consistent and polished. Each lesson can still override with its own
+   <style> block. */
+
+* { box-sizing: border-box; }
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    padding: 20px;
+    color: #1a1a2e;
+    background: #fafafa;
+    line-height: 1.5;
+}
+
+h2 {
+    font-size: 15px;
+    font-weight: 600;
+    color: #333;
+    margin: 0 0 10px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+/* Lists */
+ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+li {
+    padding: 10px 12px;
+    background: #fff;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    transition: background 0.15s;
+}
+li:hover {
+    background: #f5f7ff;
+}
+
+/* Name / email spans */
+.name {
+    font-weight: 600;
+    min-width: 160px;
+    color: #1a1a2e;
+}
+.email {
+    color: #666;
+    flex: 1;
+    font-size: 13px;
+}
+
+/* Inputs */
+input[type="text"], input[type="email"] {
+    padding: 7px 10px;
+    border: 1px solid #d0d0d8;
+    border-radius: 5px;
+    font-size: 14px;
+    font-family: inherit;
+    background: #fff;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    outline: none;
+}
+input[type="text"]:focus, input[type="email"]:focus {
+    border-color: #5b8def;
+    box-shadow: 0 0 0 3px rgba(91, 141, 239, 0.15);
+}
+
+/* Buttons */
+button {
+    padding: 7px 16px;
+    font-size: 13px;
+    font-family: inherit;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid #d0d0d8;
+    border-radius: 5px;
+    background: #fff;
+    color: #333;
+    transition: all 0.15s;
+}
+button:hover {
+    background: #f0f4ff;
+    border-color: #5b8def;
+}
+button:active {
+    transform: translateY(1px);
+}
+button.del, button.cancel {
+    color: #c33;
+    border-color: #e0b8b8;
+}
+button.del:hover, button.cancel:hover {
+    background: #fff0f0;
+    border-color: #c33;
+}
+
+/* Row buttons (compact, inside list items) */
+li button {
+    padding: 4px 10px;
+    font-size: 12px;
+}
+
+/* Add-user / add-group forms */
+div[id="addUser"], div[id="addGroup"] {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    align-items: center;
+}
+div[id="addUser"] input, div[id="addGroup"] input {
+    flex: 1;
+}
+
+/* Warnings / notes */
+.warn, .note {
+    font-size: 13px;
+    color: #888;
+    margin: 4px 0;
+}
+.warn {
+    color: #c33;
+}
+
+/* Log line */
+#log {
+    font-size: 12px;
+    color: #888;
+    margin-top: 12px;
+    padding: 8px 12px;
+    background: #f0f0f4;
+    border-radius: 4px;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+}
+
+/* Checkboxes + labels (membership) */
+.groups {
+    margin-top: 8px;
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+.groups label {
+    font-size: 13px;
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    cursor: pointer;
+}
+.groups input[type="checkbox"] {
+    cursor: pointer;
+}
+
+/* Toolbar (persistence lesson) */
+.toolbar {
+    margin-bottom: 16px;
+    padding: 12px;
+    background: #fff;
+    border-radius: 6px;
+    border: 1px solid #e0e0e0;
+}
+.toolbar button {
+    background: #5b8def;
+    color: #fff;
+    border-color: #4a7ddf;
+}
+.toolbar button:hover {
+    background: #4a7ddf;
+}
+
+/* Panels */
+.panel {
+    margin-bottom: 20px;
+}

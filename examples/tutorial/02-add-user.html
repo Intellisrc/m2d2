@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="../css/lesson.css">
+<title>M2D2 Lesson 2 — Add a user</title>
+<style>
+    body { font-family: system-ui, sans-serif; padding: 16px; color: #222; }
+    h2 { margin: 0 0 8px; font-size: 16px; }
+    .panel { margin-bottom: 20px; }
+    ul { list-style: none; padding: 0; margin: 0; }
+    li { padding: 6px 8px; border-bottom: 1px solid #eee; display: flex; gap: 8px; }
+    .name { font-weight: 600; }
+    .email { color: #666; }
+    form { display: flex; gap: 6px; margin-bottom: 12px; }
+    input[type="text"] { padding: 4px 6px; border: 1px solid #999; border-radius: 3px; }
+    button { padding: 4px 12px; cursor: pointer; }
+    .warn { color: #c00; font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="panel">
+    <h2>Add a user</h2>
+    <div id="addUser">
+        <input type="text" name="name" placeholder="Name">
+        <input type="text" name="email" placeholder="Email">
+        <button id="addBtn">Add</button>
+    </div>
+    <p class="warn" id="msg"></p>
+</div>
+<div class="panel">
+    <h2>Users</h2>
+    <ul id="users"></ul>
+</div>
+
+<script src="../../dist/m2d2.min.js"></script>
+<script>
+/**
+ * Lesson 2: Add a user.
+ * We add a form to create new users. Covers reading input values,
+ * validation, and items.push to append a row reactively.
+ *
+ * Teaching points:
+ *   - Read inputs via $("#id").value.
+ *   - items.push(obj) appends a row built from the template, instantly.
+ *   - Validation: check the name isn't empty before pushing.
+ *   - Try adding a user in the preview.
+ */
+
+const users = [
+    { id: 1, name: "Ada Lovelace",    email: "ada@analyticalengine.io" },
+    { id: 2, name: "Alan Turing",     email: "alan@enigma.co.uk" },
+    { id: 3, name: "Grace Hopper",    email: "grace@navy.mil" }
+];
+let nextId = 4;
+
+m2d2.ready($ => {
+    const userList = $("#users", {
+        template: {
+            li: {
+                name:  { tagName: "span", css: "name" },
+                email: { tagName: "span", css: "email" }
+            }
+        },
+        items: users.map(u => ({ name: u.name, email: u.email }))
+    });
+
+    $("#addBtn", {
+        onclick: function () {
+            const name = document.querySelector('[name="name"]').value.trim();
+            const email = document.querySelector('[name="email"]').value.trim();
+            if (!name) {
+                $("#msg", "Please enter a name.");
+                return false;
+            }
+            users.push({ id: nextId++, name: name, email: email });
+            userList.items.push({ name: name, email: email });
+            // reset the inputs:
+            document.querySelector('[name="name"]').value = "";
+            document.querySelector('[name="email"]').value = "";
+            $("#msg", "");
+            return false;
+        }
+    });
+});
+</script>
+</body>
+</html>

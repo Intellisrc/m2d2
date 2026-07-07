@@ -1,0 +1,338 @@
+/*
+ * m2d2 alert — common structural CSS (theme-agnostic, modern).
+ *
+ * All colors reference var(--alert-*) so this file knows nothing about themes.
+ * Load a theme file (alert-light.css or alert-dark.css) to define the variables,
+ * or define them yourself on :root / [data-theme].
+ *
+ * Layout: the dialog is a two-column CSS grid — a large icon on the left
+ * (vertically centered, spanning all body rows) and a text column on the right
+ * (title, message, field, buttons stacked top to bottom). The markup is flat
+ * (icon, title, text, buttons are siblings inside the form), so we place the
+ * icon in column 1 spanning every row, and the remaining children in column 2.
+ *
+ * Design: clean, flat, rounded, subtle shadows, smooth transitions.
+ */
+
+/* ---- Default variable values (consumers can override or load a theme file) ---- */
+:root {
+    /* surfaces — neutral gray (Chrome-like), no blue tint */
+    --alert-back:             rgba(0, 0, 0, 0.45);
+    --alert-front-bg:         #f1f3f4;
+    --alert-front-fg:         #202124;
+    --alert-title-fg:         #202124;
+    --alert-text-fg:          #5f6368;
+    --alert-icon-fg:          #80868b;
+    --alert-border:           rgba(60, 64, 67, 0.16);
+    --alert-shadow:           0 20px 60px -15px rgba(0, 0, 0, 0.35);
+
+    /* buttons */
+    --alert-button-bg:        #ffffff;
+    --alert-button-fg:        #3c4043;
+    --alert-button-border:    transparent;
+    --alert-button-hover-bg:  #e8eaed;
+
+    /* accent colors per message kind */
+    --alert-ok:               #1e8e3e;
+    --alert-error:            #d93025;
+    --alert-question:         #1a73e8;
+    --alert-info:             #1a73e8;
+    --alert-input:            #9334e6;
+    --alert-wait:             #80868b;
+
+    /* typography */
+    --alert-font:             "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --alert-title-size:       1.2rem;
+    --alert-text-size:        0.95rem;
+    --alert-line-height:      1.55;
+
+    /* geometry */
+    --alert-radius:           14px;
+    --alert-radius-sm:        10px;
+    --alert-padding:          24px;
+    --alert-max-width:        440px;
+
+    /* icon size */
+    --alert-icon-box:         56px;
+    --alert-icon-glyph:       48px;
+
+    /* motion */
+    --alert-animation:        280ms;
+    --alert-easing:           cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ---- Backdrop ---- */
+#m2d2-alert .m2d2-alert-back {
+    position: fixed;
+    inset: 0;
+    background: var(--alert-back);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 99998;
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+    animation: m2d2-fade-in var(--alert-animation) var(--alert-easing);
+}
+
+@keyframes m2d2-fade-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+/* ---- Front (dialog card) ----
+   Two-column grid: column 1 = icon (auto width, spans all rows), column 2 =
+   the body (title/text/field/buttons stack as normal grid rows). */
+#m2d2-alert .m2d2-alert-front {
+    position: relative;
+    z-index: 99999;
+    background: var(--alert-front-bg);
+    color: var(--alert-front-fg);
+    border: 1px solid var(--alert-border);
+    border-radius: var(--alert-radius);
+    box-shadow: var(--alert-shadow);
+    font-family: var(--alert-font);
+    width: 100%;
+    max-width: var(--alert-max-width);
+    padding: var(--alert-padding);
+    box-sizing: border-box;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: 18px;
+    row-gap: 0;
+    align-items: center;
+    animation: m2d2-pop var(--alert-animation) var(--alert-easing);
+    margin: 16px;
+}
+
+/* No icon rendered (iconsOff / waitless) → single column, body fills width: */
+#m2d2-alert .m2d2-alert-front:not(:has(.m2d2-icon)) {
+    grid-template-columns: 1fr;
+}
+
+/* ---- Compact mode (title only, no message body) ----
+   One horizontal row: [icon] [title] [buttons]. Grid placement is explicit so
+   it does not depend on the order the children appear in the DOM (the icon is
+   appended after the body in the spec). Title fills the middle column and
+   truncates if too long; buttons sit on the right, vertically centered. */
+#m2d2-alert .m2d2-alert-front.compact {
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    column-gap: 18px;
+}
+/* Icon → column 1, single row: */
+#m2d2-alert .m2d2-alert-front.compact .m2d2-icon {
+    grid-column: 1;
+    grid-row: 1;
+}
+/* Title → column 2, single row, fills available width: */
+#m2d2-alert .m2d2-alert-front.compact .m2d2-alert-title {
+    grid-column: 2;
+    grid-row: 1;
+    margin-bottom: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+/* Buttons → column 3, single row, flush right: */
+#m2d2-alert .m2d2-alert-front.compact .m2d2-alert-buttons {
+    grid-column: 3;
+    grid-row: 1;
+    margin-top: 0;
+}
+/* With icon off in compact mode, drop the empty first column: */
+#m2d2-alert .m2d2-alert-front.compact:not(:has(.m2d2-icon)) {
+    grid-template-columns: 1fr auto;
+}
+#m2d2-alert .m2d2-alert-front.compact:not(:has(.m2d2-icon)) .m2d2-alert-title {
+    grid-column: 1;
+}
+#m2d2-alert .m2d2-alert-front.compact:not(:has(.m2d2-icon)) .m2d2-alert-buttons {
+    grid-column: 2;
+}
+
+@keyframes m2d2-pop {
+    from { transform: translateY(12px) scale(0.96); opacity: 0; }
+    to   { transform: translateY(0)    scale(1);    opacity: 1; }
+}
+
+/* Close animation */
+#m2d2-alert .m2d2-alert-front.vanish {
+    animation: m2d2-vanish calc(var(--alert-animation) * 0.7) var(--alert-easing) forwards;
+}
+@keyframes m2d2-vanish {
+    from { transform: translateY(0)    scale(1);    opacity: 1; }
+    to   { transform: translateY(12px) scale(0.96); opacity: 0; }
+}
+
+/* ---- Icon (large, on the left, vertically centered) ---- */
+#m2d2-alert .m2d2-icon {
+    grid-column: 1;
+    grid-row: 1 / -1;            /* span every body row → vertically centered */
+    justify-self: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--alert-icon-box);
+    height: var(--alert-icon-box);
+    border-radius: 50%;
+    font-size: var(--alert-icon-glyph);
+    line-height: 1;
+    color: #fff;
+    background: var(--alert-icon-fg);
+}
+#m2d2-alert .m2d2-icon svg {
+    width: calc(var(--alert-icon-glyph) * 0.78);
+    height: calc(var(--alert-icon-glyph) * 0.78);
+}
+#m2d2-alert .m2d2-icon.spin {
+    animation: m2d2-spin 1s linear infinite;
+}
+@keyframes m2d2-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Per-type icon background (colored badges) */
+#m2d2-alert .m2d2-icon.icon-question { background: var(--alert-question); }
+#m2d2-alert .m2d2-icon.icon-error    { background: var(--alert-error); }
+#m2d2-alert .m2d2-icon.icon-ok       { background: var(--alert-ok); }
+#m2d2-alert .m2d2-icon.icon-info     { background: var(--alert-info); }
+#m2d2-alert .m2d2-icon.icon-input    { background: var(--alert-input); }
+#m2d2-alert .m2d2-icon.icon-wait     { background: var(--alert-wait); }
+
+/* ---- Body column children (title, text, field, buttons) ---- */
+#m2d2-alert .m2d2-alert-title,
+#m2d2-alert .m2d2-alert-text,
+#m2d2-alert .m2d2-alert-field,
+#m2d2-alert .m2d2-alert-buttons {
+    grid-column: 2;
+    min-width: 0;                /* allow text wrapping inside the column */
+}
+
+/* ---- Title ---- */
+#m2d2-alert .m2d2-alert-title {
+    color: var(--alert-title-fg);
+    font-weight: 700;
+    font-size: var(--alert-title-size);
+    margin-bottom: 4px;
+    line-height: 1.3;
+}
+
+/* ---- Text body ---- */
+#m2d2-alert .m2d2-alert-text {
+    color: var(--alert-text-fg);
+    font-size: var(--alert-text-size);
+    line-height: var(--alert-line-height);
+}
+
+/* ---- Input field ---- */
+#m2d2-alert .m2d2-alert-field input,
+#m2d2-alert .m2d2-alert-field select,
+#m2d2-alert .m2d2-alert-field textarea {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1px solid var(--alert-border);
+    border-radius: var(--alert-radius-sm);
+    background: var(--alert-button-bg);
+    color: var(--alert-front-fg);
+    font-family: var(--alert-font);
+    font-size: var(--alert-text-size);
+    box-sizing: border-box;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+#m2d2-alert .m2d2-alert-field input:focus,
+#m2d2-alert .m2d2-alert-field select:focus,
+#m2d2-alert .m2d2-alert-field textarea:focus {
+    border-color: var(--alert-info);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--alert-info) 20%, transparent);
+}
+
+/* ---- Buttons ---- */
+#m2d2-alert .m2d2-alert-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 18px;
+}
+#m2d2-alert .m2d2-alert-buttons button {
+    padding: 9px 22px;
+    border: 1px solid var(--alert-button-border);
+    border-radius: var(--alert-radius-sm);
+    background: var(--alert-button-bg);
+    color: var(--alert-button-fg);
+    font-family: var(--alert-font);
+    font-size: var(--alert-text-size);
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    -webkit-tap-highlight-color: transparent;
+}
+#m2d2-alert .m2d2-alert-buttons button:hover {
+    background: var(--alert-button-hover-bg);
+}
+#m2d2-alert .m2d2-alert-buttons button:active {
+    transform: scale(0.97);
+}
+/* Primary / affirmative buttons (filled accent) */
+#m2d2-alert .m2d2-alert-buttons button.color-ok,
+#m2d2-alert .m2d2-alert-buttons button.color-yes {
+    background: var(--alert-ok);
+    color: #fff;
+}
+#m2d2-alert .m2d2-alert-buttons button.color-ok:hover,
+#m2d2-alert .m2d2-alert-buttons button.color-yes:hover {
+    background: color-mix(in srgb, var(--alert-ok) 88%, #000);
+}
+/* Destructive / negative */
+#m2d2-alert .m2d2-alert-buttons button.color-no {
+    background: var(--alert-error);
+    color: #fff;
+}
+#m2d2-alert .m2d2-alert-buttons button.color-no:hover {
+    background: color-mix(in srgb, var(--alert-error) 88%, #000);
+}
+/* Cancel (neutral) */
+#m2d2-alert .m2d2-alert-buttons button.color-cancel {
+    background: var(--alert-button-bg);
+    color: var(--alert-button-fg);
+}
+/* Send (info accent) */
+#m2d2-alert .m2d2-alert-buttons button.color-send {
+    background: var(--alert-info);
+    color: #fff;
+}
+#m2d2-alert .m2d2-alert-buttons button.color-send:hover {
+    background: color-mix(in srgb, var(--alert-info) 88%, #000);
+}
+
+#m2d2-alert .m2d2-icon.default_style {
+    font-family: monospace;
+    font-weight: bold;
+    font-size: 43px;
+}
+
+#m2d2-alert .m2d2-icon.icon-ok.default_style {
+    background: none;
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 480px) {
+    #m2d2-alert .m2d2-alert-front {
+        --alert-padding: 18px;
+        --alert-title-size: 1.1rem;
+        --alert-icon-box: 48px;
+        --alert-icon-glyph: 26px;
+        column-gap: 14px;
+        margin: 12px;
+    }
+    /* On small screens, stacked alerts (title + message body) drop buttons to
+       a full-width vertical stack. Compact (title-only) alerts stay in one row. */
+    #m2d2-alert .m2d2-alert-front:not(.compact) .m2d2-alert-buttons {
+        flex-direction: column-reverse;
+    }
+    #m2d2-alert .m2d2-alert-front:not(.compact) .m2d2-alert-buttons button {
+        width: 100%;
+        text-align: center;
+    }
+}

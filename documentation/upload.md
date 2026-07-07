@@ -38,6 +38,7 @@ $.upload(event, {
     multiple : true, // Allow multiple files to be selected to upload,
     maxFiles : 0, // Maximum number of files to allow to upload. 0 = unlimited
     maxSizeMb: 0, // Maximum size per file (P) or total (S) to allow
+    args     : {} // Data to send together with the file(s) 
 });
 ```
 
@@ -72,6 +73,10 @@ const uploader = $("#uploader", {
             parallel : true,
             maxFiles : 30,
             maxSizeMb : 1000,
+            args : { 
+                id : 100,
+                rw : true
+            },
             onSelect : (files) => {
                 upload.disabled = true;
                 let index = 0;

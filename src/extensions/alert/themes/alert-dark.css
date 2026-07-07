@@ -1,0 +1,61 @@
+/*
+ * m2d2 alert — Dark theme variable definitions.
+ *
+ * This file ONLY declares --alert-* variables for dark mode. The structural
+ * CSS lives in alert.css. When bundling a "dark theme" build, concatenate
+ * alert.css + this file.
+ *
+ * Palette: neutral dark gray (not blue). Activates when [data-theme="dark"] is
+ * set on <html>/<body>, OR automatically via prefers-color-scheme.
+ * Apply manually: document.documentElement.dataset.theme = "dark";
+ */
+
+/* Explicit [data-theme="dark"]: */
+[data-theme="dark"] {
+    --alert-back:             rgba(0, 0, 0, 0.65);
+    --alert-front-bg:         #2d2e30;
+    --alert-front-fg:         #e8eaed;
+    --alert-title-fg:         #ffffff;
+    --alert-text-fg:          #bdc1c6;
+    --alert-icon-fg:          #9aa0a6;
+    --alert-border:           rgba(255, 255, 255, 0.12);
+    --alert-shadow:           0 20px 60px -15px rgba(0, 0, 0, 0.6);
+
+    --alert-button-bg:        #3c4043;
+    --alert-button-fg:        #e8eaed;
+    --alert-button-border:    transparent;
+    --alert-button-hover-bg:  #4d5156;
+
+    --alert-ok:               #81c995;
+    --alert-error:            #f28b82;
+    --alert-question:         #8ab4f8;
+    --alert-info:             #8ab4f8;
+    --alert-input:            #c58af9;
+    --alert-wait:             #9aa0a6;
+}
+
+/* Auto-enable dark theme when the OS prefers it (unless light is explicitly set): */
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        --alert-back:             rgba(0, 0, 0, 0.65);
+        --alert-front-bg:         #2d2e30;
+        --alert-front-fg:         #e8eaed;
+        --alert-title-fg:         #ffffff;
+        --alert-text-fg:          #bdc1c6;
+        --alert-icon-fg:          #9aa0a6;
+        --alert-border:           rgba(255, 255, 255, 0.12);
+        --alert-shadow:           0 20px 60px -15px rgba(0, 0, 0, 0.6);
+
+        --alert-button-bg:        #3c4043;
+        --alert-button-fg:        #e8eaed;
+        --alert-button-border:    transparent;
+        --alert-button-hover-bg:  #4d5156;
+
+        --alert-ok:               #81c995;
+        --alert-error:            #f28b82;
+        --alert-question:         #8ab4f8;
+        --alert-info:             #8ab4f8;
+        --alert-input:            #c58af9;
+        --alert-wait:             #9aa0a6;
+    }
+}

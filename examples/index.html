@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>M2D2 Tutorial</title>
+    <meta name="HandheldFriendly" content="1">
+    <meta name="viewport" content="width=device-width, maximum-scale=1.0">
+    <meta name="theme-color" content="#333333">
+    <!-- CSS used by examples and examples: -->
+    <link rel="stylesheet" href="css/examples.css" type="text/css" />
+    <!-- Playground layout: -->
+    <link rel="stylesheet" href="css/playground.css" type="text/css" />
+
+    <!-- Import map: maps bare ESM specifiers used by playground.js to a CDN.
+         playground.js dynamically import()s these. Must come before any module
+         scripts. esm.sh resolves the CM6 dependency graph for us. -->
+    <script type="importmap">
+    {
+      "imports": {
+        "codemirror": "https://esm.sh/codemirror@6.0.1",
+        "@codemirror/lang-javascript": "https://esm.sh/@codemirror/lang-javascript@6.2.2",
+        "@codemirror/lang-html": "https://esm.sh/@codemirror/lang-html@6.4.9",
+        "thememirror": "https://esm.sh/thememirror@2.0.1"
+      }
+    }
+    </script>
+
+    <!-- Playground pure functions (no deps; exposes window.pg): -->
+    <script src="js/playground-core.js"></script>
+    <!-- Using M2D2 to render parts of the examples: -->
+    <script src="../dist/m2d2.min.js" type="text/javascript"></script>
+    <!-- Generates the pages[] data: -->
+    <script src="js/tutorial.js" type="text/javascript"></script>
+    <!-- Playground interactive layer (uses window.pg + dynamic import()): -->
+    <script src="js/playground.js" type="text/javascript"></script>
+    <!-- Drives nav/routing and calls playground.load(): -->
+    <script src="js/pages.js" type="text/javascript"></script>
+</head>
+<body class="tutorial">
+    <header id="buttons">
+        <button class="prev"></button>
+        <button class="next"></button>
+    </header>
+    <article id="lesson">
+        <h1 id="title"></h1>
+        <section id="example"></section>
+    </article>
+</body>
+</html>

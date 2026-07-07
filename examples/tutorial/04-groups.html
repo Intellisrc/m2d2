@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="../css/lesson.css">
+<title>M2D2 Lesson 4 — Groups</title>
+<style>
+    body { font-family: system-ui, sans-serif; padding: 16px; color: #222; max-width: 600px; }
+    h2 { margin: 0 0 8px; font-size: 16px; }
+    ul { list-style: none; padding: 0; margin: 0; }
+    li.group { padding: 8px; border-bottom: 1px solid #eee; }
+    .group-head { display: flex; gap: 8px; align-items: center; }
+    .name { font-weight: 600; flex: 1; }
+    button { padding: 4px 10px; font-size: 12px; cursor: pointer; border: 1px solid #ccc; border-radius: 3px; background: #f5f5f5; }
+    button:hover { background: #e8e8e8; }
+    .del { color: #c00; }
+    .members { margin-top: 8px; padding-left: 16px; display: none; }
+    .members.visible { display: block; }
+    .members li { padding: 4px 8px; border-bottom: 1px solid #f0f0f0; display: flex; gap: 6px; }
+    .members .mname { font-weight: 500; }
+    .members .memail { color: #888; font-size: 12px; }
+    form { display: flex; gap: 6px; margin-bottom: 12px; }
+    input[type="text"] { padding: 4px 6px; border: 1px solid #999; border-radius: 3px; flex: 1; }
+</style>
+</head>
+<body>
+<div>
+    <h2>Groups</h2>
+    <div id="addGroup">
+        <input type="text" name="name" placeholder="Group name">
+        <button id="addGroupBtn">Add</button>
+    </div>
+    <ul id="groups"></ul>
+</div>
+
+<script src="../../dist/m2d2.min.js"></script>
+<script>
+/**
+ * Lesson 4: Groups.
+ * A second collection (groups) with add/delete, plus a "Members" button
+ * that toggles a user list below each group. Same template+items pattern
+ * applied to a new list, with conditional rendering.
+ *
+ * Teaching points:
+ *   - Each list owns its own template and items array.
+ *   - The Members button toggles a sub-list by re-rendering with a flag.
+ *   - The structure scales: a third collection would follow the same shape.
+ */
+
+const users = [
+    { id: 1, name: "Ada Lovelace",    email: "ada@analyticalengine.io" },
+    { id: 2, name: "Alan Turing",     email: "alan@enigma.co.uk" },
+    { id: 3, name: "Grace Hopper",    email: "grace@navy.mil" }
+];
+const groups = [
+    { id: 101, name: "Pioneers" },
+    { id: 102, name: "Engineers" }
+];
+let nextGroupId = 103;
+let expandedGroup = null;   // id of the group whose members are visible, or null
+
+m2d2.ready($ => {
+    const $groups = $("#groups", {
+        warn: false,
+        template: { li: { /* per-row spec in renderGroups() */ } },
+        items: []
+    });
+
+    function renderGroups() {
+        $groups.items.clear();
+        groups.forEach(g => {
+            const isExpanded = expandedGroup === g.id;
+            // Build the members sub-list HTML (only shown when expanded):
+            const membersHtml = users.map(u =>
+                '<li><span class="mname">' + u.name + '</span>' +
+                '<span class="memail">' + u.email + '</span></li>'
+            ).join("");
+
+            $groups.items.push({
+                tagName: "li",
+                css: "group" + (isExpanded ? " expanded" : ""),
+                head: {
+                    tagName: "div",
+                    css: "group-head",
+                    name: { tagName: "span", css: "name", text: g.name },
+                    members: { tagName: "button", css: "members-btn",
+                        text: isExpanded ? "Hide members" : "Members",
+                        onclick: function () {
+                            expandedGroup = (expandedGroup === g.id) ? null : g.id;
+                            renderGroups();
+                        }},
+                    del: { tagName: "button", css: "del", text: "Delete",
+                        onclick: function () {
+                            const idx = Number(this.closest("li").dataset.id);
+                            if (expandedGroup === g.id) expandedGroup = null;
+                            groups.splice(idx, 1);
+                            renderGroups();
+                        }}
+                },
+                members: {
+                    tagName: "ul",
+                    css: "members" + (isExpanded ? " visible" : ""),
+                    html: membersHtml
+                }
+            });
+        });
+    }
+    renderGroups();
+
+    $("#addGroupBtn", {
+        onclick: function () {
+            const name = document.querySelector('[name="name"]').value.trim();
+            if (!name) return false;
+            groups.push({ id: nextGroupId++, name: name });
+            renderGroups();
+            document.querySelector('[name="name"]').value = "";
+            return false;
+        }
+    });
+});
+</script>
+</body>
+</html>

@@ -1,5 +1,10 @@
 # M2D2
 
+> **v3.0:** M2D2 has been rewritten in TypeScript. The library is consumed
+> identically (`m2d2.ready($ => ...)`, `const $ = m2d2.load()`). See
+> [CHANGELOG.md](CHANGELOG.md) for the documented behavior changes. All
+> extensions (alert, lang, storage, xhr, upload, ws) are included.
+
 [![MIT Licence](https://badges.frapsoft.com/os/mit/mit.svg?v=103)](https://opensource.org/licenses/mit-license.php)
 [![Open Source Love](https://badges.frapsoft.com/os/v2/open-source.svg?v=103)](https://github.com/ellerbrock/open-source-badges/)
 [![npm version](https://badge.fury.io/js/m2d2.svg)](https://www.npmjs.com/package/m2d2)
@@ -166,7 +171,7 @@ Read the documentation, try the tutorial or the examples:
 [Best practices when using M2D2](documentation/recommendations.md)
 
 ### Tutorial:
-[Learn it now using jsfiddle](https://gl.githack.com/intellisrc/m2d2/raw/master/examples/tutorial.html)
+[Learn it now](https://gl.githack.com/intellisrc/m2d2/raw/master/examples/index.html)
 
 ### Live Demo:
 [Stand-alone html + js examples](https://gl.githack.com/intellisrc/m2d2/raw/master/examples/tests/index.html)
@@ -195,13 +200,11 @@ Then you will find the library files under `node_modules/m2d2/dist/` (more about
 
 #### Option 2 : Direct download
 
-> Core Only (~19Kb): [m2d2.min.js](https://gl.githack.com/intellisrc/m2d2/raw/master/dist/m2d2.min.js) and set it in the HTML head.<br>
-> With all extensions (~29Kb): [m2d2.bundle.min.js](https://gl.githack.com/intellisrc/m2d2/raw/master/dist/m2d2.bundle.min.js) and set it in the HTML head.
+> All extensions included: [m2d2.min.js](https://gl.githack.com/intellisrc/m2d2/raw/master/dist/m2d2.min.js) — set it in the HTML head.
 
 #### Option 3 : CDN
 
-> Core Only: [m2d2.min.js](https://cdn.jsdelivr.net/npm/m2d2@2.1.0/dist/m2d2.min.js)<br>
-> With all extensions: [m2d2.bundle.min.js](https://cdn.jsdelivr.net/npm/m2d2@2.1.0/dist/m2d2.bundle.min.js)
+> [m2d2.min.js](https://cdn.jsdelivr.net/npm/m2d2@3/dist/m2d2.min.js)
 
 To use it:
 
@@ -224,6 +227,8 @@ import m2d2 from 'm2d2';
 const $ = m2d2.load();
 ```
 
+The npm package includes full TypeScript type declarations (`.d.ts`).
+
 You can use it [together with JQuery](documentation/m2d2.md#using-with-jquery), or [with Framework7](documentation/m2d2.md#using-with-framework7)
 or any other framework of your choice.
 
@@ -233,6 +238,8 @@ or any other framework of your choice.
 
 ---
 This extension makes it easy to display alerts, confirmation, input dialogs and more.
+Uses Unicode icons by default (no font dependency), with pluggable icon sources
+(Material, Font Awesome, SVG) and modern CSS themes (light/dark).
 
 Example:
 ```js
@@ -243,10 +250,15 @@ $.confirm("Are you sure?", "This is important", res => {
 });
 ```
 
-[Try it (UTF8 Icons)](https://gl.githack.com/intellisrc/m2d2/raw/master/examples/extensions/alert.html)
-[Try it (FontAwesome)](https://gl.githack.com/intellisrc/m2d2/raw/master/examples/extensions/alert-fontawesome.html)
-[Try it (Google Material)](https://gl.githack.com/intellisrc/m2d2/raw/master/examples/extensions/alert-material.html)
-or
+Configure once at startup:
+```js
+m2d2.alert.register({
+    icons: "material",   // "default" | "material" | "fa" | "svg"
+    theme: "dark",       // "light" | "dark"
+    iconsOff: false      // disable icons entirely
+});
+```
+
 [Learn about it](documentation/alert.md)
 
 ### Storage
@@ -345,36 +357,51 @@ $.ws.request({
 or
 [Learn about it](documentation/ws.md)
 
-## Bundle Packs:
+## Bundles:
 
 ---
-For your convenience, there are some minimized files included in each release (you can find them under `dist/` directory if you install via `npm` or download them clicking on the file name):
+As of v3.0, there is a single bundle that includes core + all extensions
+(alert, lang, storage, xhr, upload, ws). It is available in three formats:
 
-| 		 		 	                                                                                                  | Core | Alert | Storage | Lang | XHR | WS  | Size |
-|----------------------------------------------------------------------------------------------------------|------|-------|---------|------|-----|-----|------|
-| [m2d2.min.js](https://gl.githack.com/intellisrc/m2d2/raw/master/dist/m2d2.min.js)		  		                  | Yes  | No    | No      | No   | No  | No  | 19K  |
-| [m2d2.bundle.xhr.min.js](https://gl.githack.com/intellisrc/m2d2/raw/master/dist/m2d2.bundle.xhr.min.js)	 | Yes  | Yes   | Yes     | Yes  | Yes | No  | 28K  |
-| [m2d2.bundle.ws.min.js](https://gl.githack.com/intellisrc/m2d2/raw/master/dist/m2d2.bundle.ws.min.js)		  | Yes  | Yes   | Yes     | Yes  | No  | Yes | 27K  |
-| [m2d2.bundle.min.js](https://gl.githack.com/intellisrc/m2d2/raw/master/dist/m2d2.bundle.min.js)		        | Yes  | Yes   | Yes     | Yes  | Yes | Yes | 29K  |
+| File | Format | Use case |
+|------|--------|----------|
+| `m2d2.min.js`  | IIFE (browser global `m2d2`) | `<script>` tag in HTML |
+| `m2d2.cjs.js`  | CommonJS | `require()` in Node |
+| `m2d2.esm.js`  | ESM | `import` in bundlers / Node ESM |
 
 ## Import:
 
 ---
-You can import M2D2 in this way:
+```js
+import m2d2 from 'm2d2';        // ESM — includes all extensions
+const $ = m2d2.load();
+```
 
 ```js
-import m2d2 from 'm2d2'         // You get m2d2.bundle.min.js
-import m2d2 from 'm2d2/core'    // You get m2d2.min.js
-import m2d2 from 'm2d2/ws'      // You get m2d2.bundle.ws.min.js
-import m2d2 from 'm2d2/xhr'     // You get m2d2.bundle.xhr.min.js
+const m2d2 = require('m2d2');   // CommonJS
+const $ = m2d2.load();
 ```
+
+TypeScript types are included automatically (`dist/index.d.ts`).
+
+## What's New in version 3.0:
+
+---
+M2D2 has been rewritten in TypeScript. The source is now modular (`src/` with
+focused modules) and compiled to ESM, CJS, and a browser IIFE bundle with full
+type declarations. The public API is unchanged. See
+[CHANGELOG.md](CHANGELOG.md) for the complete list of bug fixes and behavior
+changes.
+
+The alert extension has been redesigned with a cleaner architecture:
+pluggable icon sources (Unicode default, Material Symbols, Font Awesome, SVG),
+modern CSS themes (light/dark via CSS variables), and a single configuration
+point (`m2d2.alert.register({ icons, theme, ... })`).
 
 ## What's New in version 2.0:
 
 ---
 This library was almost completely rewritten in v2.0. The main difference is that in 1.x, the M2D2 object was mainly a Proxy object which upon change, updated the DOM. However the main issue was that if you changed the DOM directly, there was no way to update the M2D2 object automatically, and thus could have side effects. In 2.x, the M2D2 object is a Node/HTMLElement wrapped around a Proxy and extended, which means that you can safely change the DOM directly without having side effects. Because now the M2D2 object is a DOM element, you have access to everything through vanilla javascript (like classList, appendChild, style, etc), which greatly simplified things.
-
-Other big difference with v2.0 is that you can split your code across several small files in a very easy way (very useful if you use tools like 'gulp' to concatenate and minify your code).
 
 # Developing
 
@@ -382,9 +409,11 @@ To modify or contribute to this code, start by cloning this repository.
 
 Then execute: `npm install`
 
-To compile, execute: `gulp`
+To build: `npm run build` (produces `dist/` — ESM, CJS, IIFE, and `.d.ts`)
 
-To run all tests, execute: `npm test`
+To typecheck: `npm run typecheck`
+
+To run all tests: `npm test` (Vitest + jsdom, terminal-based)
 
 ## Acknowledgments:
 

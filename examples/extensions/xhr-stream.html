@@ -5,8 +5,9 @@
 <meta name="viewport" content="width=device-width, maximum-scale=1.0">
 <meta name="theme-color" content="#333333">
 <link rel="stylesheet" href="../css/examples.css" type="text/css" />
-<script src="../../dist/m2d2.bundle.xhr.min.js" type="text/javascript"></script>
-<!-- DEBUG script src="../../dist/src/m2d2.all.src.js" type="text/javascript"></script -->
+    <link rel="stylesheet" href="../css/demo.css" type="text/css" />
+<script src="../../dist/m2d2.min.js" type="text/javascript"></script>
+<!-- DEBUG script src="../../dist/m2d2.min.js" type="text/javascript"></script -->
 <script type="text/javascript">
 	//On ready..
 	m2d2.ready ($ => {
@@ -25,36 +26,35 @@
 <article>
     <h1>M2D2 Stream Example</h1>
     <ul id="out">
+	<code style="white-space: pre">
+// To test, create web server with ICL library:
+@CompileStatic
+class WebStreamTest implements ServiciableSingle {
+	static void main(String[] args) {
+		new WebService(port: 7171).add(new WebStreamTest()).start()
+	}
+
+	@Override
+	Service getService() {
+		return new Service(
+			path: "/stream",
+			allowOrigin: "*",
+			action : {
+				Request request, Response response ->
+					response.raw().setContentType(Mime.JSON) //"application/x-ndjson"
+					(1..60).each {
+						response.raw().outputStream.println(JSON.encode([ time: SysClock.now.YMDHmsS ]))
+						response.raw().outputStream.flush()
+						sleep(100)
+					}
+					response.raw().outputStream.close()
+					return null
+			}
+		)
+	}
+}
+	</code>
     </ul>
 </article>
 </body>
 </html>
-<script>
-    /* To test, create web server with ICL library:
-    @CompileStatic
-    class WebStreamTest implements ServiciableSingle {
-        static void main(String[] args) {
-            new WebService(port: 7171).add(new WebStreamTest()).start()
-        }
-
-        @Override
-        Service getService() {
-            return new Service(
-                path: "/stream",
-                allowOrigin: "*",
-                action : {
-                    Request request, Response response ->
-                        response.raw().setContentType(Mime.JSON) //"application/x-ndjson"
-                        (1..60).each {
-                            response.raw().outputStream.println(JSON.encode([ time: SysClock.now.YMDHmsS ]))
-                            response.raw().outputStream.flush()
-                            sleep(100)
-                        }
-                        response.raw().outputStream.close()
-                        return null
-                }
-            )
-        }
-    }
-    */
-</script>

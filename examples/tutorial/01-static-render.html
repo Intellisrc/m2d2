@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="../css/lesson.css">
+<title>M2D2 Lesson 1 — Render the data</title>
+<style>
+    body { font-family: system-ui, sans-serif; padding: 16px; color: #222; }
+    h2 { margin: 0 0 8px; font-size: 16px; }
+    .panel { margin-bottom: 20px; }
+    ul { list-style: none; padding: 0; margin: 0; }
+    li { padding: 6px 8px; border-bottom: 1px solid #eee; display: flex; gap: 8px; }
+    .name { font-weight: 600; }
+    .email { color: #666; }
+</style>
+</head>
+<body>
+<div class="panel">
+    <h2>Users</h2>
+    <ul id="users"></ul>
+</div>
+<div class="panel">
+    <h2>Groups</h2>
+    <ul id="groups"></ul>
+</div>
+
+<script src="../../dist/m2d2.min.js"></script>
+<script>
+/**
+ * Lesson 1: Render the data.
+ * We render a static list of users and groups. Covers m2d2.ready,
+ * short-assign, templates, and items.
+ *
+ * Teaching points:
+ *   - Every m2d2 program begins with `m2d2.ready($ => { ... })`.
+ *   - A *template* describes how each row looks; *items* fills it per record.
+ *   - Short-assign: a plain string like name: "Ada" goes into the element text.
+ *   - Try adding a user to the array, then press Run.
+ */
+
+const users = [
+    { id: 1, name: "Ada Lovelace",    email: "ada@analyticalengine.io" },
+    { id: 2, name: "Alan Turing",     email: "alan@enigma.co.uk" },
+    { id: 3, name: "Grace Hopper",    email: "grace@navy.mil" },
+    { id: 4, name: "Margaret Hamilton", email: "margaret@mit.edu" },
+    { id: 5, name: "Linus Torvalds",  email: "linus@kernel.org" }
+];
+
+const groups = [
+    { id: 101, name: "Pioneers" },
+    { id: 102, name: "Engineers" },
+    { id: 103, name: "Mentors" }
+];
+
+m2d2.ready($ => {
+    $("#users", {
+        template: {
+            li: {
+                name:  { tagName: "span", css: "name" },
+                email: { tagName: "span", css: "email" }
+            }
+        },
+        items: users.map(u => ({ name: u.name, email: u.email }))
+    });
+
+    $("#groups", {
+        template: { li: { name: { tagName: "span", css: "name" } } },
+        items: groups.map(g => ({ name: g.name }))
+    });
+});
+</script>
+</body>
+</html>

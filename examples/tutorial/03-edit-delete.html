@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="../css/lesson.css">
+<title>M2D2 Lesson 3 — Edit and delete</title>
+<style>
+    body { font-family: system-ui, sans-serif; padding: 16px; color: #222; }
+    h2 { margin: 0 0 8px; font-size: 16px; }
+    ul { list-style: none; padding: 0; margin: 0; }
+    li { padding: 6px 8px; border-bottom: 1px solid #eee; display: flex; gap: 8px; align-items: center; }
+    .name { font-weight: 600; min-width: 160px; }
+    .email { color: #666; flex: 1; }
+    button { padding: 2px 8px; font-size: 12px; cursor: pointer; }
+    .del { color: #c00; }
+    input[type="text"] { padding: 2px 4px; border: 1px solid #999; }
+</style>
+</head>
+<body>
+<div class="panel">
+    <h2>Users (edit / delete)</h2>
+    <ul id="users"></ul>
+</div>
+<p id="log" style="font-size:12px;color:#666"></p>
+
+<script src="../../dist/m2d2.min.js"></script>
+<script>
+/**
+ * Lesson 3: Edit and delete.
+ * Each row gets Edit and Delete buttons. Covers the clear+re-render pattern,
+ * recovering the row index via li.dataset.id, and swapping spans to inputs
+ * for in-place editing.
+ *
+ * Teaching points:
+ *   - The source of truth is a plain `users` array; we clear+re-render on change.
+ *   - m2d2 assigns data-id = index to every item; use this.closest("li").dataset.id.
+ *   - Edit swaps spans to inputs; Save writes them back.
+ *   - onupdate fires whenever the list changes.
+ */
+
+const users = [
+    { id: 1, name: "Ada Lovelace",    email: "ada@analyticalengine.io" },
+    { id: 2, name: "Alan Turing",     email: "alan@enigma.co.uk" },
+    { id: 3, name: "Grace Hopper",    email: "grace@navy.mil" }
+];
+let editing = -1;   // index of the row currently being edited, or -1
+
+m2d2.ready($ => {
+    const $users = $("#users", {
+        warn: false,
+        template: { li: { /* per-row spec supplied in render() */ } },
+        items: []
+    });
+
+    function render() {
+        $users.items.clear();
+        users.forEach((u, i) => {
+            if (editing === i) {
+                // Edit row: inputs + Save/Cancel
+                $users.items.push({
+                    name:    { tagName: "input",  css: "name",  value: u.name },
+                    email:   { tagName: "input",  css: "email", value: u.email },
+                    save:    { tagName: "button", css: "save", text: "Save",
+                        onclick: function () {
+                            const li = this.closest("li");
+                            const idx = Number(li.dataset.id);
+                            users[idx].name  = li.querySelector(".name").value;
+                            users[idx].email = li.querySelector(".email").value;
+                            editing = -1;
+                            render();
+                        }},
+                    cancel: { tagName: "button", css: "cancel", text: "Cancel",
+                        onclick: function () { editing = -1; render(); }}
+                });
+            } else {
+                // Display row: spans + Edit/Delete
+                $users.items.push({
+                    name:  { tagName: "span",   css: "name",  text: u.name },
+                    email: { tagName: "span",   css: "email", text: u.email },
+                    edit:  { tagName: "button", css: "edit", text: "Edit",
+                        onclick: function () {
+                            editing = Number(this.closest("li").dataset.id);
+                            render();
+                        }},
+                    del:   { tagName: "button", css: "del", text: "Delete",
+                        onclick: function () {
+                            const idx = Number(this.closest("li").dataset.id);
+                            users.splice(idx, 1);
+                            render();
+                        }}
+                });
+            }
+        });
+        $("#log", users.length + " user(s).");
+    }
+
+    render();
+});
+</script>
+</body>
+</html>

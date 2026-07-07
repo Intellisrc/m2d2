@@ -1,0 +1,155 @@
+/* M2D2 Tutorial Playground
+   Layout: toolbar on top, editor (left) + preview (right) below.
+   The #example <section> is the mount point (its template is removed by pages.js
+   so the playground owns its contents). */
+
+#example .pg-root {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    grid-template-areas: "toolbar toolbar" "editors preview";
+    grid-template-columns: 55% 45%;
+    height: 100%;
+    min-height: 500px;
+}
+
+#example .pg-toolbar {
+    grid-area: toolbar;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
+    background: #1c2128;
+    border-bottom: 1px solid #414a52;
+}
+
+#example .pg-toolbar button,
+#example .pg-toolbar label {
+    background: #2a303b;
+    color: #eee;
+    border: 1px solid #414a52;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-size: 13px;
+    line-height: 1.4;
+    border-radius: 3px;
+}
+
+#example .pg-toolbar button:hover {
+    background: #3a404b;
+}
+
+#example .pg-toolbar .pg-spacer {
+    flex: 1;
+}
+
+#example .pg-toolbar .pg-theme-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #999;
+}
+
+#example .pg-toolbar select {
+    background: #2a303b;
+    color: #eee;
+    border: 1px solid #414a52;
+    padding: 6px;
+    border-radius: 3px;
+    font-size: 13px;
+}
+
+#example .pg-editors {
+    grid-area: editors;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    grid-template-areas: "tabs" "editor";
+    background: #1e1e1e;
+    border: 1px solid #414a52;
+    overflow: hidden;
+}
+
+#example .pg-tabs {
+    grid-area: tabs;
+    display: flex;
+    background: #181d26;
+    border-bottom: 1px solid #414a52;
+}
+
+#example .pg-tabs button {
+    background: transparent;
+    color: #999;
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding: 8px 16px;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+#example .pg-tabs button.pg-active {
+    color: #eee;
+    border-bottom-color: #5a1e34;
+}
+
+#example .pg-editor-host {
+    grid-area: editor;
+    overflow: auto;
+}
+
+#example .pg-editor-host .cm-editor {
+    height: 100%;
+}
+
+#example .pg-editor-host .cm-scroller {
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 13px;
+}
+
+#example .pg-preview-wrap {
+    grid-area: preview;
+    display: grid;
+    grid-template-rows: 1fr auto;
+    grid-template-areas: "frame" "error";
+    background: #fff;
+    border: 1px solid #414a52;
+    overflow: hidden;
+}
+
+#example .pg-preview-wrap iframe {
+    grid-area: frame;
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: #fff;
+}
+
+#example .pg-errorbar {
+    grid-area: error;
+    background: #2a1517;
+    color: #ff8080;
+    border-top: 1px solid #5a1e34;
+    padding: 8px;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 12px;
+    white-space: pre-wrap;
+    max-height: 120px;
+    overflow: auto;
+    display: none;
+}
+
+#example .pg-errorbar.pg-visible {
+    display: block;
+}
+
+/* Responsive: stack editors above preview on narrow screens. */
+@media (max-width: 760px) {
+    #example .pg-root {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto auto;
+        grid-template-areas: "toolbar" "editors" "preview";
+    }
+    #example .pg-editors,
+    #example .pg-preview-wrap {
+        min-height: 300px;
+    }
+}

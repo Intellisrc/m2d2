@@ -3,38 +3,43 @@ html * {
     font-family: Noto, verdana, tahoma, sans-serif;
 }
 
+/* Body is a flex container. body.example lays out horizontally (links | example);
+   body.tutorial lays out vertically (header on top, article below). */
 body {
     max-width: 1500px;
     margin: auto;
-    display: grid;
-    grid-template-columns: 50% 50%;
-    grid-gap: 10px;
+    display: flex;
     height: 100vh;
     font-size: 16px;
     background-color: #181d26;
     color: #eee;
 }
 
-body.example {
-    grid-template-rows: min-content auto;
-    grid-template-areas: "header header"
-        "links example";
+/* Tutorial: header bar on top, article (lesson + playground) fills the rest. */
+body.tutorial {
+    flex-direction: column;
 }
 
-body.tutorial {
-    grid-template-rows: min-content 20% auto;
-    grid-template-areas: "header header"
-        "links example"
-        "footer example";
+/* Example pages: aside on the left, article on the right. */
+body.example {
+    flex-direction: row;
 }
 
 header {
-    grid-area: header;
+    flex: 0 0 auto;
     padding: 0;
-    display: grid;
-    grid-template-columns: 50% auto;
-    grid-gap: 0;
+    display: flex;
     border-bottom: 1px solid #5a1e34;
+    position: sticky;
+	top: 0;
+	background: #1c2128;
+}
+
+/* Example-page header splits into a title and a row of demo links. */
+body.example header {
+    flex: 0 0 auto;
+    justify-content: space-between;
+    align-items: center;
 }
 
 header h3 {
@@ -55,19 +60,28 @@ header button:hover {
     background-color: #2a303b;
 }
 
+/* Tutorial prev/next arrows in the header. */
 header button.prev::before {
     content: '◀';
     float: left;
+	padding-right: 10px;
 }
 
 header button.next::after {
     content: '▶';
     float: right;
+	padding-left: 10px;
+}
+
+/* Tutorial: the header spreads prev/next to opposite edges. */
+body.tutorial header {
+    justify-content: space-between;
 }
 
 article {
     padding: 10px;
-    grid-area: example;
+    flex: 1 1 auto;
+    overflow: auto;
 }
 body.example article {
     background-color: #eee;
@@ -76,6 +90,26 @@ body.example article {
 body.example article h1 {
     color: white;
 }
+
+/* Tutorial: the <section id="example"> hosts the playground, which owns its
+   own internal grid (see playground.css). Make it fill the article. */
+body.tutorial article {
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+}
+body.tutorial #lesson {
+    flex: 0 0 auto;
+    padding: 10px;
+}
+body.tutorial #example {
+    flex: 1 1 auto;
+    display: block;
+    border: none;
+    padding: 0;
+    min-height: 0; /* allow the playground to shrink within the flex item */
+}
+
 section {
     display: grid;
     grid-template-rows: 50% 50%;
@@ -86,8 +120,10 @@ iframe {
     min-height: 300px;
 }
 
+/* Example pages keep their left <aside> link menu. */
 aside {
-    grid-area: links;
+    flex: 0 0 auto;
+    width: 260px;
     background-color: #20262E;
     overflow: auto;
 }
@@ -116,25 +152,9 @@ aside a {
     color: #eee;
 }
 
-footer {
-    grid-area: footer;
-    border-bottom: 0;
-    background-color: #20262E;
-    padding: 5px;
-}
-
 aside ul,
 aside ol {
     padding: 0 10px;
-}
-
-footer ol {
-    padding: 0 10px 0 25px;
-
-}
-
-footer li {
-    margin: 20px 0;
 }
 
 h1 {
@@ -153,8 +173,7 @@ table td {
     color: black;
 }
 
-#lesson a[href],
-#lessons a[href] {
+#lesson a[href] {
     color: #f9528f;
 }
 
@@ -180,4 +199,3 @@ blockquote {
 ::-webkit-scrollbar-thumb {
     background: #5a1e34;
 }
-

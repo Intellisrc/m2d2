@@ -168,92 +168,127 @@ and the other part is dynamic using M2D2 templates.
 
 ## Observing object changes
 
-In many cases an object may depend on other object values. For example, if you have a `basic` account type, and you add
-extra features to it (pro version). In that case, the `pro` version depends on the `basic` version. In order to update
-the `pro` information, you can either "push" the `basic` changes into the `pro` object, or you can pull the `basic` 
-changes from the `pro` object.
+In many scenarios the same information is used in several parts of an interface. For example, the `username` may be 
+displayed in the top bar, the profile floating element, the quick edit widget and a sidebar. What would happen when
+the user edits the `username`? 
 
-Let's see both cases:
+You can either push or pull that data, let's assume the following html for exemplification:
 
 ```html
-<section id="basic">
-    <span>Nickname: </span>
-    <input type="text" name="nickname" value="" />
+<section id="topbar">
+    <span>Username: </span>
+    <span class="username"></span>
 </section>
-<section id="pro">
-    <div class="nickname"></div>
-    <div>Number of Licenses: <span class="licenses">0</span></div>
+<section id="profile">
+    <span class="username"></span>
+    <span class="name"></span>
+    <span class="email"></span>
+</section>
+<section id="quick">
+    <h1>Quick edit:</h1>
+    <input type="text" name="username" value="" />
 </section>
 ```
 
-Task: If the object `basic` is modified, you will update the `pro` object.
+### Pushing changes
 
-### Pushing changes from `basic` into `pro`: 
-
-This is they way you will do it if you use `JQuery`. This works by pushing your changes into all the affected parts.
+This is they way you will do it if you use `JQuery` or vanilla Javascript. This works by pushing your changes into all 
+the affected parts.
 The advantage is that it is easier to understand, but the complex a project becomes, the harder is to track changes.
 Another disadvantage is that dependencies are reversed, it means, that `basic` needs to know about `pro`.
 
 ```js
-// basic.js
+// info.js
+m2d2.load($ => {
+    // This object will most likely be generated server-side.
+    $.info = {
+        username : "user1",
+        name : "Jossy Mendez",
+        email : "jossy.m@example.com"
+    }
+});
+
+// topbar.js
 m2d2.ready($ => {
-    const pro = $("#pro"); // import `pro`
-    
-    const basic = $("#basic", {
-        nickname : {
-            // this is the event which triggers the change:
-            oninput : function(ev) {
-                // changes are "pushed" into `pro`
-                pro.nickname.text = this.value;
-            }
+    const topbar = $("#topbar", {
+        username: $.info.username
+    });
+});
+
+// profile.js
+m2d2.ready($ => {
+    const profile = $("#profile", $.info);
+});
+
+// quick.js
+m2d2.ready($ => {
+    const topbar = $("#topbar"); // import
+    const profile = $("#profile"); // import
+
+    const quick = $("#quick", {
+        username : $.info.username,
+        onchange : function(ev) {
+            profile.username = topbar.username = this.value;
         }
     });
 });
 ```
+When you change the value in `#quick .username`, it will update the value everywhere it is needed. In this example,
+we are not updating the `$.info` object and that could potentially cause an issue if any other element initialized
+after the change uses that value.
 
-```js
-// pro.js
-m2d2.ready($ => {
-    const pro = $("#pro", {
-        nickname : $.local.get("user.nickname"), // <-- default value from LocalStorage (just an example)
-        licenses : 1
-    });
-});
-```
-Note:  `$.local` is an [extension to use LocalStorage](storage.md)
-
-### Pulling `basic` changes from `pro`:
+### Pulling changes
 
 This is the way `Angular`, `React`, `Vue` and similar works. Instead of pushing the changes, they are "pulled" (or more
 correctly, observed and then applied), I call it "linked reference". The advantage is that all changes related to a 
 single object are done in one place, so if something is not rendered correctly, it is easier to find out. 
 
-In our example, it is more natural that `pro` requires `basic`, and that `basic` no need to know about `pro` existence:
+Let's modify our example:
 
 ```js
-// basic.js
+// info.js
+m2d2.load($ => {
+    // Note here that we are using `$({...})` instead of simply `{...}`
+    $.info = $({
+        username : "user1",
+        name : "Jossy Mendez",
+        email : "jossy.m@example.com"
+    });
+});
+
+// topbar.js
 m2d2.ready($ => {
-    const basic = $("#basic", {
-        nickname : ""
+    const topbar = $("#topbar", {
+        username: [$.info, "username"] 
+    });
+});
+
+// profile.js
+m2d2.ready($ => {
+    // This will assign to each <key> in $.info, to the #profile element, the array: [$.info, <key>]
+    const profile = $("#profile", Object.fromEntries(Object.keys($.info).map(key => [key, [$.info, key]])));
+});
+
+// quick.js
+m2d2.ready($ => {
+    const topbar = $("#topbar"); // import
+    const profile = $("#profile"); // import
+
+    const quick = $("#quick", {
+        username : [$.info, "username"],
+        onchange : function(ev) {
+            $.info.username = this.value;
+        }
     });
 });
 ```
 
-```js
-// pro.js
-m2d2.ready($ => {
-    const basic = $("#basic"); // import `basic`
-    
-    const pro = $("#pro", {
-        nickname : [ basic.nickname, 'value' ], // <-- we are using 'value' here as basic.nickname is an `input` element.
-        licenses : 1
-    });
-});
-```
+If we modify the property `username` of the object `$.info`, it will automagically update anywhere it is used.
 
-Whenever `basic.nickname.value` changes, `pro.nickname.text` will be updated. 
-In order this "magic" to work, you need to assign an array with its first element, a `Node` and the second
-element a `string` (property to observe). 
+In order this "magic" to work, you need:
+
+1. Either use a `Node` or an `Object` (initialized with `$({...})`) as first element of the array.
+2. Specify the property to observe as second element (string);
 
 You can use this "linked reference" to modify and observe dataset and style changes as well, or use a callback function
 to update the value before is updated, for example

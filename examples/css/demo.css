@@ -1,0 +1,282 @@
+/* Shared extension-demo styles — professional look for the playground iframe.
+   Linked alongside examples.css by every extension demo (except alert, which
+   has its own theming). */
+
+/* Base layout: clean light card on a neutral background */
+* { box-sizing: border-box; }
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    padding: 20px;
+    color: #1a1a2e;
+    background: #fafafa;
+    line-height: 1.5;
+    max-width: 720px;
+    margin: 0 auto;
+}
+
+article {
+    background: #fff;
+    border-radius: 8px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+h1 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    margin: 0 0 12px;
+    background: transparent;
+    padding: 0;
+    text-align: left;
+}
+
+h3 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #555;
+    margin: 20px 0 8px;
+}
+
+p {
+    color: #666;
+    font-size: 14px;
+    margin: 8px 0;
+}
+
+hr {
+    border: none;
+    border-top: 1px solid #eee;
+    margin: 16px 0;
+}
+
+/* Forms */
+form {
+    display: block;
+    width: 100%;
+    max-width: 400px;
+}
+form div {
+    padding: 6px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+label {
+    display: inline-block;
+    width: 110px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #555;
+}
+
+/* Inputs */
+input[type="text"], input[type="password"], input[type="email"] {
+    flex: 1;
+    padding: 7px 10px;
+    border: 1px solid #d0d0d8;
+    border-radius: 5px;
+    font-size: 14px;
+    font-family: inherit;
+    background: #fff;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focus {
+    border-color: #5b8def;
+    box-shadow: 0 0 0 3px rgba(91, 141, 239, 0.15);
+}
+
+/* Selects */
+select {
+    flex: 1;
+    padding: 7px 10px;
+    border: 1px solid #d0d0d8;
+    border-radius: 5px;
+    font-size: 14px;
+    font-family: inherit;
+    background: #fff;
+    color: #1a1a2e;
+    outline: none;
+    cursor: pointer;
+}
+select:focus {
+    border-color: #5b8def;
+    box-shadow: 0 0 0 3px rgba(91, 141, 239, 0.15);
+}
+
+/* Buttons */
+button {
+    padding: 7px 18px;
+    font-size: 13px;
+    font-family: inherit;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid #d0d0d8;
+    border-radius: 5px;
+    background: #fff;
+    color: #333;
+    transition: all 0.15s;
+}
+button:hover {
+    background: #f0f4ff;
+    border-color: #5b8def;
+}
+button:active {
+    transform: translateY(1px);
+}
+.right { text-align: right; }
+div.right { justify-content: flex-end; }
+
+/* Lists (storage, xhr-stream) */
+ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+ul#stored li, ul#out li {
+    padding: 8px 12px;
+    background: #fff;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    transition: background 0.15s;
+    font-size: 14px;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+}
+ul#stored li:hover, ul#out li:hover {
+    background: #f0f4ff;
+}
+
+/* Value display (storage) */
+code {
+    display: block;
+    padding: 12px;
+    background: #1e1e2e;
+    color: #a5d6a7;
+    border-radius: 5px;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 13px;
+    margin-top: 8px;
+    overflow-x: auto;
+}
+
+/* Tables (xhr) */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0;
+    font-size: 14px;
+}
+table caption {
+    text-align: left;
+    font-weight: 600;
+    color: #333;
+    padding: 8px 0;
+    font-size: 14px;
+}
+table th {
+    text-align: left;
+    padding: 8px 12px;
+    background: #f5f5f8;
+    color: #555;
+    font-weight: 500;
+    font-size: 13px;
+    width: 130px;
+    border-bottom: 2px solid #e0e0e0;
+}
+table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid #eee;
+    color: #1a1a2e;
+}
+table td a {
+    color: #5b8def;
+    text-decoration: none;
+}
+table td a:hover {
+    text-decoration: underline;
+}
+
+/* Loading indicator (xhr) */
+#loading {
+    display: none;
+    padding: 8px 12px;
+    color: #888;
+    font-size: 13px;
+    font-style: italic;
+}
+
+/* Controls row (xhr) */
+.controls {
+    margin-top: 16px;
+    padding: 12px;
+    background: #f5f5f8;
+    border-radius: 6px;
+}
+.controls > div {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.controls label {
+    width: auto;
+    margin: 0;
+}
+
+/* Log console (websocket) */
+ul#log {
+    list-style: none;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 12px;
+    background: #1e1e2e;
+    padding: 14px;
+    margin: 12px 0 0;
+    height: 400px;
+    overflow-y: auto;
+    border-radius: 6px;
+}
+ul#log li {
+    display: flex;
+    padding: 2px 0;
+    border: none;
+    background: transparent;
+}
+ul#log li span {
+    white-space: nowrap;
+}
+ul#log .date {
+    color: #6b6b8a;
+    width: 180px;
+}
+ul#log .action {
+    color: #ffcc66;
+    width: 80px;
+    font-weight: 600;
+}
+ul#log .msg {
+    color: #7ee787;
+}
+
+/* Language switcher links (lang demo) */
+#change {
+    margin-top: 16px;
+    display: flex;
+    gap: 12px;
+}
+#change a {
+    display: inline-block;
+    padding: 6px 14px;
+    background: #f5f5f8;
+    border: 1px solid #d0d0d8;
+    border-radius: 5px;
+    text-decoration: none;
+    color: #333;
+    font-size: 13px;
+    transition: all 0.15s;
+}
+#change a:hover {
+    background: #f0f4ff;
+    border-color: #5b8def;
+    color: #5b8def;
+}

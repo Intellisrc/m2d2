@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="../css/lesson.css">
+<title>M2D2 Lesson 6 — Persistence</title>
+<style>
+    body { font-family: system-ui, sans-serif; padding: 16px; color: #222; }
+    h2 { margin: 0 0 8px; font-size: 16px; }
+    ul { list-style: none; padding: 0; margin: 0; }
+    li.user { padding: 8px; border-bottom: 1px solid #eee; }
+    .name { font-weight: 600; }
+    .email { color: #666; font-size: 13px; }
+    .groups { margin-top: 6px; display: flex; gap: 12px; flex-wrap: wrap; }
+    .groups label { font-size: 13px; display: flex; gap: 3px; align-items: center; }
+    .toolbar { margin-bottom: 12px; }
+    .toolbar button { padding: 4px 12px; cursor: pointer; }
+    .note { font-size: 12px; color: #666; margin-top: 8px; }
+</style>
+</head>
+<body>
+<div class="toolbar">
+    <button id="reset">Reset stored data</button>
+    <p class="note">Data is saved to localStorage on every change. Reload to confirm.</p>
+</div>
+<div class="panel">
+    <h2>Users</h2>
+    <ul id="users"></ul>
+</div>
+<p id="log" style="font-size:12px;color:#666"></p>
+
+<script src="../../dist/m2d2.min.js"></script>
+<script>
+/**
+ * Lesson 6: Persistence.
+ * We save and load the data with the m2d2.storage extension (localStorage).
+ * On startup we load (or seed); on every change we autosave.
+ *
+ * Teaching points:
+ *   - $.local.set(key, val) serializes to localStorage; $.local.get reads it back.
+ *   - We seed initial data if storage is empty.
+ *   - Reload the preview (Run) to confirm data survived.
+ */
+
+const SEED_USERS = [
+    { id: 1, name: "Ada Lovelace",  email: "ada@analyticalengine.io", groupIds: [101] },
+    { id: 2, name: "Alan Turing",   email: "alan@enigma.co.uk",       groupIds: [101, 102] }
+];
+const SEED_GROUPS = [
+    { id: 101, name: "Pioneers" },
+    { id: 102, name: "Engineers" }
+];
+const KEY = "m2d2-tutorial-users";
+
+m2d2.ready($ => {
+    // Load (or seed):
+    let users = $.local.get(KEY);
+    if (!users) {
+        users = SEED_USERS;
+        $.local.set(KEY, users);
+    }
+    const groups = SEED_GROUPS;
+
+    function save() { $.local.set(KEY, users); }
+
+    const $users = $("#users", {
+        warn: false,
+        template: { li: { /* per-row spec in render() */ } },
+        items: []
+    });
+
+    function render() {
+        $users.items.clear();
+        users.forEach(u => {
+            const checkboxes = groups.map(g => {
+                const checked = u.groupIds.indexOf(g.id) >= 0;
+                return '<label><input type="checkbox" data-uid="' + u.id +
+                       '" data-gid="' + g.id + '"' + (checked ? " checked" : "") +
+                       '> ' + g.name + '</label>';
+            }).join(" ");
+            $users.items.push({
+                name:   { tagName: "span", css: "name",  text: u.name },
+                email:  { tagName: "span", css: "email", text: " (" + u.email + ")" },
+                groups: { tagName: "div",  css: "groups", html: checkboxes }
+            });
+        });
+    }
+    render();
+
+    document.getElementById("users").addEventListener("change", function (e) {
+        if (e.target.type !== "checkbox") return;
+        const uid = parseInt(e.target.dataset.uid, 10);
+        const gid = parseInt(e.target.dataset.gid, 10);
+        const user = users.find(u => u.id === uid);
+        if (!user) return;
+        const idx = user.groupIds.indexOf(gid);
+        if (e.target.checked && idx < 0) user.groupIds.push(gid);
+        else if (!e.target.checked && idx >= 0) user.groupIds.splice(idx, 1);
+        save();
+        $("#log", "Saved. " + user.name + " → groups: [" + user.groupIds.join(", ") + "]");
+    });
+
+    $("#reset", {
+        onclick: function () {
+            $.local.del(KEY);
+            location.reload();
+        }
+    });
+});
+</script>
+</body>
+</html>

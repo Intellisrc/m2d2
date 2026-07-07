@@ -46,4 +46,4 @@ $.appendAllChild(e,e)   // Append all child from one node to another
 $.prependAllChild(e,e)  // Prepend all child from one node to another
 ```
 
-See [source code](../js/utils.src.js) for more details in implementation.
+See [source code](../src/utils.ts) for more details in implementation.

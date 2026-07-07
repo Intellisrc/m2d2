@@ -130,3 +130,26 @@ $.lang.onchange = (new_lang) => { /* ... */ }
 ### Finally:
 When you change the language, it will keep it in the local storage (at the browser),  so
 if you refresh the page it will still use your selected language.
+
+9) By default, the text part of the elements with the `lang` attribute will be translated, 
+along with their `title` or `placeholder` if they are not empty. You can skip translating them by
+adding special classes:
+
+* `notxt` or `lang_no_text` : Do not translate text inside this element
+* `lang_no_title` : Do not translate `title` attribute
+* `lang_no_ph` : Do not translate `placeholder` attribute
+* `lang_value` : Translate `value` (not translated by default)
+
+**NOTE** : only `value` attributes are not translated by default. You can enable it by setting the
+class name : `lang_value`.
+
+You can override such classes this way:
+
+```javascript
+m2d2.load($ => {
+    $.dict.noTextClass = "material_icon";
+    $.dict.noTitleClass = ["button", "link"]; // Specifying multiple class names
+    $.dict.noPlaceHolderClass = "no_ph";
+    $.dict.valueClass = ["auto","lang"];
+});
+```

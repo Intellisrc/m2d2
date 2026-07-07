@@ -1,0 +1,36 @@
+/*
+ * m2d2 alert — Light theme variable definitions.
+ *
+ * This file ONLY declares --alert-* variables. The structural CSS lives in
+ * alert.css. When bundling a "light theme" build, concatenate alert.css +
+ * this file.
+ *
+ * Palette: near-white surfaces with neutral gray text (no blue tint), matching
+ * the look of a native desktop alert on a light UI.
+ */
+:root,
+[data-theme="light"] {
+    /* surfaces — near-white */
+    --alert-back:             rgba(0, 0, 0, 0.4);
+    --alert-front-bg:         #ffffff;
+    --alert-front-fg:         #202124;
+    --alert-title-fg:         #202124;
+    --alert-text-fg:          #5f6368;
+    --alert-icon-fg:          #80868b;
+    --alert-border:           rgba(60, 64, 67, 0.14);
+    --alert-shadow:           0 20px 60px -15px rgba(0, 0, 0, 0.3);
+
+    /* buttons */
+    --alert-button-bg:        #f1f3f4;
+    --alert-button-fg:        #3c4043;
+    --alert-button-border:    transparent;
+    --alert-button-hover-bg:  #e8eaed;
+
+    /* accents */
+    --alert-ok:               #1e8e3e;
+    --alert-error:            #d93025;
+    --alert-question:         #1a73e8;
+    --alert-info:             #1a73e8;
+    --alert-input:            #9334e6;
+    --alert-wait:             #80868b;
+}
