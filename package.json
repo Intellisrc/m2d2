@@ -35,9 +35,7 @@
     "typecheck": "tsc --noEmit"
   },
   "files": [
-    "dist/**/*.js",
-    "dist/**/*.d.ts",
-    "dist/**/*.map"
+    "dist"
   ],
   "devDependencies": {
     "@types/node": "^25.9.3",
