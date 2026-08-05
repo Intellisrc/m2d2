@@ -206,6 +206,10 @@ function handleNoMatch(node: M2d2Node, key: string, value: unknown, obj: Record<
     } else if (key === "items") {
         // Items creation:
         const template = obj["template"];
+        // Capture the optional reconciliation key (string field name or function):
+        if ((node as any)._itemKey === undefined && obj["key"] !== undefined) {
+            utils.defineProp(node, "_itemKey", obj["key"]);
+        }
         if (utils.isPlainObject(value)) {
             // Convert plain object to value→text array (original: m2d2.src.js:514-531):
             const valTmp: unknown[] = [];
@@ -285,9 +289,14 @@ export function doDom(selector: unknown, object?: unknown): M2d2Node | null {
         return node;
     }
 
-    // Iterate keys (skip tagName):
+    // Iterate keys (skip tagName). Also skip `key` in an items/template context,
+    // where it declares the reconciliation key (captured in handleNoMatch):
     Object.keys(obj)
-        .filter((key) => key !== "tagName")
+        .filter((key) => {
+            if (key === "tagName") return false;
+            if (key === "key" && (obj.items !== undefined || obj.template !== undefined)) return false;
+            return true;
+        })
         .forEach((key) => {
             let origValue = obj[key];
             if (origValue === undefined || origValue === null) {

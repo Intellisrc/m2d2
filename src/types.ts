@@ -12,6 +12,8 @@ export interface M2d2Node extends HTMLElement {
     _m2d2_display?: string;
     _template?: Element | null;
     __template?: Record<string, unknown> | null;
+    /** Reconciliation key for items: a field name (string) or a function. */
+    _itemKey?: string | ((item: any, index: number) => unknown);
     domNode?: Element;
     hasEventListeners?: boolean;
     items?: ItemsCollection;

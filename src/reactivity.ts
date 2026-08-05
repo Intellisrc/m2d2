@@ -58,10 +58,17 @@ function rememberDispatch(target: object, signature: string): void {
 }
 
 /**
- * Dispatch an "update" CustomEvent on target, with deduplication.
+ * Dispatch an "update" CustomEvent on target, with optional deduplication.
  * Replaces the duplicated dispatch logic in proxy.set and onObserve.
+ *
+ * `dedupe` (default true) suppresses repeat dispatches of the same
+ * property+value within `config.storedEventsTimeout`. It exists to absorb the
+ * proxy↔MutationObserver collision on *reflected* property/attribute writes.
+ * The `items` path bypasses it (dedupe=false): items changes are dispatched
+ * exactly once by the library (proxy set + items methods), so dedupe would
+ * only ever drop legitimate rapid reassignments (e.g. `items=a; items=b`).
  */
-export function dispatchUpdate(target: M2d2Node, detail: UpdateDetail): void {
+export function dispatchUpdate(target: M2d2Node, detail: UpdateDetail, dedupe = true): void {
     if (!config.updates) return;
     if (detail.newValue === detail.oldValue) return;
     // Only dispatch if there's something to receive it:
@@ -91,8 +98,8 @@ export function dispatchUpdate(target: M2d2Node, detail: UpdateDetail): void {
         valueKey = String(v);
     }
     const signature = detail.property + "=" + valueKey;
-    if (isRecentlyDispatched(target, signature)) return; // deduplicate within the timeout window
-    rememberDispatch(target, signature);
+    if (dedupe && isRecentlyDispatched(target, signature)) return; // deduplicate within the timeout window
+    if (dedupe) rememberDispatch(target, signature);
 
     try {
         const event = new CustomEvent("update", { detail });
@@ -276,8 +283,8 @@ export function proxy<T extends object>(obj: T, force?: boolean): T {
                     console.warn("[m2d2] Updates disabled (m2d2.updates=false):", target);
                 }
             } else if (prop === "items") {
-                // Reset items: clear then re-render.
-                (target.items as any)?.clear?.();
+                // Reconcile in place (reuses nodes by position/key) instead of
+                // clearing and rebuilding — preserves focus/state and avoids churn.
                 if (_doItems && utils.isArray(value)) {
                     _doItems(target, value);
                 }
@@ -287,12 +294,16 @@ export function proxy<T extends object>(obj: T, force?: boolean): T {
                 target[prop] = value;
             }
 
-            dispatchUpdate(target, {
-                type: typeof value,
-                property: prop,
-                newValue: value,
-                oldValue,
-            });
+            dispatchUpdate(
+                target,
+                {
+                    type: typeof value,
+                    property: prop,
+                    newValue: value,
+                    oldValue,
+                },
+                prop !== "items" // items: no dedupe (library owns the single dispatch)
+            );
             return true;
         },
     };
@@ -346,12 +357,14 @@ export function onObserve(mutationsList: MutationRecord[]): void {
                     });
                 }
             } else if ((target as any).items !== undefined) {
-                dispatchUpdate(target, {
-                    type: "object",
-                    property: "items",
-                    newValue: m.addedNodes,
-                    oldValue: m.removedNodes,
-                });
+                // Managed items container: the items path (proxy `set` + the items
+                // methods in items.ts) owns the single "items" update dispatch, so
+                // the observer must NOT also emit one. Re-broadcasting the childList
+                // mutation here was the source of the double/multi-fire bug (the
+                // proxy's Array-typed dispatch and this NodeList-typed dispatch
+                // produced different dedupe signatures and both slipped through).
+                // External childList mutations on a managed list are intentionally
+                // not re-broadcast.
             }
         }
     });

@@ -1,9 +1,21 @@
 import { utils } from "./utils";
 import { extDom } from "./dom";
-import { proxy } from "./reactivity";
+import { proxy, dispatchUpdate } from "./reactivity";
 import { getItem } from "./template";
 import { coerce } from "./binding";
 import type { M2d2Node, ItemsCollection } from "./types";
+
+/**
+ * Fire a single "items" update for a collection mutation. Bypasses dedupe
+ * (each call is a distinct logical change; the observer no longer emits these).
+ */
+function notifyItems(node: M2d2Node): void {
+    dispatchUpdate(
+        node,
+        { type: "object", property: "items", newValue: node.items, oldValue: null },
+        false
+    );
+}
 
 /**
  * Extend node.items (HTMLCollection) with array-like and custom methods.
@@ -48,10 +60,10 @@ export function extendItems(node: M2d2Node): void {
                         }
                         // Insert new items before the element currently at (start + deleteCount):
                         const insertBefore = children[start + count] as Element | undefined;
-                        newItems.forEach((obj) => {
+                        newItems.forEach((obj, idx) => {
                             const coerced = coerce(node, obj);
                             if (utils.isPlainObject(coerced)) {
-                                const child = getItem(node, node.items!.length, coerced);
+                                const child = getItem(node, start + idx, coerced);
                                 if (child) {
                                     if (insertBefore) {
                                         insertBefore.before(child);
@@ -61,6 +73,7 @@ export function extendItems(node: M2d2Node): void {
                                 }
                             }
                         });
+                        notifyItems(node);
                         return removed;
                     };
                     break;
@@ -79,6 +92,7 @@ export function extendItems(node: M2d2Node): void {
                                 });
                             }
                         }
+                        notifyItems(node);
                     };
                     break;
 
@@ -93,6 +107,7 @@ export function extendItems(node: M2d2Node): void {
                             extDom(clone);
                             targetChild.replaceWith(clone);
                         }
+                        notifyItems(node);
                     };
                     break;
 
@@ -102,6 +117,7 @@ export function extendItems(node: M2d2Node): void {
                             const arr = Array.from(node.items!);
                             arr.reverse();
                             reattach(arr);
+                            notifyItems(node);
                         }
                     };
                     break;
@@ -109,6 +125,7 @@ export function extendItems(node: M2d2Node): void {
                 case "clear":
                     func = function (this: M2d2Node) {
                         while (node.items![0]) (node.items![0] as M2d2Node).remove();
+                        notifyItems(node);
                     };
                     break;
 
@@ -163,7 +180,9 @@ export function extendItems(node: M2d2Node): void {
                 case "pop":
                     func = function (this: M2d2Node) {
                         if (node.items!.length) {
-                            return proxy(node.removeChild(node.items![node.items!.length - 1]) as M2d2Node);
+                            const removed = proxy(node.removeChild(node.items![node.items!.length - 1]) as M2d2Node);
+                            notifyItems(node);
+                            return removed;
                         }
                         return null;
                     };
@@ -181,6 +200,7 @@ export function extendItems(node: M2d2Node): void {
                         } else {
                             console.warn("[m2d2] Trying to push unknown value into list:", obj);
                         }
+                        notifyItems(node);
                     };
                     break;
 
@@ -188,7 +208,10 @@ export function extendItems(node: M2d2Node): void {
                     func = function (this: M2d2Node, id: string | number) {
                         if (node.items!.length) {
                             const elem = (node.items as ItemsCollection).get(id);
-                            if (elem) (elem as M2d2Node).remove();
+                            if (elem) {
+                                (elem as M2d2Node).remove();
+                                notifyItems(node);
+                            }
                         }
                     };
                     break;
@@ -196,7 +219,9 @@ export function extendItems(node: M2d2Node): void {
                 case "shift":
                     func = function (this: M2d2Node) {
                         if (node.items!.length) {
-                            return proxy(node.removeChild(node.items![0]) as M2d2Node);
+                            const removed = proxy(node.removeChild(node.items![0]) as M2d2Node);
+                            notifyItems(node);
+                            return removed;
                         }
                         return null;
                     };
@@ -210,6 +235,7 @@ export function extendItems(node: M2d2Node): void {
                                 return (a as M2d2Node).text.localeCompare((b as M2d2Node).text);
                             }));
                             reattach(arr);
+                            notifyItems(node);
                         }
                     };
                     break;
@@ -226,6 +252,7 @@ export function extendItems(node: M2d2Node): void {
                         } else {
                             console.warn("[m2d2] Trying to unshift unknown value:", obj);
                         }
+                        notifyItems(node);
                     };
                     break;
 
@@ -234,17 +261,20 @@ export function extendItems(node: M2d2Node): void {
                         args.forEach((arr) => {
                             if (utils.isArray(arr)) {
                                 arr.forEach((obj) => {
-                                    if (!utils.isElement(obj)) {
+                                    let toAppend: Node | null = null;
+                                    if (utils.isElement(obj)) {
+                                        toAppend = obj as unknown as Node;
+                                    } else {
                                         const coerced = coerce(node, obj);
                                         if (utils.isPlainObject(coerced)) {
-                                            const index = node.items!.length;
-                                            obj = getItem(node, index, coerced);
+                                            toAppend = getItem(node, node.items!.length, coerced);
                                         }
                                     }
-                                    (node.items as ItemsCollection).push(obj);
+                                    if (toAppend) node.appendChild(toAppend);
                                 });
                             }
                         });
+                        notifyItems(node);
                     };
                     break;
 

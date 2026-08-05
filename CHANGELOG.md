@@ -1,5 +1,47 @@
 # Changelog
 
+## v3.1.0
+
+Lists (`items`) now reconcile instead of clearing + rebuilding, and `items`
+changes fire the `update` event exactly once. Existing list code keeps working
+unchanged and immediately benefits; a new optional `key` enables reuse by
+identity across reorders.
+
+### Added
+- **Keyed reconciliation for `items`** — declare `key` (a field name or a
+  function) so list items are reused **by identity** across sorts, filters,
+  prepends and reorders, instead of by position. Focus, selection, scroll and
+  per-item state are preserved because nodes are moved, not recreated.
+  ```js
+  $("#list", { key: "id", template: { … }, items: […] });          // field name
+  $("#list", { key: (item) => item.uuid, template: { … }, … });    // function
+  ```
+  `key` is optional — omit it and M2D2 reconciles by position (no code change).
+
+### Fixed
+- **`items` updates fire once** — assigning `items` (and `push`, `unshift`,
+  `splice`, `pop`, `shift`, `clear`, `remove`, `sort`, `reverse`, `fill`,
+  `copyWithin`, `concat`) now dispatches the `update`/`onupdate` event exactly
+  once per change. Previously a single reassignment could fire it two or three
+  times (the Proxy and the MutationObserver both emitted, with different dedupe
+  signatures). The library is now the single source of `items` updates.
+
+### Changed (compat-affecting, all intentional)
+1. **`items` reassignment reconciles** — setting `items = […]` on an existing
+   list reuses the item nodes that are already there and patches them in place,
+   rather than clearing and rebuilding. Faster, and preserves focus/state.
+   `dataset.id` still equals the positional index, so `items.get(i)` and the
+   `index` are unaffected.
+2. **`key` field is consumed, not rendered** — when `key` is a field name, that
+   field is used only for matching and is stripped from the item content, so
+   keying on `id`, `uuid`, `sku`, etc. neither warns nor appears on the element.
+   (Function keys can't know which fields they read, so those still follow the
+   normal rules.)
+3. **External mutations on a managed list are no longer re-broadcast** — DOM
+   changes made outside M2D2 on an `items` container are no longer emitted as
+   `items` update events. Library-driven changes (`items = …` and the items
+   methods) are the single source.
+
 ## v3.0.0 — 2026-06-20
 
 M2D2 has been rewritten in TypeScript. The public API is unchanged

@@ -246,8 +246,150 @@ export function getItem(
 }
 
 /**
- * Process an array of values into items appended to node.
- * Ported from m2d2.src.js:801-826.
+ * Reconciliation: instead of clearing and rebuilding the whole list on every
+ * `items = [...]` (which destroys focus, scroll, selection, transitions and
+ * per-item state, and re-creates the entire subtree), diff the new values
+ * against the existing item nodes and reuse / reorder / replace only what
+ * changed. `dataset.id` always reflects the positional index (so `items.get(i)`
+ * and the `dataset.id === index` invariant keep working); the keyed-mode
+ * identity used only for matching is held in `itemKeys` (GC-friendly WeakMap).
+ */
+
+/** Maps each item element to its stable reconciliation key (keyed mode only). */
+const itemKeys = new WeakMap<Element, string>();
+
+/**
+ * Normalize a raw key spec — a field name (string) or a function — into a
+ * key extractor. Returns null when no key is declared (→ positional mode).
+ */
+function normalizeKeyFn(keySpec: unknown): ((item: any, index: number) => string | null) | null {
+    if (keySpec == null) return null;
+    if (utils.isFunction(keySpec)) {
+        return (item, index) => {
+            const k = (keySpec as Function)(item, index);
+            return k == null ? null : String(k);
+        };
+    }
+    const field = String(keySpec);
+    return (item) => (item && (item as any)[field] != null ? String((item as any)[field]) : null);
+}
+
+/**
+ * When the key is declared as a field name, that field is *consumed* by
+ * reconciliation (like `key` in React/Vue) and must NOT also be treated as
+ * item content — otherwise a non-renderable field (e.g. `sku`, `uuid`) would
+ * trip the unknown-key warning, and a renderable one (e.g. `id`) would pollute
+ * the DOM. Returns a shallow copy of `spec` without the key field. (Function
+ * keys can't know which fields they read, so they are not stripped.)
+ */
+function stripKeyField(spec: unknown, keyField: string | null): unknown {
+    if (!keyField || !utils.isPlainObject(spec)) return spec;
+    if (!(keyField in (spec as object))) return spec;
+    const copy = { ...(spec as Record<string, unknown>) };
+    delete copy[keyField];
+    return copy;
+}
+
+/** Reconcile by position (default): reuse the node at index i, patch in place. */
+function reconcilePositional(node: M2d2Node, values: unknown[], $template: M2d2Node): void {
+    const existing = Array.from(node.children) as M2d2Node[];
+    values.forEach((val, i) => {
+        const coerced = coerce(node, val);
+        if (i < existing.length) {
+            const item = existing[i];
+            doDom(item, coerced as Record<string, unknown>);
+            item.dataset.id = String(i);
+        } else {
+            const item = getItem(node, i, coerced, $template);
+            if (item) node.appendChild(item);
+        }
+    });
+    // Remove trailing extras (list shrank):
+    for (let j = values.length; j < existing.length; j++) {
+        existing[j].remove();
+    }
+}
+
+/** Reconcile by stable key: reuse + reorder, preserving node identity/focus. */
+function reconcileKeyed(
+    node: M2d2Node,
+    values: unknown[],
+    $template: M2d2Node,
+    keyFn: (item: any, index: number) => string | null,
+    keyField: string | null
+): void {
+    const existing = Array.from(node.children) as M2d2Node[];
+    const oldByKey = new Map<string, M2d2Node>();
+    existing.forEach((c) => {
+        const k = itemKeys.get(c);
+        if (k != null && !oldByKey.has(k)) oldByKey.set(k, c);
+    });
+
+    const used = new Set<M2d2Node>();
+    const ordered: M2d2Node[] = [];
+    const seen = new Set<string>();
+
+    values.forEach((val, i) => {
+        const coerced = coerce(node, val);
+        const spec = stripKeyField(coerced, keyField);
+        const key = keyFn(val, i);
+        let item: M2d2Node | null = null;
+        if (key != null && !seen.has(key)) {
+            seen.add(key);
+            const match = oldByKey.get(key);
+            if (match && !used.has(match)) {
+                item = match;
+                used.add(match);
+                doDom(item, spec as Record<string, unknown>);
+                item.dataset.id = String(i);
+            }
+        }
+        if (!item) item = getItem(node, i, spec, $template);
+        if (item) {
+            if (key != null) itemKeys.set(item, key);
+            ordered.push(item);
+        }
+    });
+
+    // Remove old nodes that were not reused:
+    existing.forEach((c) => {
+        if (!used.has(c)) {
+            itemKeys.delete(c);
+            c.remove();
+        }
+    });
+
+    // Reorder the DOM to match `ordered`. insertBefore *moves* a node (it is
+    // never detached across a task boundary), so focus/selection survive:
+    reorderInPlace(node, ordered);
+}
+
+/** Reorder parent's existing children to match `ordered`, with minimal moves. */
+function reorderInPlace(parent: M2d2Node, ordered: M2d2Node[]): void {
+    let anchor: M2d2Node | null = null;
+    for (const child of ordered) {
+        if (anchor === null) {
+            if (parent.firstChild !== child) parent.insertBefore(child, parent.firstChild);
+        } else if (anchor.nextSibling !== child) {
+            parent.insertBefore(child, anchor.nextSibling);
+        }
+        anchor = child;
+    }
+}
+
+/**
+ * Process an array of values into items on node.
+ *
+ * First render (`node.items` not yet set): build fresh from the template,
+ * exactly as before (this preserves the original semantics, including
+ * consuming an HTML `<template>` child as the template source).
+ *
+ * Re-render (`node.items` already set, i.e. `node.items = [...]`): reconcile
+ * against the existing item nodes — reuse / reorder / replace only what
+ * changed — instead of clearing and rebuilding. This preserves focus, scroll,
+ * selection, transitions and per-item state, and avoids wholesale DOM churn.
+ *
+ * Ported from m2d2.src.js:801-826, reworked for reconciliation.
  */
 export function doItems(node: M2d2Node, values: unknown[], template?: unknown): void {
     const $template = getTemplate(node, template);
@@ -255,17 +397,41 @@ export function doItems(node: M2d2Node, values: unknown[], template?: unknown): 
         error("Template not found. An array is being used where not expected. Node:", node, "Values:", values);
         return;
     }
-    let i = 0;
-    values.forEach((val) => {
-        const coerced = coerce(node, val);
-        const newItem = getItem(node, i++, coerced, $template);
-        if (newItem) {
-            node.appendChild(newItem);
+
+    const rawKey = (node as any)._itemKey;
+    const keyFn = normalizeKeyFn(rawKey);
+    const keyField = typeof rawKey === "string" ? (rawKey as string) : null;
+
+    if ((node as any).items === undefined) {
+        // First render: build fresh.
+        let i = 0;
+        values.forEach((val) => {
+            const coerced = coerce(node, val);
+            const spec = stripKeyField(coerced, keyField);
+            const newItem = getItem(node, i, spec, $template);
+            if (newItem) {
+                // Record the reconciliation key (keyed mode) so the first
+                // reassignment has something to match against:
+                if (keyFn) {
+                    const k = keyFn(val, i);
+                    if (k != null) itemKeys.set(newItem, k);
+                }
+                node.appendChild(newItem);
+            }
+            i++;
+        });
+        // Cleanup <template> tag:
+        const tempTag = node.querySelector("template");
+        if (tempTag) node.removeChild(tempTag);
+    } else {
+        // Re-render: reconcile against existing item nodes.
+        if (keyFn) {
+            reconcileKeyed(node, values, $template as M2d2Node, keyFn, keyField);
+        } else {
+            reconcilePositional(node, values, $template as M2d2Node);
         }
-    });
-    // Cleanup <template> tag:
-    const tempTag = node.querySelector("template");
-    if (tempTag) node.removeChild(tempTag);
+    }
+
     // Set items link:
     (node as any).items = node.children;
     extendItems(node);
