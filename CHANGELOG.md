@@ -1,5 +1,20 @@
 # Changelog
 
+## v3.1.1
+
+### Fixed
+- **Nested items wiped on push** — pushing an item whose template contains a
+  nested items container (e.g. `bar: { template: {...}, items: [...] }`)
+  rendered the nested children and then immediately removed them. After
+  rendering the item, `getItemWithEvents` re-applies the template to wire event
+  handlers; that re-application hit the "items is optional when template is set"
+  path in `handleNoMatch`, which synthesized `items = []`, and under the 3.1.0
+  reconciliation that empty list deleted the just-rendered children. The empty
+  init is now only synthesized when the container has not been initialized yet
+  (`node.items === undefined`), so re-applying a template no longer clobbers an
+  already-rendered container. Pre-3.1.0 this was masked because `doItems` was
+  append-only.
+
 ## v3.1.0
 
 Lists (`items`) now reconcile instead of clearing + rebuilding, and `items`

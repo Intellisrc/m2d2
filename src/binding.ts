@@ -186,8 +186,13 @@ function assignPropAttr(node: M2d2Node, key: string, value: unknown): void {
  * Ported from m2d2.src.js:498-561. Changed: unknown keys warn+skip (not assign).
  */
 function handleNoMatch(node: M2d2Node, key: string, value: unknown, obj: Record<string, unknown>): void {
-    // Make "items" optional when template is set:
-    if (key === "template" && obj["items"] === undefined) {
+    // Make "items" optional when template is set: a template declared without an
+    // explicit `items` initializes the container with an empty list. Only do this
+    // when the container hasn't been initialized yet (node.items === undefined);
+    // re-applying a template to an already-rendered container (e.g. event wiring
+    // in getItemWithEvents) must not synthesize an empty items array, which would
+    // reconcile away the already-rendered items.
+    if (key === "template" && obj["items"] === undefined && (node as any).items === undefined) {
         key = "items";
         value = [];
     }
